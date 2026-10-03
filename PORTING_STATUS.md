@@ -17,7 +17,7 @@ An upstream Vice City engine source was audited from `re3fork/re3-miami-vita` an
 
 ## Completed milestone: PSP toolchain smoke-test build
 
-A separate PSP-native platform foundation now compiles in GitHub Actions with PSPSDK. The workflow verifies that both `EBOOT.PBP` and the ELF are non-empty and uploads them as the `vc-psp-platform-foundation-not-game` artifact. This program only initializes PSP graphics and exits on START; it is a toolchain/platform smoke test, not Vice City.
+A separate PSP-native platform foundation now compiles in GitHub Actions with PSPSDK. The workflow verifies that both `EBOOT.PBP` and the ELF are non-empty and uploads them as the `vc-psp-platform-foundation-not-game` artifact. This program initializes PSP graphics and toggles the screen colour when START is pressed; it is a toolchain/platform smoke test, not Vice City. It intentionally does not exit on START while the exit crash is unverified. The green/red display confirms only the diagnostic graphics and button-input path.
 
 Build workflow: https://github.com/Frolicworks1/Gtavcportpsp/actions/runs/37142675706
 
