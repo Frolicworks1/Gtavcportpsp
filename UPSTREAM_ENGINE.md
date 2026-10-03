@@ -3,7 +3,7 @@
 ## Primary engine candidate
 
 - Repository: https://github.com/mrxenginner/reVC
-- Branch used by the existing host baseline: `miami`
+- Pinned revision used by the host baseline: `a26fff4af555a8a425ac9f17d1dd718d00d1f942` (branch `miami` at pin time)
 - Purpose: reverse-engineered Grand Theft Auto: Vice City engine source.
 - The Linux host baseline has built successfully in [GitHub Actions run 37145378347](https://github.com/Frolicworks1/Gtavcportpsp/actions/runs/37145378347).
 - **That success is host-only.** It does not mean the engine builds for PSP, and no upstream engine code is currently linked into the PSP EBOOT.
