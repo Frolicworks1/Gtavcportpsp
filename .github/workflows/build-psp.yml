@@ -34,6 +34,10 @@ jobs:
         env:
           PSPSDK: /usr/local/pspdev/psp/sdk
         run: |
+          # Diagnostic source currently exits its render loop on START, which
+          # looks like a black-screen crash. Keep the diagnostic renderer alive.
+          sed -i 's/if (pad.Buttons \& PSP_CTRL_START) break;/\/\* START ignored in diagnostic-only build \*\//' src/main.c
+          grep -n 'START ignored\|PSP_CTRL_START' src/main.c || true
           make clean || true
           make V=1
           test -s EBOOT.PBP
