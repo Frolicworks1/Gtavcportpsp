@@ -22,12 +22,17 @@ jobs:
       - name: Show PSP toolchain
         run: |
           echo "PSPDEV=${PSPDEV:-unset}"
+          export PSPSDK="${PSPSDK:-$PSPDEV/psp/sdk}"
+          echo "PSPSDK=$PSPSDK"
+          test -f "$PSPSDK/lib/build.mak"
           command -v psp-gcc
           command -v psp-g++
           command -v mksfoex
           command -v pack-pbp
       - name: Build EBOOT
         working-directory: source/GTAVC-WIP9-cloud-build
+        env:
+          PSPSDK: /usr/local/pspdev/psp/sdk
         run: |
           make clean || true
           make V=1
