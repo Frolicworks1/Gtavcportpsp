@@ -15,9 +15,15 @@ An upstream Vice City engine source was audited from `re3fork/re3-miami-vita` an
 5. **Adapt game systems** — memory limits, streaming, audio, video, controls, and asset loading need PSP-specific tuning.
 6. **Incremental tests** — first compile a PSP-native platform smoke test, then initialize engine systems, then load a scene, then verify gameplay in PPSSPP and real hardware.
 
+## Completed milestone: PSP toolchain smoke-test build
+
+A separate PSP-native platform foundation now compiles in GitHub Actions with PSPSDK. The workflow verifies that both `EBOOT.PBP` and the ELF are non-empty and uploads them as the `vc-psp-platform-foundation-not-game` artifact. This program only initializes PSP graphics and exits on START; it is a toolchain/platform smoke test, not Vice City.
+
+Build workflow: https://github.com/Frolicworks1/Gtavcportpsp/actions/runs/37142675706
+
 ## Immediate blocker
 
-The current repository does not have the complete engine or a PSP-compatible renderer integrated. The next meaningful milestone is a reproducible PSP toolchain/platform-layer build, not another diagnostic cube or a renamed EBOOT.
+The current repository does not have the complete engine or a PSP-compatible renderer integrated. The next meaningful milestone is a license-reviewed engine integration plan and PSP renderer/platform port, not another diagnostic cube or a renamed EBOOT.
 
 ## Acceptance criteria for calling it playable
 
