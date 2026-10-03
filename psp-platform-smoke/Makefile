@@ -11,5 +11,5 @@ LIBS = -lpspgu -lpspdebug -lpspdisplay -lpspctrl
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = VC PSP Port Foundation (not the game)
 
-PSPSDK := $(shell psp-config --pspsdk-path)
+PSPSDK ?= /usr/local/pspdev/psp/sdk
 include $(PSPSDK)/lib/build.mak
