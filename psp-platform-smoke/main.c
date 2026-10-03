@@ -4,45 +4,59 @@
 #include <pspgu.h>
 #include <pspgum.h>
 
-PSP_MODULE_INFO("VC PSP GU Renderer Probe", 0, 0, 1);
+PSP_MODULE_INFO("VC PSP GU Texture Probe", 0, 0, 1);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 PSP_HEAP_SIZE_KB(2048);
 
 static unsigned int __attribute__((aligned(16))) list[262144];
+static unsigned int __attribute__((aligned(16))) checkerTexture[64 * 64];
 
 typedef struct {
+    float u, v;
     unsigned int color;
     float x, y, z;
 } Vertex;
 
-#define V(c, x, y, z) { (c), (x), (y), (z) }
+#define V(c, x, y, z, u, v) { (u), (v), (c), (x), (y), (z) }
 static const Vertex cube[] __attribute__((aligned(16))) = {
     /* front */
-    V(0xFFFF4040,-1,-1,1), V(0xFFFF4040,1,-1,1), V(0xFFFF4040,1,1,1),
-    V(0xFFFF4040,-1,-1,1), V(0xFFFF4040,1,1,1), V(0xFFFF4040,-1,1,1),
+    V(0xFFFFFFFF,-1,-1,1, 0,64), V(0xFFFFFFFF,1,-1,1, 64,64), V(0xFFFFFFFF,1,1,1, 64,0),
+    V(0xFFFFFFFF,-1,-1,1, 0,64), V(0xFFFFFFFF,1,1,1, 64,0), V(0xFFFFFFFF,-1,1,1, 0,0),
     /* back */
-    V(0xFF40FF40,1,-1,-1), V(0xFF40FF40,-1,-1,-1), V(0xFF40FF40,-1,1,-1),
-    V(0xFF40FF40,1,-1,-1), V(0xFF40FF40,-1,1,-1), V(0xFF40FF40,1,1,-1),
+    V(0xFFFFFFFF,1,-1,-1, 0,64), V(0xFFFFFFFF,-1,-1,-1, 64,64), V(0xFFFFFFFF,-1,1,-1, 64,0),
+    V(0xFFFFFFFF,1,-1,-1, 0,64), V(0xFFFFFFFF,-1,1,-1, 64,0), V(0xFFFFFFFF,1,1,-1, 0,0),
     /* left */
-    V(0xFF4040FF,-1,-1,-1), V(0xFF4040FF,-1,-1,1), V(0xFF4040FF,-1,1,1),
-    V(0xFF4040FF,-1,-1,-1), V(0xFF4040FF,-1,1,1), V(0xFF4040FF,-1,1,-1),
+    V(0xFFFFFFFF,-1,-1,-1, 0,64), V(0xFFFFFFFF,-1,-1,1, 64,64), V(0xFFFFFFFF,-1,1,1, 64,0),
+    V(0xFFFFFFFF,-1,-1,-1, 0,64), V(0xFFFFFFFF,-1,1,1, 64,0), V(0xFFFFFFFF,-1,1,-1, 0,0),
     /* right */
-    V(0xFFFFFF40,1,-1,1), V(0xFFFFFF40,1,-1,-1), V(0xFFFFFF40,1,1,-1),
-    V(0xFFFFFF40,1,-1,1), V(0xFFFFFF40,1,1,-1), V(0xFFFFFF40,1,1,1),
+    V(0xFFFFFFFF,1,-1,1, 0,64), V(0xFFFFFFFF,1,-1,-1, 64,64), V(0xFFFFFFFF,1,1,-1, 64,0),
+    V(0xFFFFFFFF,1,-1,1, 0,64), V(0xFFFFFFFF,1,1,-1, 64,0), V(0xFFFFFFFF,1,1,1, 0,0),
     /* top */
-    V(0xFFFF40FF,-1,1,1), V(0xFFFF40FF,1,1,1), V(0xFFFF40FF,1,1,-1),
-    V(0xFFFF40FF,-1,1,1), V(0xFFFF40FF,1,1,-1), V(0xFFFF40FF,-1,1,-1),
+    V(0xFFFFFFFF,-1,1,1, 0,64), V(0xFFFFFFFF,1,1,1, 64,64), V(0xFFFFFFFF,1,1,-1, 64,0),
+    V(0xFFFFFFFF,-1,1,1, 0,64), V(0xFFFFFFFF,1,1,-1, 64,0), V(0xFFFFFFFF,-1,1,-1, 0,0),
     /* bottom */
-    V(0xFF40FFFF,-1,-1,-1), V(0xFF40FFFF,1,-1,-1), V(0xFF40FFFF,1,-1,1),
-    V(0xFF40FFFF,-1,-1,-1), V(0xFF40FFFF,1,-1,1), V(0xFF40FFFF,-1,-1,1)
+    V(0xFFFFFFFF,-1,-1,-1, 0,64), V(0xFFFFFFFF,1,-1,-1, 64,64), V(0xFFFFFFFF,1,-1,1, 64,0),
+    V(0xFFFFFFFF,-1,-1,-1, 0,64), V(0xFFFFFFFF,1,-1,1, 64,0), V(0xFFFFFFFF,-1,-1,1, 0,0)
 };
 #undef V
+
+static void build_checker_texture(void)
+{
+    int x, y;
+    for (y = 0; y < 64; ++y) {
+        for (x = 0; x < 64; ++x) {
+            const int checker = ((x / 8) ^ (y / 8)) & 1;
+            checkerTexture[y * 64 + x] = checker ? 0xFFFFC040 : 0xFF204080;
+        }
+    }
+}
 
 int main(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;
 
+    build_checker_texture();
     sceCtrlSetSamplingCycle(0);
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
 
@@ -91,12 +105,19 @@ int main(int argc, char *argv[])
         ScePspFVector3 rotation = { angle * 0.73f, angle, angle * 0.37f };
         sceGumRotateXYZ(&rotation);
 
-        sceGuDisable(GU_TEXTURE_2D);
+        sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
+        sceGuTexImage(0, 64, 64, 64, checkerTexture);
+        sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+        sceGuTexFilter(GU_LINEAR, GU_LINEAR);
+        sceGuTexWrap(GU_REPEAT, GU_REPEAT);
+        sceGuEnable(GU_TEXTURE_2D);
         sceGuDisable(GU_CULL_FACE);
+        sceGuColor(0xFFFFFFFF);
         sceGuDrawArray(GU_TRIANGLES,
-            GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_3D,
+            GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_3D,
             sizeof(cube) / sizeof(cube[0]), 0, cube);
 
+        sceGuDisable(GU_TEXTURE_2D);
         sceGuFinish();
         sceGuSync(0, 0);
         sceDisplayWaitVblankStart();
