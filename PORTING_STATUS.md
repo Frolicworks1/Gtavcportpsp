@@ -4,7 +4,7 @@
 
 This repository does **not** contain a bootable Vice City engine yet. The small WIP archive currently in the repo is a graphics diagnostic, not the game. Do not label its EBOOT as a GTA Vice City build.
 
-An upstream Vice City engine source was audited from `re3fork/re3-miami-vita`. It contains about 460 C/C++/header source files, but its build targets **PS Vita (ARM)** and links Vita-specific libraries (`vita2d`, `vitagl`, `Sce*_stub`, SDL2/OpenAL). PSP is a different platform (MIPS Allegrex); a Vita EBOOT/VPK cannot be used as a PSP executable.
+An upstream Vice City engine source was audited from `re3fork/re3-miami-vita` and the audit workflow now pins revision `5de9de0d8072c3644f6cb961160b0fd7bfb067fb` for repeatability. The audit found about 460 C/C++/header source files, but its build targets **PS Vita (ARM)** and links Vita-specific libraries (`vita2d`, `vitagl`, `Sce*_stub`, SDL2/OpenAL). No top-level license/copying file was found by the shallow license-file scan, so license and dependency terms need review before copying source into this repository. PSP is a different platform (MIPS Allegrex); a Vita EBOOT/VPK cannot be used as a PSP executable.
 
 ## Porting work required
 
