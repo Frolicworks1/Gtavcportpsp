@@ -1,9 +1,7 @@
 #include <pspkernel.h>
-#include <pspdebug.h>
 #include <pspdisplay.h>
 #include <pspctrl.h>
 #include <pspgu.h>
-#include <pspgum.h>
 
 PSP_MODULE_INFO("VC PSP Port Foundation", 0, 0, 1);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
@@ -15,13 +13,6 @@ int main(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;
-
-    pspDebugScreenInit();
-    pspDebugScreenSetXY(0, 0);
-    pspDebugScreenPrintf("Vice City PSP port foundation\n");
-    pspDebugScreenPrintf("Milestone: PSP SDK startup + controller input\n");
-    pspDebugScreenPrintf("This is NOT the Vice City game engine.\n");
-    pspDebugScreenPrintf("Press START to exit.\n");
 
     sceCtrlSetSamplingCycle(0);
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
@@ -42,24 +33,31 @@ int main(int argc, char *argv[])
     sceDisplayWaitVblankStart();
     sceGuDisplay(GU_TRUE);
 
+    SceCtrlData pad;
+    /* Do not quit immediately if START is already held at launch. */
+    do {
+        sceCtrlReadBufferPositive(&pad, 1);
+        sceDisplayWaitVblankStart();
+    } while (pad.Buttons & PSP_CTRL_START);
+
     int running = 1;
     while (running) {
-        SceCtrlData pad;
-        sceCtrlReadBufferPositive(&pad, 1);
-        if (pad.Buttons & PSP_CTRL_START)
-            running = 0;
-
         sceGuStart(GU_DIRECT, list);
-        sceGuClearColor(0xFF18202A);
+        /* A bright solid fill makes display initialization easy to verify.
+           This is a platform test, not the Vice City game. */
+        sceGuClearColor(0xFF20D020);
         sceGuClear(GU_COLOR_BUFFER_BIT);
         sceGuFinish();
         sceGuSync(0, 0);
         sceDisplayWaitVblankStart();
         sceGuSwapBuffers();
+
+        sceCtrlReadBufferPositive(&pad, 1);
+        if (pad.Buttons & PSP_CTRL_START)
+            running = 0;
     }
 
-    sceGuDisplay(GU_FALSE);
-    sceGuTerm();
+    /* Avoid GU teardown while debugging the exit path. */
     sceKernelExitGame();
     return 0;
 }
