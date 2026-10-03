@@ -18,7 +18,7 @@ jobs:
             -v "${{ github.workspace }}:/src" \
             -w /src/psp-platform-smoke \
             pspdev/pspdev:latest \
-            sh -lc 'make clean && make'
+            sh -c 'export PATH=/usr/local/pspdev/bin:$PATH; export PSPSDK=/usr/local/pspdev/psp/sdk; make clean && make'
       - name: Confirm PSP executable artifacts
         run: |
           test -s psp-platform-smoke/EBOOT.PBP
