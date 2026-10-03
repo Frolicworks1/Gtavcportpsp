@@ -33,31 +33,29 @@ int main(int argc, char *argv[])
     sceDisplayWaitVblankStart();
     sceGuDisplay(GU_TRUE);
 
+    /* This diagnostic intentionally never exits on a controller press.
+       START toggles the screen colour so input can be tested without
+       triggering the previously crashing exit path. */
     SceCtrlData pad;
-    /* Do not quit immediately if START is already held at launch. */
-    do {
+    unsigned int previousButtons = 0;
+    unsigned int screenColor = 0xFF20D020;
+    for (;;) {
         sceCtrlReadBufferPositive(&pad, 1);
-        sceDisplayWaitVblankStart();
-    } while (pad.Buttons & PSP_CTRL_START);
+        if ((pad.Buttons & PSP_CTRL_START) &&
+            !(previousButtons & PSP_CTRL_START)) {
+            screenColor = (screenColor == 0xFF20D020)
+                ? 0xFF2020D0 : 0xFF20D020;
+        }
+        previousButtons = pad.Buttons;
 
-    int running = 1;
-    while (running) {
         sceGuStart(GU_DIRECT, list);
-        /* A bright solid fill makes display initialization easy to verify.
-           This is a platform test, not the Vice City game. */
-        sceGuClearColor(0xFF20D020);
+        sceGuClearColor(screenColor);
         sceGuClear(GU_COLOR_BUFFER_BIT);
         sceGuFinish();
         sceGuSync(0, 0);
         sceDisplayWaitVblankStart();
         sceGuSwapBuffers();
-
-        sceCtrlReadBufferPositive(&pad, 1);
-        if (pad.Buttons & PSP_CTRL_START)
-            running = 0;
     }
 
-    /* Avoid GU teardown while debugging the exit path. */
-    sceKernelExitGame();
     return 0;
 }
