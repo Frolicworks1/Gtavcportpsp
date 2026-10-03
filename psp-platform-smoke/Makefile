@@ -6,10 +6,10 @@ CFLAGS = -O2 -G0 -Wall
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 
-LIBS = -lpspgu -lpspdebug -lpspdisplay -lpspctrl
+LIBS = -lpspgum -lpspgu -lpspdebug -lpspdisplay -lpspctrl
 
 EXTRA_TARGETS = EBOOT.PBP
-PSP_EBOOT_TITLE = VC PSP Port Foundation (not the game)
+PSP_EBOOT_TITLE = VC PSP GU Renderer Probe (not the game)
 
 PSPSDK ?= /usr/local/pspdev/psp/sdk
 include $(PSPSDK)/lib/build.mak
