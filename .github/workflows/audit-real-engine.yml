@@ -1,0 +1,33 @@
+name: Audit real Vice City engine for PSP port
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/audit-real-engine.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout port repository
+        uses: actions/checkout@v4
+      - name: Get real Vice City engine source
+        run: |
+          git clone --depth 1 --recurse-submodules https://github.com/re3fork/re3-miami-vita.git upstream-revc
+      - name: Inspect engine entry points and Vita-only dependencies
+        shell: bash
+        run: |
+          set -uo pipefail
+          cd upstream-revc
+          echo '=== SOURCE FILE COUNT ==='
+          find src -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.h' \) | wc -l
+          echo '=== TARGET / PLATFORM DEFINES ==='
+          grep -R -n -E 'PSP2|vita|vita2d|vitagl|Sce[A-Z]|arm-vita-eabi|TARGET|main\(' Makefile src/skel src/core 2>/dev/null | head -n 240 || true
+          echo '=== ENGINE ENTRY / GAME INITIALIZATION ==='
+          grep -R -n -E 'int main\(|GameInit|Initialise\(|RsEventHandler|CGame::Initialise|Idle\(' src 2>/dev/null | head -n 180 || true
+          echo '=== LIBRW / GRAPHICS DEPENDENCIES ==='
+          grep -n -E 'librw|LIBRW|RW_GL3|vita2d|vitagl|LIBRW_GLAD' Makefile
+          echo '=== PSP PORT STATUS ==='
+          echo 'This upstream Makefile targets ARM Vita (PSP2), not PSP MIPS.'
+          echo 'A PSP port requires a MIPS PSP backend, PSP-compatible librw/rendering, audio/input replacements, and memory/performance adaptation.'
