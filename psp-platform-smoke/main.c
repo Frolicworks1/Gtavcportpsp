@@ -58,6 +58,47 @@ static const FlatVertex statusBars[] __attribute__((aligned(16))) = {
     {0xFFFFC040, 16, 56, 0}, {0xFFFFC040, 64, 68, 0}, {0xFFFFC040, 16, 68, 0}
 };
 
+
+/* Untextured 3D cube isolates geometry/matrix/depth from texture handling. */
+static const FlatVertex solidCube[] __attribute__((aligned(16))) = {
+    {0xFFFF4040, -1, -1, 1},
+    {0xFFFF4040, 1, -1, 1},
+    {0xFFFF4040, 1, 1, 1},
+    {0xFFFF4040, -1, -1, 1},
+    {0xFFFF4040, 1, 1, 1},
+    {0xFFFF4040, -1, 1, 1},
+    {0xFF40FF40, 1, -1, -1},
+    {0xFF40FF40, -1, -1, -1},
+    {0xFF40FF40, -1, 1, -1},
+    {0xFF40FF40, 1, -1, -1},
+    {0xFF40FF40, -1, 1, -1},
+    {0xFF40FF40, 1, 1, -1},
+    {0xFF4080FF, -1, -1, -1},
+    {0xFF4080FF, -1, -1, 1},
+    {0xFF4080FF, -1, 1, 1},
+    {0xFF4080FF, -1, -1, -1},
+    {0xFF4080FF, -1, 1, 1},
+    {0xFF4080FF, -1, 1, -1},
+    {0xFFFFFF40, 1, -1, 1},
+    {0xFFFFFF40, 1, -1, -1},
+    {0xFFFFFF40, 1, 1, -1},
+    {0xFFFFFF40, 1, -1, 1},
+    {0xFFFFFF40, 1, 1, -1},
+    {0xFFFFFF40, 1, 1, 1},
+    {0xFFFF40FF, -1, 1, 1},
+    {0xFFFF40FF, 1, 1, 1},
+    {0xFFFF40FF, 1, 1, -1},
+    {0xFFFF40FF, -1, 1, 1},
+    {0xFFFF40FF, 1, 1, -1},
+    {0xFFFF40FF, -1, 1, -1},
+    {0xFF40FFFF, -1, -1, -1},
+    {0xFF40FFFF, 1, -1, -1},
+    {0xFF40FFFF, 1, -1, 1},
+    {0xFF40FFFF, -1, -1, -1},
+    {0xFF40FFFF, 1, -1, 1},
+    {0xFF40FFFF, -1, -1, 1}
+};
+
 static const char *dataCandidates[] = {
     "DATA/GTA_VC.DAT",
     "DATA/GTA3.DAT",
@@ -108,6 +149,7 @@ int main(int argc, char *argv[])
 
     write_diagnostics();
     build_checker_texture();
+    sceKernelDcacheWritebackInvalidateAll();
     sceCtrlSetSamplingCycle(0);
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
 
@@ -154,19 +196,43 @@ int main(int argc, char *argv[])
             sceGumRotateXYZ(&rotation);
         }
 
+        sceGuDisable(GU_CULL_FACE);
+
+        /* Left: solid 3D cube, independent of texture sampling/cache. */
+        sceGuDisable(GU_TEXTURE_2D);
+        sceGumMatrixMode(GU_MODEL);
+        sceGumLoadIdentity();
+        {
+            ScePspFVector3 position = {-1.15f, 0.0f, -5.0f};
+            ScePspFVector3 rotation = {angle * 0.73f, angle, angle * 0.37f};
+            sceGumTranslate(&position);
+            sceGumRotateXYZ(&rotation);
+        }
+        sceGuDrawArray(GU_TRIANGLES,
+            GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_3D,
+            sizeof(solidCube) / sizeof(solidCube[0]), 0, solidCube);
+
+        /* Right: textured 3D cube, so texture issues can be distinguished. */
+        sceGumMatrixMode(GU_MODEL);
+        sceGumLoadIdentity();
+        {
+            ScePspFVector3 position = {1.15f, 0.0f, -5.0f};
+            ScePspFVector3 rotation = {angle * 0.73f, angle, angle * 0.37f};
+            sceGumTranslate(&position);
+            sceGumRotateXYZ(&rotation);
+        }
         sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
         sceGuTexImage(0, 64, 64, 64, checkerTexture);
         sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
         sceGuTexFilter(GU_LINEAR, GU_LINEAR);
         sceGuTexWrap(GU_REPEAT, GU_REPEAT);
         sceGuEnable(GU_TEXTURE_2D);
-        sceGuDisable(GU_CULL_FACE);
         sceGuColor(0xFFFFFFFF);
         sceGuDrawArray(GU_TRIANGLES,
             GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_3D,
             sizeof(cube) / sizeof(cube[0]), 0, cube);
 
-        /* Draw a guaranteed, untextured 2D colour marker after the 3D pass. */
+        /* Draw the independent 2D colour marker after the 3D pass. */
         sceGuDisable(GU_TEXTURE_2D);
         sceGuDisable(GU_DEPTH_TEST);
         sceGumMatrixMode(GU_PROJECTION);
