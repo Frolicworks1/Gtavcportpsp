@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: mrxenginner/reVC
-          ref: miami
+          ref: a26fff4af555a8a425ac9f17d1dd718d00d1f942
           path: upstream-reVC
           submodules: recursive
       - name: Record upstream revision
