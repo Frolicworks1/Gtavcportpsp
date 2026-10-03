@@ -2,7 +2,13 @@
 
 ## Current state (2026-10-04)
 
-This repository does **not** contain a bootable Vice City engine yet. The PSP EBOOT is a renderer test, not the game.
+This repository does **not** contain a bootable Vice City engine yet. The PSP EBOOT built by this repository is a renderer test, not the game.
+
+## New reference inspected: user-provided GTA III PSP EBOOT
+
+Static inspection of the uploaded `EBOOT.PBP` identifies the title as **Grand Theft Auto 3** (disc ID `UCJS10041`) and its embedded `DATA.PSP` as a MIPS ELF. Strings include `re3_psp`, PSP-specific RenderWare files under `librw-psp/src/psp/`, game-data loading, controller input, save-data paths, texture downsampling, streaming, and memory diagnostics.
+
+This gives us a more relevant architectural direction than continuing with graphics-only probes: investigate a native PSP RenderWare/GU backend and the PSP platform layer as distinct components, then compare their interfaces with the Vice City engine source. The binary itself is only a reference. Static strings do not prove runtime behavior, feature completeness, or compatibility with Vice City. No executable code or proprietary assets have been copied into this repository.
 
 ## Verified build baselines
 
@@ -30,10 +36,11 @@ This is a focused test of texture upload/addressing and triangle rendering. It i
 3. PSP platform interfaces for audio, files, timing, startup, and streaming are not implemented.
 4. The host reVC build is not a PSP MIPS/Allegrex build.
 5. Actual game data must be supplied by the user; no copyrighted game assets are bundled.
+6. The source repository, revision, and license terms behind the reference EBOOT's `librw-psp` implementation have not yet been identified or reviewed.
 
 ## Next technical milestone
 
-After the texture probe's PSP build is verified, the next renderer tests should cover alpha blending, depth behavior, and texture state changes. In parallel, engine integration needs a pinned source revision and a license/dependency review, then a deliberate PSP platform port. Do not simply copy a Vita executable or its ARM toolchain: PSP uses MIPS Allegrex and different system libraries.
+Identify and review the source project corresponding to the reference's PSP RenderWare implementation, then compare its renderer/device and platform interfaces against the Vice City engine. Prefer learning from a real PSP-native renderer over expanding the standalone cube test indefinitely. Keep the renderer probe as a toolchain test, and do not claim gameplay until a real Vice City scene has been loaded and tested.
 
 ## Acceptance criteria for calling it playable
 
