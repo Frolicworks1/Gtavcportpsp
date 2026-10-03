@@ -1,0 +1,31 @@
+name: Inspect PSP build scripts
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'GTAVC-WIP9-cloud-build.zip'
+      - '.github/workflows/inspect-build-scripts.yml'
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract source bundle
+        run: |
+          mkdir -p /tmp/gtavc
+          unzip -q GTAVC-WIP9-cloud-build.zip -d /tmp/gtavc
+          cd /tmp/gtavc/GTAVC-WIP9-cloud-build
+          echo '===== README_CLOUD_BUILD.md ====='
+          cat README_CLOUD_BUILD.md || true
+          echo '===== BUILD_STATUS.txt ====='
+          cat BUILD_STATUS.txt || true
+          echo '===== Makefile ====='
+          cat Makefile || true
+          echo '===== tools/build_full_revc_psp.sh ====='
+          sed -n '1,240p' tools/build_full_revc_psp.sh || true
+          echo '===== tools/fetch_full_revc.sh ====='
+          sed -n '1,240p' tools/fetch_full_revc.sh || true
+          echo '===== tools/fetch_revc.sh ====='
+          sed -n '1,240p' tools/fetch_revc.sh || true
+          echo '===== nested build workflow ====='
+          sed -n '1,260p' .github/workflows/build-psp.yml || true
