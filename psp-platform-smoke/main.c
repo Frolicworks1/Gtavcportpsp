@@ -3,6 +3,9 @@
 #include <pspctrl.h>
 #include <pspgu.h>
 #include <pspgum.h>
+#include <pspiofilemgr.h>
+#include <stdio.h>
+#include <string.h>
 
 PSP_MODULE_INFO("VC PSP GU Texture Probe", 0, 0, 1);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
@@ -40,6 +43,40 @@ static const Vertex cube[] __attribute__((aligned(16))) = {
 };
 #undef V
 
+static const char *dataCandidates[] = {
+    "DATA/GTA_VC.DAT",
+    "DATA/GTA3.DAT",
+    "DATA/MAIN.SCM",
+    "MODELS/GTA3.IMG",
+    "MODELS/GTA_VC.IMG"
+};
+
+static void write_diagnostics(void)
+{
+    static const char logPath[] = "ms0:/PSP/GAME/VCPSP/VCPSP_DIAGNOSTICS.TXT";
+    SceUID fd = sceIoOpen(logPath, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+    char line[192];
+    unsigned int i;
+
+    if (fd < 0)
+        return;
+
+    snprintf(line, sizeof(line), "VC PSP port probe\nBuild: GU textured cube + platform diagnostics\nFree user memory: %d bytes\n",
+        sceKernelTotalFreeMemSize());
+    sceIoWrite(fd, line, strlen(line));
+
+    for (i = 0; i < sizeof(dataCandidates) / sizeof(dataCandidates[0]); ++i) {
+        SceUID file = sceIoOpen(dataCandidates[i], PSP_O_RDONLY, 0);
+        snprintf(line, sizeof(line), "%s: %s\n", dataCandidates[i],
+            file >= 0 ? "FOUND" : "not found in current working directory");
+        sceIoWrite(fd, line, strlen(line));
+        if (file >= 0)
+            sceIoClose(file);
+    }
+
+    sceIoClose(fd);
+}
+
 static void build_checker_texture(void)
 {
     int x, y;
@@ -56,6 +93,7 @@ int main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
+    write_diagnostics();
     build_checker_texture();
     sceCtrlSetSamplingCycle(0);
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
