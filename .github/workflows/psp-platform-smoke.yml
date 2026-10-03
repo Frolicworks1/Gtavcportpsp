@@ -1,0 +1,32 @@
+name: Build PSP platform foundation smoke test
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'psp-platform-smoke/**'
+      - '.github/workflows/psp-platform-smoke.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile PSP-native foundation with PSPSDK
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/src" \
+            -w /src/psp-platform-smoke \
+            pspdev/pspdev:latest \
+            sh -lc 'make clean && make'
+      - name: Confirm PSP executable artifacts
+        run: |
+          test -s psp-platform-smoke/EBOOT.PBP
+          test -s psp-platform-smoke/vcpsp_platform_smoke.elf
+          file psp-platform-smoke/EBOOT.PBP psp-platform-smoke/vcpsp_platform_smoke.elf
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vc-psp-platform-foundation-not-game
+          path: |
+            psp-platform-smoke/EBOOT.PBP
+            psp-platform-smoke/vcpsp_platform_smoke.elf
