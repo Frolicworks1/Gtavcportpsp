@@ -28,3 +28,10 @@ The current repository does not have the complete engine or a PSP-compatible ren
 ## Acceptance criteria for calling it playable
 
 Only call a build playable after a real Vice City scene loads from legally supplied game data, controls work, and it has been tested in PPSSPP with logs/screenshots. A successful compile or blank-screen boot is not sufficient.
+
+
+## Additional engine-source feasibility check
+
+A second source candidate, `mrxenginner/reVC` (Miami branch), documents working targets for Windows, Android, Linux, macOS, and FreeBSD, with rendering through desktop/OpenGL-family librw backends; its README does not claim PSP support. It also requires the owner's Vice City game assets. This is a more general engine reference than the Vita-only fork, but it is not a drop-in PSP port: the PSP MIPS build, GU renderer backend, audio backend, controller/platform layer, memory budget, and asset streaming still need engineering work. Its published MIT-PoU terms and upstream component licenses must be reviewed before any source is incorporated.
+
+Reference: https://github.com/mrxenginner/reVC
