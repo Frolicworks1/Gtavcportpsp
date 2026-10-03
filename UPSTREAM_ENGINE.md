@@ -5,7 +5,7 @@
 - Repository: https://github.com/re3fork/re3-miami-vita
 - Purpose: reverse-engineered Vice City engine source adapted for PlayStation Vita.
 - It is **not** a PSP build and must not be copied into a PSP EBOOT unchanged.
-- The audit workflow currently clones the repository at its default branch head. Before shipping or redistributing source, pin an exact commit and review the upstream license and all submodule/dependency licenses.
+- The audit workflow pins upstream commit `5de9de0d8072c3644f6cb961160b0fd7bfb067fb` for reproducibility. Before shipping or redistributing source, review the upstream license and all submodule/dependency licenses.
 
 ## Confirmed platform assumptions from the audit
 
