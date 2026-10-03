@@ -3,6 +3,9 @@ name: Inspect PSP source archive
 on:
   push:
     branches: [main]
+    paths:
+      - 'GTAVC-WIP9-cloud-build.zip'
+      - '.github/workflows/inspect-source.yml'
   workflow_dispatch:
 
 jobs:
