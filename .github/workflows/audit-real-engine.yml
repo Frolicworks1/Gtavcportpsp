@@ -13,30 +13,50 @@ jobs:
     steps:
       - name: Checkout port repository
         uses: actions/checkout@v4
-      - name: Get pinned upstream Vice City engine source
+
+      - name: Fetch the pinned Vice City engine
+        shell: bash
         run: |
-          git init upstream-revc
-          cd upstream-revc
-          git remote add origin https://github.com/re3fork/re3-miami-vita.git
-          git fetch --depth 1 origin 5de9de0d8072c3644f6cb961160b0fd7bfb067fb
-          git checkout --detach FETCH_HEAD
-          git submodule update --init --recursive
-          echo "Pinned upstream commit: $(git rev-parse HEAD)"
-      - name: Inspect engine entry points and Vita-only dependencies
+          set -euxo pipefail
+          git clone https://github.com/mrxenginner/reVC.git upstream-revc
+          git -C upstream-revc checkout --detach a26fff4af555a8a425ac9f17d1dd718d00d1f942
+          git -C upstream-revc submodule update --init --recursive
+          echo "Pinned upstream commit: $(git -C upstream-revc rev-parse HEAD)"
+
+      - name: Audit build system, game entry points, and renderer seams
         shell: bash
         run: |
           set -uo pipefail
           cd upstream-revc
-          echo '=== SOURCE FILE COUNT ==='
-          find src -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.h' \) | wc -l
-          echo '=== LICENSE FILES ==='
-          find . -maxdepth 2 -iname 'license*' -o -iname 'copying*' | head -n 30
-          echo '=== TARGET / PLATFORM DEFINES ==='
-          grep -R -n -E 'PSP2|vita|vita2d|vitagl|Sce[A-Z]|arm-vita-eabi|TARGET|main\(' Makefile src/skel src/core 2>/dev/null | head -n 240 || true
-          echo '=== ENGINE ENTRY / GAME INITIALIZATION ==='
-          grep -R -n -E 'main\(|GameInit|RsEventHandler|CGame::Initialise|Idle\(' src/skel src/core 2>/dev/null | head -n 160 || true
-          echo '=== COMPILER / LINK / OUTPUT ==='
-          grep -n -E 'PREFIX|CFLAGS|LIBS|vpk|velf|vita-make|vita-elf' Makefile
-          echo '=== PSP PORT STATUS ==='
-          echo 'This upstream Makefile targets ARM Vita (PSP2), not PSP MIPS.'
-          echo 'A PSP port requires a MIPS PSP backend, PSP-compatible renderer, audio/input replacements, and memory/performance adaptation.'
+          echo '=== SOURCE / SUBMODULES ==='
+          git submodule status || true
+          find src -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.h' \) 2>/dev/null | wc -l
+          echo '=== LICENSES ==='
+          find . -maxdepth 3 \( -iname 'license*' -o -iname 'copying*' \) -type f | head -n 50
+          echo '=== CMAKE OPTIONS AND TARGETS ==='
+          grep -n -E 'project\(|option\(|add_subdirectory\(|add_executable\(|find_package\(|SDL|OPENGL|OpenGL|DIRECTX|D3D|PSP|VITA|PLATFORM' CMakeLists.txt | head -n 260 || true
+          echo '=== GAME START / FRAME LOOP ==='
+          grep -R -n -E 'int main\(|SDL_main|GameInit|CGame::Initialise|Idle\(|RsEventHandler|FrontendInit' src 2>/dev/null | head -n 220 || true
+          echo '=== RENDERWARE / RENDERER BACKEND SEAMS ==='
+          grep -R -n -E 'class .*Renderer|Create.*Renderer|RenderState|rw::Engine|RwEngine|OpenGL|gl[A-Z]|D3D|Im2D|Im3D|Raster' src librw 2>/dev/null | head -n 260 || true
+          echo '=== PLATFORM / AUDIO / INPUT DEPENDENCIES ==='
+          grep -R -n -E 'SDL_Init|SDL_PollEvent|SDL_GetTicks|SDL_Audio|Mix_|OpenAL|ALSA|pthread|std::thread|SDL_GetPrefPath|SDL_RWops' src 2>/dev/null | head -n 220 || true
+          echo '=== PSP PORT GATE ==='
+          echo 'This is a source audit, not a PSP build. PSP MIPS Allegrex still needs a native GU renderer and PSP platform/audio/input/filesystem adaptations.'
+
+      - name: Preserve audit report
+        if: always()
+        run: |
+          {
+            echo '# Upstream source audit'
+            echo
+            echo 'Pinned engine: mrxenginner/reVC @ a26fff4af555a8a425ac9f17d1dd718d00d1f942'
+            echo 'See this workflow log for dependency, entry-point, renderer, and platform search results.'
+            echo 'This audit does not claim that a PSP EBOOT or playable port was built.'
+          } > upstream-audit-summary.md
+      - name: Upload audit summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: upstream-revc-audit-summary
+          path: upstream-audit-summary.md
