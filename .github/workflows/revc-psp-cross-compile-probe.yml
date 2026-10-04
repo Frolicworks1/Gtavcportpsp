@@ -1,0 +1,77 @@
+name: Probe pinned reVC with PSP MIPS toolchain
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/revc-psp-cross-compile-probe.yml'
+      - 'cmake/toolchains/psp-allegrex.cmake'
+      - 'UPSTREAM_ENGINE.md'
+
+jobs:
+  cross-compile-probe:
+    runs-on: ubuntu-latest
+    container:
+      image: pspdev/pspdev:latest
+    steps:
+      - name: Checkout port repository
+        uses: actions/checkout@v4
+      - name: Verify PSP toolchain
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
+          test -x "$PSPDEV/bin/psp-gcc"
+          test -x "$PSPDEV/bin/psp-g++"
+          "$PSPDEV/bin/psp-gcc" --version
+          "$PSPDEV/bin/psp-g++" --version
+      - name: Fetch pinned upstream engine and submodules
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git clone https://github.com/mrxenginner/reVC.git upstream-revc
+          git -C upstream-revc checkout --detach a26fff4af555a8a425ac9f17d1dd718d00d1f942
+          git -C upstream-revc submodule update --init --recursive
+      - name: Attempt native PSP cross-configuration
+        id: configure
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
+          cmake -S upstream-revc -B build-revc-psp \
+            -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLIBRW_PLATFORM=NULL \
+            -DREVC_WITH_OPUS=OFF \
+            -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
+      - name: Attempt PSP compile if configuration succeeds
+        if: steps.configure.outcome == 'success'
+        id: compile
+        continue-on-error: true
+        shell: bash
+        run: |
+          cmake --build build-revc-psp --parallel 2 2>&1 | tee psp-cross-compile.log
+      - name: Summarize outcome without hiding blockers
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '# reVC PSP MIPS cross-compile probe'
+            echo
+            echo '- Pinned upstream: mrxenginner/reVC @ a26fff4af555a8a425ac9f17d1dd718d00d1f942'
+            echo '- PSP toolchain: pspdev/pspdev'
+            echo '- CMake configure outcome: ${{ steps.configure.outcome }}'
+            echo '- Compile step attempted only if CMake configuration succeeds'
+            echo
+            echo 'This is a feasibility probe, not a playable EBOOT. PSP GU renderer, platform layer, audio backend, and game-data support remain separate porting work.'
+          } > psp-cross-compile-summary.md
+      - name: Upload logs and summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: revc-psp-cross-compile-probe
+          path: |
+            psp-cross-compile-summary.md
+            psp-cmake-configure.log
+            psp-cross-compile.log
+          if-no-files-found: warn
