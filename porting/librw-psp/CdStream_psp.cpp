@@ -43,7 +43,7 @@ int CdStreamSync(int channel)
     return CdStreamGetStatus(channel);
 }
 
-int CdStreamGetLastPosn(void) { return gPspLastPosn; }
+int32 CdStreamGetLastPosn(void) { return gPspLastPosn; }
 
 void CdStreamShutdown(void) { CdStreamRemoveImages(); }
 
@@ -75,7 +75,7 @@ void CdStreamRemoveImages(void)
     gPspNumImages = 0;
 }
 
-int CdStreamGetNumImages(void) { return gPspNumImages; }
+int32 CdStreamGetNumImages(void) { return gPspNumImages; }
 
 uint32 GetGTA3ImgSize(void)
 {
