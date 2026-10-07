@@ -99,7 +99,17 @@ if [ -f "$CROSSPLATFORM" ]; then
     sed -i '1a #ifdef RW_PSP\n#include <alloca.h>\n#include <stdlib.h>\n#include <string.h>\n#include <strings.h>\n#include <unistd.h>\n#endif' "$CROSSPLATFORM"
   fi
   grep -q '^#include <alloca.h>$' "$CROSSPLATFORM"
-  grep -q '^#include <unistd.h># Keep WaterCreatures active-count state identical to its int32 class declaration.
+  grep -q '^#include <unistd.h>$' "$CROSSPLATFORM"
+  if ! grep -q 'psp_strsep' "$CROSSPLATFORM"; then
+    sed -i '1a #ifdef RW_PSP\nstatic char *psp_strsep(char **stringp, const char *delim) { if (!stringp || !*stringp) return 0; char *s=*stringp; char *p=s; while (*p && !strchr(delim,*p)) ++p; if (*p) { *p=0; *stringp=p+1; } else { *stringp=0; } return s; }\n#endif' "$CROSSPLATFORM"
+  fi
+  sed -i 's@realpath(relativepath, path);@#ifdef RW_PSP\n\t\t\tstrncpy(path, relativepath, sizeof(path)-1);\n\t\t\tpath[sizeof(path)-1] = 0;\n#else\n\t\t\trealpath(relativepath, path);\n#endif@' "$CROSSPLATFORM"
+  sed -i 's/strsep(&p, "\/\\\\")/psp_strsep(\&p, "\/\\\\")/' "$CROSSPLATFORM"
+  grep -q 'psp_strsep' "$CROSSPLATFORM"
+  grep -q 'strncpy(path, relativepath' "$CROSSPLATFORM"
+fi
+
+# Keep WaterCreatures active-count state identical to its int32 class declaration.
 WATERCREATURESCPP="upstream-revc/src/renderer/WaterCreatures.cpp"
 if [ -f "$WATERCREATURESCPP" ]; then
   sed -i 's/^int CWaterCreatures::nNumActiveSeaLifeForms;/int32 CWaterCreatures::nNumActiveSeaLifeForms;/' "$WATERCREATURESCPP"
