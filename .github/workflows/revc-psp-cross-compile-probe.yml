@@ -1,4 +1,5 @@
 name: Build reVC PSP MIPS
+# deterministic PSP build trigger
 
 on:
   # frontend PSP input patch trigger
