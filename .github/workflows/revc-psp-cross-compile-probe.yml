@@ -50,6 +50,7 @@ jobs:
           set -euxo pipefail
           test -s upstream-revc/vendor/librw/src/psp/rwpsp.cpp
           test -s upstream-revc/src/core/psp_input.cpp
+          grep -q 'void CapturePad(RwInt32 padID);' upstream-revc/src/core/Pad.h
           grep -q 'psp/rwpsp.cpp' upstream-revc/vendor/librw/src/CMakeLists.txt
           ! grep -q '^[[:space:]]*ps2/' upstream-revc/vendor/librw/src/CMakeLists.txt
           ! grep -q '^[[:space:]]*d3d/' upstream-revc/vendor/librw/src/CMakeLists.txt
