@@ -84,6 +84,13 @@ if [ -f "$FLUFFH" ]; then
   grep -Fq 'static int32 TonightsEvent;' "$FLUFFH"
 fi
 
+# Keep Font button-slot state identical to the PSP int32 declaration.
+FONTCPP="upstream-revc/src/renderer/Font.cpp"
+if [ -f "$FONTCPP" ]; then
+  sed -i 's/^int CFont::ButtonsSlot = -1;/int32 CFont::ButtonsSlot = -1;/' "$FONTCPP"
+  grep -Fq 'int32 CFont::ButtonsSlot = -1;' "$FONTCPP"
+fi
+
 if [ -f "$PEDATTR" ]; then
   # Keep PedAttractor declarations identical to PSP int32 definitions.
   sed -i 's/ComputeAttractPos(int qid,/ComputeAttractPos(int32 qid,/g; s/ComputeAttractHeading(int qid,/ComputeAttractHeading(int32 qid,/g' "$PEDATTR"
