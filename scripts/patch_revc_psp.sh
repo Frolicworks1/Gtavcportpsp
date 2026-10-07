@@ -12,7 +12,7 @@ CTRL="upstream-revc/src/core/ControllerConfig.h"
 if [ -f "$CTRL" ]; then
   sed -i 's@^#if defined RW_GL3$@#if defined RW_GL3 || defined RW_PSP@' "$CTRL"
   sed -i 's@^#ifdef RW_GL3$@#if defined RW_GL3 || defined RW_PSP@' "$CTRL"
-  sed -i 's@^#ifndef RW_GL3$@#if !defined RW_GL3 \\&\\& !defined RW_PSP@' "$CTRL"
+  sed -i 's@^#ifndef RW_GL3$@#if 0@' "$CTRL"
 
   if ! grep -q '^#if defined RW_GL3 || defined RW_PSP$' "$CTRL"; then
     sed -i '/^#define ACTIONNAME_LENGTH 40$/a #if defined RW_PSP\nstruct JoyState {\n    int8 id;\n    bool isGamepad;\n    uint8 numButtons;\n    uint8 buttons[MAX_BUTTONS];\n    bool mappedButtons[MAX_BUTTONS];\n};\n#endif' "$CTRL"
