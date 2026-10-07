@@ -253,6 +253,12 @@ if [ -f "$SRC_CMAKE" ]; then
   } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
   mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
 fi
+if [ -f "$SRC_CMAKE" ]; then
+  if ! grep -q 'pspgu pspgum pspctrl pspge pspdisplay' "$SRC_CMAKE"; then
+    sed -i '/^target_link_libraries(\${EXECUTABLE} PRIVATE/i if(RW_PSP)\ntarget_link_libraries(\${EXECUTABLE} PRIVATE pspgu pspgum pspctrl pspge pspdisplay)\nendif()' "$SRC_CMAKE"
+  fi
+  grep -q 'pspgu pspgum pspctrl pspge pspdisplay' "$SRC_CMAKE"
+fi
 sed -i 's@if(\${PROJECT}_WITH_OPUS)@if(NOT RW_PSP AND \${PROJECT}_WITH_OPUS)@' "$SRC_CMAKE"
 if [ -f "$SRC_CMAKE" ]; then
   awk '/^file\(GLOB_RECURSE / {
