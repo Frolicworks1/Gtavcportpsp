@@ -73,6 +73,8 @@ jobs:
           grep -Fq 'static int32 TonightsEvent;' upstream-revc/src/renderer/Fluff.h
           grep -Fq 'int32 CFont::ButtonsSlot = -1;' upstream-revc/src/renderer/Font.cpp
           grep -Fq 'int32 CWaterCreatures::nNumActiveSeaLifeForms;' upstream-revc/src/renderer/WaterCreatures.cpp
+          grep -Fq '#include <alloca.h>' upstream-revc/src/skel/crossplatform.cpp
+          grep -Fq '#include <unistd.h>' upstream-revc/src/skel/crossplatform.cpp
           ! grep -n 'SetNewAttraction(CPedAttractor.*int);' upstream-revc/src/peds/Ped.h
           grep -Fq 'static int32 ChooseGangOccupation(int32);' upstream-revc/src/peds/Population.h
           grep -Fq 'static void PlaceGangMembers(ePedType, int32, CVector const&);' upstream-revc/src/peds/Population.h
