@@ -1,4 +1,4 @@
-name: Build reVC PSP MIPS # PSP CdStream compatibility pass v3
+name: Build reVC PSP MIPS # PSP CdStream compatibility pass v4
 
 on:
   workflow_dispatch:
