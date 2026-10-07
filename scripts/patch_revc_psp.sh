@@ -7,10 +7,11 @@ ENG="upstream-revc/vendor/librw/src/engine.cpp"
 CMAKE="upstream-revc/vendor/librw/src/CMakeLists.txt"
 CTRL="upstream-revc/src/core/ControllerConfig.h"
 
-# PSP has no DirectInput. Keep the legacy controller-state storage type so the
-# common controller configuration code can compile without Windows dinput.h.
-if [ -f "$CTRL" ] && ! grep -q "struct DIJOYSTATE2" "$CTRL"; then
-  sed -i '/#pragma once/a #ifdef RW_PSP\nstruct DIJOYSTATE2 { unsigned char _psp_state[1024]; };\n#endif' "$CTRL"
+# PSP uses its own controller path; select the non-DirectInput controller state
+# representation and bypass the Windows-only size assertion.
+if [ -f "$CTRL" ]; then
+  sed -i 's/#if defined RW_GL3/#if defined RW_GL3 || defined RW_PSP/' "$CTRL"
+  sed -i 's/#ifndef RW_GL3/#if !defined RW_GL3 \&\& !defined RW_PSP/' "$CTRL"
 fi
 
 # Remove desktop device headers from the common public/engine headers.
