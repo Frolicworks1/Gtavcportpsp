@@ -49,8 +49,8 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          grep -A4 -B2 'if(RW_PSP)' upstream-revc/vendor/librw/src/CMakeLists.txt
-          grep -A4 -B2 'if(RW_PSP)' upstream-revc/vendor/librw/src/CMakeLists.txt | grep -q 'endif()'
+          grep -q 'psp/rwpsp.cpp' upstream-revc/vendor/librw/src/CMakeLists.txt
+          grep -q 'psp/rwpsp.h' upstream-revc/vendor/librw/src/CMakeLists.txt
 
       - name: Apply temporary PSP header isolation for compile probe
         shell: bash
