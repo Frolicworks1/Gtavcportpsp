@@ -18,6 +18,7 @@ RADAR="upstream-revc/src/core/Radar.cpp"
 DEBUGMENU="upstream-revc/src/extras/debugmenu.h"
 STREAMING="upstream-revc/src/core/Streaming.cpp"
 RE3="upstream-revc/src/core/re3.cpp"
+DEBUGMENU="upstream-revc/src/extras/debugmenu.h"
 FAKERW="upstream-revc/src/fakerw/fake.cpp"
 CAMERA="upstream-revc/src/core/Camera.cpp"
 RADAR="upstream-revc/src/core/Radar.cpp"
@@ -216,6 +217,16 @@ fi
 
 if [ -f "$CAMERA" ]; then
   sed -i 's/^CCamera::TryToStartNewCamMode(int obbeMode)/CCamera::TryToStartNewCamMode(int32 obbeMode)/' "$CAMERA"
+fi
+
+if [ -f "$RE3" ]; then
+  sed -i '/^void StoreIni(const char \*cat, const char \*key, uint32 val)/i\#ifdef RW_PSP\nvoid StoreIni(const char *cat, const char *key, bool val) { cfg[cat][key] = val ? "1" : "0"; }\n#endif' "$RE3"
+fi
+
+if [ -f "$DEBUGMENU" ]; then
+  if ! grep -q 'const char \*path, const char \*name, int \*ptr' "$DEBUGMENU"; then
+    sed -i '/^inline DebugMenuEntry \*DebugMenuAddVar(const char \*path, const char \*name, int32_t \*ptr/i\#ifdef RW_PSP\ninline DebugMenuEntry *DebugMenuAddVar(const char *path, const char *name, int *ptr, TriggerFunc triggerFunc, int step, int lowerBound, int upperBound, const char **strings)\n{ return DebugMenuAddInt32(path, name, reinterpret_cast<int32_t *>(ptr), triggerFunc, (int32_t)step, (int32_t)lowerBound, (int32_t)upperBound, strings); }\n#endif' "$DEBUGMENU"
+  fi
 fi
 
 exit 0
