@@ -55,7 +55,18 @@ if [ -f "$POP" ]; then
   # Keep Population definitions identical to int32 declarations under PSP.
   # Use separate substitutions for BusyBox/POSIX sed portability and verify each result.
   # Match only ChooseGangOccupation's return type and parameter typedef.
-  awk 'prev == "int" && $0 == "CPopulation::ChooseGangOccupation(int gangId)" { print "int32"; print "CPopulation::ChooseGangOccupation(int32 gangId)"; prev=""; next } { if (prev != "") print prev; prev=$0 } END { if (prev != "") print prev }' "$POP" > "$POP.psp.tmp"
+  awk '
+    $0 == "int" { pending_int=1; next }
+    pending_int && $0 == "CPopulation::ChooseGangOccupation(int gangId)" {
+      print "int32"
+      print "CPopulation::ChooseGangOccupation(int32 gangId)"
+      pending_int=0
+      next
+    }
+    pending_int { print "int"; pending_int=0 }
+    { print }
+    END { if (pending_int) print "int" }
+  ' "$POP" > "$POP.psp.tmp"
   mv "$POP.psp.tmp" "$POP"
   sed -i 's/CPopulation::PlaceGangMembers(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembers(ePedType pedType, int32 pedAmount/' "$POP"
   sed -i 's/CPopulation::PlaceGangMembersInFormation(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembersInFormation(ePedType pedType, int32 pedAmount/' "$POP"
