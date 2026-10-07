@@ -8,9 +8,9 @@ void CapturePad(RwInt32 padID)
         return;
 
     SceCtrlData pad;
-    sceCtrlPeekBufferPositive(&pad, 0, 1);
+    sceCtrlPeekBufferPositive(&pad, 1);
 
-    CControllerState &s = GetPad(padID)->PCTempJoyState;
+    CControllerState &s = CPad::GetPad(padID)->PCTempJoyState;
     s.Clear();
     s.DPadUp = !!(pad.Buttons & PSP_CTRL_UP);
     s.DPadDown = !!(pad.Buttons & PSP_CTRL_DOWN);
