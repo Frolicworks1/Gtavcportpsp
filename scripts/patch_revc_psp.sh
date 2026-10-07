@@ -30,6 +30,7 @@ PADHEADER="upstream-revc/src/core/Pad.h"
 FRONTEND="upstream-revc/src/core/Frontend.cpp"
 PEDH="upstream-revc/src/peds/Ped.h"
 PEDATTR="upstream-revc/src/peds/PedAttractor.h"
+POP="upstream-revc/src/peds/Population.cpp"
 PAD="upstream-revc/src/core/Pad.cpp"
 
 if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; then
@@ -38,6 +39,11 @@ if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; 
     printf '%s\n' '' '#ifdef RW_PSP' '#endif'
   } > "$PADHEADER.psp.tmp"
   mv "$PADHEADER.psp.tmp" "$PADHEADER"
+fi
+
+if [ -f "$POP" ]; then
+  # Keep Population definitions identical to int32 declarations under PSP.
+  sed -i 's/^CPopulation::ChooseGangOccupation(int gangId)/CPopulation::ChooseGangOccupation(int32 gangId)/; s/^CPopulation::PlaceGangMembers(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembers(ePedType pedType, int32 pedAmount/; s/^CPopulation::PlaceGangMembersInFormation(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembersInFormation(ePedType pedType, int32 pedAmount/; s/^CPopulation::PlaceGangMembersInCircle(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembersInCircle(ePedType pedType, int32 pedAmount/' "$POP"
 fi
 
 if [ -f "$PEDATTR" ]; then
