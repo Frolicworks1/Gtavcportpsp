@@ -8,6 +8,13 @@ CMAKE="upstream-revc/vendor/librw/src/CMakeLists.txt"
 SRC_CMAKE="upstream-revc/src/CMakeLists.txt"
 ROOT="upstream-revc/CMakeLists.txt"
 CTRL="upstream-revc/src/core/ControllerConfig.h"
+EAX="upstream-revc/src/audio/eax/eax-util.cpp"
+
+# PSP desktop EAX source is never compiled: it requires DirectSound headers.
+if [ -f "$EAX" ]; then
+  sed -i '1i #ifndef RW_PSP' "$EAX"
+  printf '\n#endif\n' >> "$EAX"
+fi
 
 # PSP controller path: reuse the GL3-style JoyState representation and disable
 # the Windows DirectInput layout/size validation.
