@@ -15,6 +15,7 @@ CARCTRL="upstream-revc/src/control/CarCtrl.cpp"
 PATHFIND="upstream-revc/src/control/PathFind.cpp"
 PICKUPS="upstream-revc/src/control/Pickups.cpp"
 RADAR="upstream-revc/src/core/Radar.cpp"
+STREAMING="upstream-revc/src/core/Streaming.cpp"
 CAMERA="upstream-revc/src/core/Camera.cpp"
 RADAR="upstream-revc/src/core/Radar.cpp"
 CDSTREAM="upstream-revc/src/core/CdStream_posix.cpp"
@@ -84,6 +85,10 @@ if [ -f "$CDSTREAM" ]; then
 fi
 if [ -f "$CDHEADER" ]; then
   sed -i 's/^int CdStreamGetLastPosn(void);$/int32 CdStreamGetLastPosn(void);/' "$CDHEADER"
+fi
+
+if [ -f "$STREAMING" ]; then
+  sed -i 's/^CStreaming::LoadCdDirectory(const char \*dirname, int n)/CStreaming::LoadCdDirectory(const char *dirname, int32 n)/' "$STREAMING"
 fi
 
 if [ -f "$RADAR" ]; then
