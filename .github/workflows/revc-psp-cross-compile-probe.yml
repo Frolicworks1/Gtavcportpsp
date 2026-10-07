@@ -103,7 +103,13 @@ jobs:
           grep -q 'audio/eax/eax-util.cpp' upstream-revc/src/CMakeLists.txt
           grep -q '^    pspgu$' upstream-revc/src/CMakeLists.txt
           grep -q '^    pspgum$' upstream-revc/src/CMakeLists.txt
-          grep -q '^    pspctrl      - name: Configure native PSP build
+          grep -q '^    pspctrl$' upstream-revc/src/CMakeLists.txt
+          grep -q '^    pspge$' upstream-revc/src/CMakeLists.txt
+          grep -q '^    pspdisplay$' upstream-revc/src/CMakeLists.txt
+          grep -q '^if(RW_PSP)$' upstream-revc/vendor/librw/CMakeLists.txt
+          grep -q 'set(LIBRW_PLATFORMS "PSP")' upstream-revc/vendor/librw/CMakeLists.txt
+          grep -q 'psp/rwpsp.cpp' upstream-revc/vendor/librw/src/CMakeLists.txt
+      - name: Configure native PSP build
         id: configure
         shell: bash
         run: |
