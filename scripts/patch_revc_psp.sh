@@ -16,6 +16,7 @@ PATHFIND="upstream-revc/src/control/PathFind.cpp"
 PICKUPS="upstream-revc/src/control/Pickups.cpp"
 RADAR="upstream-revc/src/core/Radar.cpp"
 CAMERA="upstream-revc/src/core/Camera.cpp"
+RADAR="upstream-revc/src/core/Radar.cpp"
 CDSTREAM="upstream-revc/src/core/CdStream_posix.cpp"
 CDHEADER="upstream-revc/src/core/CdStream.h"
 PAD="upstream-revc/src/core/Pad.cpp"
@@ -83,6 +84,13 @@ if [ -f "$CDSTREAM" ]; then
 fi
 if [ -f "$CDHEADER" ]; then
   sed -i 's/^int CdStreamGetLastPosn(void);$/int32 CdStreamGetLastPosn(void);/' "$CDHEADER"
+fi
+
+if [ -f "$RADAR" ]; then
+  sed -i \
+    -e 's/^int CRadar::SetCoordBlip(/int32 CRadar::SetCoordBlip(/' \
+    -e 's/^int CRadar::SetShortRangeCoordBlip(/int32 CRadar::SetShortRangeCoordBlip(/' \
+    -e 's/^int CRadar::SetEntityBlip(/int32 CRadar::SetEntityBlip(/' "$RADAR"
 fi
 
 if [ -f "$CAMERA" ]; then
