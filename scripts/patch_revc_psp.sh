@@ -95,7 +95,16 @@ fi
 # does not expose through the upstream include chain. Keep these includes local to PSP.
 CROSSPLATFORM="upstream-revc/src/skel/crossplatform.cpp"
 if [ -f "$CROSSPLATFORM" ]; then
-  if ! grep -q '^#include <alloca.h>if [ -f "$WATERCREATURESCPP" ]; then
+  if ! grep -q '^#include <alloca.h>$' "$CROSSPLATFORM"; then
+    sed -i '1a #ifdef RW_PSP\n#include <alloca.h>\n#include <stdlib.h>\n#include <string.h>\n#include <strings.h>\n#include <unistd.h>\n#endif' "$CROSSPLATFORM"
+  fi
+  grep -q '^#include <alloca.h>$' "$CROSSPLATFORM"
+  grep -q '^#include <unistd.h>$' "$CROSSPLATFORM"
+fi
+
+# Keep WaterCreatures active-count state identical to its int32 class declaration.
+WATERCREATURESCPP="upstream-revc/src/renderer/WaterCreatures.cpp"
+if [ -f "$WATERCREATURESCPP" ]; then
   sed -i 's/^int CWaterCreatures::nNumActiveSeaLifeForms;/int32 CWaterCreatures::nNumActiveSeaLifeForms;/' "$WATERCREATURESCPP"
   grep -Fq 'int32 CWaterCreatures::nNumActiveSeaLifeForms;' "$WATERCREATURESCPP"
 fi
