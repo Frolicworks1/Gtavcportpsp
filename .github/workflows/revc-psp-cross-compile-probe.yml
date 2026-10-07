@@ -76,6 +76,7 @@ jobs:
           grep -q 'CPathFind::CalcNodeCoors(float x, float y, float z, int32 id' upstream-revc/src/control/PathFind.cpp
           grep -q 'CPathFind::PreparePathDataForType' upstream-revc/src/control/PathFind.cpp
           grep -Fq 'CPathInfoForObject *detachednodes, int32 numDetached' upstream-revc/src/control/PathFind.cpp
+          grep -q '^int CPacManPickups::PillsEatenInRace;' upstream-revc/src/control/Pickups.cpp
 
       - name: Configure native PSP build
         id: configure
