@@ -290,6 +290,10 @@ if [ -f "$SRC_CMAKE" ]; then
   } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
   mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
 fi
+if [ -f "$SRC_CMAKE" ]; then
+  sed -i '/CdStream_posix.cpp/d' "$SRC_CMAKE"
+fi
+
 if [ -f "$RADAR" ]; then
   sed -i     -e 's/^int CRadar::SetCoordBlip(/int32 CRadar::SetCoordBlip(/'     -e 's/^int CRadar::SetShortRangeCoordBlip(/int32 CRadar::SetShortRangeCoordBlip(/'     -e 's/^int CRadar::SetEntityBlip(/int32 CRadar::SetEntityBlip(/'     "$RADAR"
 fi
