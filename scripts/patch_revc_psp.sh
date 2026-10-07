@@ -23,7 +23,10 @@ sed -i \
 
 # rw.h must expose the PSP device namespace to every game-side include,
 # not just to librw's own compilation unit.
-sed -i '/#include "src\/rwobjects.h"/a#include "src/psp/rwpsp.h"' "$RW"
+if ! grep -q '#include "src/psp/rwpsp.h"' "$RW"; then
+  awk 'BEGIN { added=0 } { print; if (!added && $0 == "#include \"src/rwobjects.h\"") { print "#include \"src/psp/rwpsp.h\""; added=1 } }' "$RW" > "$RW.tmp"
+  mv "$RW.tmp" "$RW"
+fi
 
 if ! grep -q '#define RWDEVICE psp' "$BASE"; then
   awk 'BEGIN { added=0 } { if (!added && $0 == "#ifdef RW_GL3") { print "#ifdef RW_PSP"; print "#define RWDEVICE psp"; print "#endif"; added=1 } print }' "$BASE" > "$BASE.tmp"
@@ -122,7 +125,8 @@ fi
 FAKERW="upstream-revc/src/fakerw/rwcore.h"
 if [ -f "$FAKERW" ]; then
   sed -i '/^#ifdef RW_PSP$/,/^#endif$/d' "$FAKERW"
-  sed -i '1i#ifdef RW_PSP\n#define RWDEVICE psp\n#endif' "$FAKERW"
+  awk 'BEGIN { print "#ifdef RW_PSP"; print "#define RWDEVICE psp"; print "#endif" } { print }' "$FAKERW" > "$FAKERW.tmp"
+  mv "$FAKERW.tmp" "$FAKERW"
 fi
 
 # Use the portable JoyState shape on PSP; actual sceCtrlReadBufferPositive
