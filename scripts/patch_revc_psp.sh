@@ -8,18 +8,7 @@ CMAKE="upstream-revc/vendor/librw/src/CMakeLists.txt"
 
 # Remove desktop-only platform headers and keep the PSP backend as the
 # concrete device interface for this probe.
-sed -i \
-  -e '/#include "src\/ps2\/rwps2.h"/d' \
-  -e '/#include "src\/ps2\/rwps2plg.h"/d' \
-  -e '/#include "src\/d3d\/rwxbox.h"/d' \
-  -e '/#include "src\/d3d\/rwd3d.h"/d' \
-  -e '/#include "src\/d3d\/rwd3d8.h"/d' \
-  -e '/#include "src\/d3d\/rwd3d9.h"/d' \
-  -e '/#include "src\/gl\/rwwdgl.h"/d' \
-  -e '/#include "src\/gl\/rwgl3.h"/d' \
-  -e '/#include "src\/gl\/rwgl3shader.h"/d' \
-  -e '/#include "src\/gl\/rwgl3plg.h"/d' \
-  "$RW"
+sed -i '/#include "src\\/ps2\\/rwps2.h"/d; /#include "src\\/ps2\\/rwps2plg.h"/d; /#include "src\\/d3d\\/rwxbox.h"/d; /#include "src\\/d3d\\/rwd3d.h"/d; /#include "src\\/d3d\\/rwd3d8.h"/d; /#include "src\\/d3d\\/rwd3d9.h"/d; /#include "src\\/gl\\/rwwdgl.h"/d; /#include "src\\/gl\\/rwgl3.h"/d; /#include "src\\/gl\\/rwgl3shader.h"/d; /#include "src\\/gl\\/rwgl3plg.h"/d' "$RW"
 
 # rw.h must expose the PSP device namespace to every game-side include,
 # not just to librw's own compilation unit.
