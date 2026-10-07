@@ -86,6 +86,22 @@ endif()
 EOF
 fi
 
+# The pinned reVC CMake project only exposes OpenAL as its non-Windows
+# audio backend. PSP has no OpenAL implementation in this port yet, so keep
+# the engine compile probe independent of desktop OpenAL headers. Audio will
+# be reintroduced through a dedicated PSP backend later.
+SRC_CMAKE="upstream-revc/src/CMakeLists.txt"
+if [ -f "$SRC_CMAKE" ]; then
+  sed -i '/target_compile_definitions(\$\{EXECUTABLE\} PRIVATE AUDIO_OAL)/d' "$SRC_CMAKE"
+  sed -i '/target_link_libraries(\$\{EXECUTABLE\} PRIVATE OpenAL::OpenAL)/d' "$SRC_CMAKE"
+  sed -i '/find_package(OpenAL REQUIRED)/d' "$SRC_CMAKE"
+  sed -i '/if(TARGET OpenAL::OpenAL)/,/endif()/d' "$SRC_CMAKE"
+  sed -i '/if(\$\{PROJECT\}_AUDIO STREQUAL "OAL")/d' "$SRC_CMAKE"
+  sed -i '/elseif(\$\{PROJECT\}_AUDIO STREQUAL "MSS")/d' "$SRC_CMAKE"
+  sed -i '/find_package(MilesSDK REQUIRED)/d; /target_compile_definitions(\$\{EXECUTABLE\} PRIVATE AUDIO_MSS)/d; /target_link_libraries(\$\{EXECUTABLE\} PRIVATE MilesSDK::MilesSDK)/d' "$SRC_CMAKE"
+  sed -i '/audio\/oal\//d; /audio\/sampman_oal.cpp/d' "$SRC_CMAKE"
+fi
+
 # Select the PSP device in Engine::open.
 if ! grep -q 'engine->device = psp::renderdevice' "$ENG"; then
   sed -i '/#ifdef RW_PS2/i\\
