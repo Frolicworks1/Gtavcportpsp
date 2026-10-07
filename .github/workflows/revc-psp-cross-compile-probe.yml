@@ -94,6 +94,237 @@ jobs:
           grep -q 'add_library(MPG123::libmpg123 INTERFACE IMPORTED)' upstream-revc/src/CMakeLists.txt
           grep -q 'list(REMOVE_ITEM' upstream-revc/src/CMakeLists.txt
           grep -q 'audio/eax/eax-util.cpp' upstream-revc/src/CMakeLists.txt
+          grep -q '^    pspgu      - name: Configure native PSP build
+        id: configure
+        shell: bash
+        run: |
+          set -o pipefail
+          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
+          cmake -S upstream-revc -B build-revc-psp \
+            -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake" \
+            -DRW_PSP=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -DM_SQRT2=1.4142135623730951 -I$PSPDEV/psp/sdk/include" \
+            -DLIBRW_PLATFORM=NULL \
+            -DREVC_WITH_OPUS=OFF \
+            -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
+      - name: Compile reVC for PSP
+        if: steps.configure.outcome == 'success'
+        id: compile
+        shell: bash
+        run: |
+          set -o pipefail
+          cmake --build build-revc-psp --parallel 2 2>&1 | tee psp-cross-compile.log
+      - name: Package and validate PSP EBOOT
+        if: steps.compile.outcome == 'success'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
+          BUILD_DIR="$GITHUB_WORKSPACE/build-revc-psp"
+          PACKAGE_DIR="$BUILD_DIR/psp-package"
+          mkdir -p "$PACKAGE_DIR"
+
+          ELF="$(find "$BUILD_DIR" -type f -name 'reVC' -print -quit)"
+          if [ -z "$ELF" ]; then
+            ELF="$(find "$BUILD_DIR" -type f -name '*.elf' -print -quit)"
+          fi
+          test -n "$ELF"
+          test -s "$ELF"
+          printf 'ELF=%s\n' "$ELF"
+          printf 'ELF_MAGIC='
+          od -An -tx1 -N4 "$ELF"
+
+          cp "$ELF" "$PACKAGE_DIR/reVC"
+          "$PSPDEV/bin/psp-strip" "$PACKAGE_DIR/reVC"
+          "$PSPDEV/bin/psp-fixup-imports" "$PACKAGE_DIR/reVC"
+          test -s "$PACKAGE_DIR/reVC"
+
+          cd "$PACKAGE_DIR"
+          "$PSPDEV/bin/mksfoex" -d MEMSIZE=1 "Grand Theft Auto: Vice City PSP" PARAM.SFO
+          test -s PARAM.SFO
+
+          "$PSPDEV/bin/pack-pbp" EBOOT.PBP PARAM.SFO NULL NULL NULL NULL NULL reVC NULL
+          test -s EBOOT.PBP
+
+          MAGIC="$(od -An -tx1 -N4 EBOOT.PBP | tr -d ' \n')"
+          test "$MAGIC" = "50425000"
+          ELF_MAGIC="$(od -An -tx1 -N4 reVC | tr -d ' \n')"
+          test "$ELF_MAGIC" = "7f454c46"
+
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP"
+          cp EBOOT.PBP "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP/EBOOT.PBP"
+          cp PARAM.SFO "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP/PARAM.SFO"
+          cp reVC "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP/reVC.elf"
+          find "$GITHUB_WORKSPACE/artifacts" -type f -exec ls -lh {} \;
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: revc-psp-build-diagnostics
+          path: |
+            psp-patch.log
+            psp-cmake-configure.log
+            psp-cross-compile.log
+            artifacts/PSP/GAME/GTAVCPSP/EBOOT.PBP
+            artifacts/PSP/GAME/GTAVCPSP/PARAM.SFO
+            artifacts/PSP/GAME/GTAVCPSP/reVC.elf
+          if-no-files-found: warn
+ upstream-revc/src/CMakeLists.txt
+          grep -q '^    pspgum      - name: Configure native PSP build
+        id: configure
+        shell: bash
+        run: |
+          set -o pipefail
+          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
+          cmake -S upstream-revc -B build-revc-psp \
+            -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake" \
+            -DRW_PSP=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -DM_SQRT2=1.4142135623730951 -I$PSPDEV/psp/sdk/include" \
+            -DLIBRW_PLATFORM=NULL \
+            -DREVC_WITH_OPUS=OFF \
+            -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
+      - name: Compile reVC for PSP
+        if: steps.configure.outcome == 'success'
+        id: compile
+        shell: bash
+        run: |
+          set -o pipefail
+          cmake --build build-revc-psp --parallel 2 2>&1 | tee psp-cross-compile.log
+      - name: Package and validate PSP EBOOT
+        if: steps.compile.outcome == 'success'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
+          BUILD_DIR="$GITHUB_WORKSPACE/build-revc-psp"
+          PACKAGE_DIR="$BUILD_DIR/psp-package"
+          mkdir -p "$PACKAGE_DIR"
+
+          ELF="$(find "$BUILD_DIR" -type f -name 'reVC' -print -quit)"
+          if [ -z "$ELF" ]; then
+            ELF="$(find "$BUILD_DIR" -type f -name '*.elf' -print -quit)"
+          fi
+          test -n "$ELF"
+          test -s "$ELF"
+          printf 'ELF=%s\n' "$ELF"
+          printf 'ELF_MAGIC='
+          od -An -tx1 -N4 "$ELF"
+
+          cp "$ELF" "$PACKAGE_DIR/reVC"
+          "$PSPDEV/bin/psp-strip" "$PACKAGE_DIR/reVC"
+          "$PSPDEV/bin/psp-fixup-imports" "$PACKAGE_DIR/reVC"
+          test -s "$PACKAGE_DIR/reVC"
+
+          cd "$PACKAGE_DIR"
+          "$PSPDEV/bin/mksfoex" -d MEMSIZE=1 "Grand Theft Auto: Vice City PSP" PARAM.SFO
+          test -s PARAM.SFO
+
+          "$PSPDEV/bin/pack-pbp" EBOOT.PBP PARAM.SFO NULL NULL NULL NULL NULL reVC NULL
+          test -s EBOOT.PBP
+
+          MAGIC="$(od -An -tx1 -N4 EBOOT.PBP | tr -d ' \n')"
+          test "$MAGIC" = "50425000"
+          ELF_MAGIC="$(od -An -tx1 -N4 reVC | tr -d ' \n')"
+          test "$ELF_MAGIC" = "7f454c46"
+
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP"
+          cp EBOOT.PBP "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP/EBOOT.PBP"
+          cp PARAM.SFO "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP/PARAM.SFO"
+          cp reVC "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP/reVC.elf"
+          find "$GITHUB_WORKSPACE/artifacts" -type f -exec ls -lh {} \;
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: revc-psp-build-diagnostics
+          path: |
+            psp-patch.log
+            psp-cmake-configure.log
+            psp-cross-compile.log
+            artifacts/PSP/GAME/GTAVCPSP/EBOOT.PBP
+            artifacts/PSP/GAME/GTAVCPSP/PARAM.SFO
+            artifacts/PSP/GAME/GTAVCPSP/reVC.elf
+          if-no-files-found: warn
+ upstream-revc/src/CMakeLists.txt
+          grep -q '^    pspctrl      - name: Configure native PSP build
+        id: configure
+        shell: bash
+        run: |
+          set -o pipefail
+          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
+          cmake -S upstream-revc -B build-revc-psp \
+            -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake" \
+            -DRW_PSP=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -DM_SQRT2=1.4142135623730951 -I$PSPDEV/psp/sdk/include" \
+            -DLIBRW_PLATFORM=NULL \
+            -DREVC_WITH_OPUS=OFF \
+            -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
+      - name: Compile reVC for PSP
+        if: steps.configure.outcome == 'success'
+        id: compile
+        shell: bash
+        run: |
+          set -o pipefail
+          cmake --build build-revc-psp --parallel 2 2>&1 | tee psp-cross-compile.log
+      - name: Package and validate PSP EBOOT
+        if: steps.compile.outcome == 'success'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
+          BUILD_DIR="$GITHUB_WORKSPACE/build-revc-psp"
+          PACKAGE_DIR="$BUILD_DIR/psp-package"
+          mkdir -p "$PACKAGE_DIR"
+
+          ELF="$(find "$BUILD_DIR" -type f -name 'reVC' -print -quit)"
+          if [ -z "$ELF" ]; then
+            ELF="$(find "$BUILD_DIR" -type f -name '*.elf' -print -quit)"
+          fi
+          test -n "$ELF"
+          test -s "$ELF"
+          printf 'ELF=%s\n' "$ELF"
+          printf 'ELF_MAGIC='
+          od -An -tx1 -N4 "$ELF"
+
+          cp "$ELF" "$PACKAGE_DIR/reVC"
+          "$PSPDEV/bin/psp-strip" "$PACKAGE_DIR/reVC"
+          "$PSPDEV/bin/psp-fixup-imports" "$PACKAGE_DIR/reVC"
+          test -s "$PACKAGE_DIR/reVC"
+
+          cd "$PACKAGE_DIR"
+          "$PSPDEV/bin/mksfoex" -d MEMSIZE=1 "Grand Theft Auto: Vice City PSP" PARAM.SFO
+          test -s PARAM.SFO
+
+          "$PSPDEV/bin/pack-pbp" EBOOT.PBP PARAM.SFO NULL NULL NULL NULL NULL reVC NULL
+          test -s EBOOT.PBP
+
+          MAGIC="$(od -An -tx1 -N4 EBOOT.PBP | tr -d ' \n')"
+          test "$MAGIC" = "50425000"
+          ELF_MAGIC="$(od -An -tx1 -N4 reVC | tr -d ' \n')"
+          test "$ELF_MAGIC" = "7f454c46"
+
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP"
+          cp EBOOT.PBP "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP/EBOOT.PBP"
+          cp PARAM.SFO "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP/PARAM.SFO"
+          cp reVC "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP/reVC.elf"
+          find "$GITHUB_WORKSPACE/artifacts" -type f -exec ls -lh {} \;
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: revc-psp-build-diagnostics
+          path: |
+            psp-patch.log
+            psp-cmake-configure.log
+            psp-cross-compile.log
+            artifacts/PSP/GAME/GTAVCPSP/EBOOT.PBP
+            artifacts/PSP/GAME/GTAVCPSP/PARAM.SFO
+            artifacts/PSP/GAME/GTAVCPSP/reVC.elf
+          if-no-files-found: warn
+ upstream-revc/src/CMakeLists.txt
       - name: Configure native PSP build
         id: configure
         shell: bash
