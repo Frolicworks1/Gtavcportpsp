@@ -102,7 +102,7 @@ DEBUGMENUCPP="upstream-revc/src/extras/debugmenu.cpp"
 if [ -f "$DEBUGMENUCPP" ]; then
   DMTMP="$DEBUGMENUCPP.psp.tmp"
   {
-    printf '%s\n' '#include <string.h>'
+    printf '%s\n' '#include <string.h>' '#include <stdlib.h>' '#ifdef RW_PSP' 'static char *psp_strdup_local(const char *s) { size_t n = strlen(s) + 1; char *p = (char *)malloc(n); if (p) memcpy(p, s, n); return p; }' '#define strdup psp_strdup_local' '#endif'
     cat "$DEBUGMENUCPP"
   } > "$DMTMP"
   mv "$DMTMP" "$DEBUGMENUCPP"
