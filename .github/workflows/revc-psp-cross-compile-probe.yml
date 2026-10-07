@@ -38,17 +38,8 @@ jobs:
           # PSP GCC's uint32 typedef is not the same C++ type as the unsigned
           # dimensions expected by vendored lodepng. Keep decoder dimensions in
           # lodepng's declared type; downstream APIs accept their numeric values.
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path("upstream-revc/vendor/librw/src/png.cpp")
-          s = p.read_text()
-          old = "uint32 w, h;"
-          new = "unsigned w, h;"
-          if old not in s:
-              raise SystemExit("Expected PNG dimension declaration not found; upstream source changed")
-          p.write_text(s.replace(old, new, 1))
-          print("Patched lodepng dimension type in local CI checkout only.")
-          PY
+          sed -i '0,/uint32 w, h;/s//unsigned w, h;/' upstream-revc/vendor/librw/src/png.cpp
+          grep -n 'unsigned w, h;' upstream-revc/vendor/librw/src/png.cpp
       - name: Attempt native PSP cross-configuration
         id: configure
         continue-on-error: true
