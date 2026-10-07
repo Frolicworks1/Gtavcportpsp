@@ -80,7 +80,7 @@ fi
 # Keep Fluff scrollbar state declaration identical to its PSP definition.
 FLUFFH="upstream-revc/src/renderer/Fluff.h"
 if [ -f "$FLUFFH" ]; then
-  sed -i 's/^        static int TonightsEvent;/        static int32 TonightsEvent;/' "$FLUFFH"
+  sed -i 's/static int TonightsEvent;/static int32 TonightsEvent;/' "$FLUFFH"
   grep -Fq 'static int32 TonightsEvent;' "$FLUFFH"
 fi
 
