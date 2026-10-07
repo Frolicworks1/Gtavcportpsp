@@ -27,8 +27,8 @@ CDSTREAM="upstream-revc/src/core/CdStream_posix.cpp"
 CDHEADER="upstream-revc/src/core/CdStream.h"
 CDPOSIX="upstream-revc/src/core/CdStream_posix.cpp"
 if [ -f "$CDPOSIX" ]; then
-  sed -i 's/^int32 CdStreamGetLastPosn(void)/int CdStreamGetLastPosn(void)/' "$CDPOSIX"
-  grep -Fq 'int CdStreamGetLastPosn(void)' "$CDPOSIX"
+  sed -i '/^int32$/ { N; s/int32\nCdStreamGetLastPosn(void)/int\nCdStreamGetLastPosn(void)/; }' "$CDPOSIX"
+  grep -Fq 'int\nCdStreamGetLastPosn(void)' "$CDPOSIX" || grep -Fq 'int CdStreamGetLastPosn(void)' "$CDPOSIX"
 fi
 PAD="upstream-revc/src/core/Pad.cpp"
 PADHEADER="upstream-revc/src/core/Pad.h"
