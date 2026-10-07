@@ -99,7 +99,8 @@ if [ -f "$SRC_CMAKE" ]; then
     !skip { print }
   ' "$SRC_CMAKE" > "$SRC_CMAKE.tmp"
   mv "$SRC_CMAKE.tmp" "$SRC_CMAKE"
-  sed -i '/audio\/oal\//d; /audio\/sampman_oal.cpp/d' "$SRC_CMAKE"
+  sed -i '/file(GLOB_RECURSE \${PROJECT}_SOURCES/a\
+list(FILTER \${PROJECT}_SOURCES EXCLUDE REGEX "/audio/oal/|/audio/sampman_oal\\.cpp$")' "$SRC_CMAKE"
 fi
 
 # Select the PSP device in Engine::open.
