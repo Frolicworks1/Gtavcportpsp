@@ -35,7 +35,7 @@ if [ -f "$GENERAL" ] && ! grep -q "PSP integer overloads" "$GENERAL"; then
   fi
 fi
 
-if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(RwInt32 padID);' "$PADHEADER"; then
+if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; then
   {
     cat "$PADHEADER"
     printf '%s\n' '' '#ifdef RW_PSP' 'void CapturePad(RwInt32 padID);' '#endif'
