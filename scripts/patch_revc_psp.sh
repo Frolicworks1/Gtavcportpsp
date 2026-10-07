@@ -21,15 +21,6 @@ PAD="upstream-revc/src/core/Pad.cpp"
 FRONTEND="upstream-revc/src/core/Frontend.cpp"
 PAD="upstream-revc/src/core/Pad.cpp"
 
-if [ -f "$GENERAL" ] && ! grep -q "PSP integer overloads" "$GENERAL"; then
-  GENTMP="$GENERAL.psp.tmp"
-  {
-    cat "$GENERAL"
-    printf '%s\n' '' '#ifdef RW_PSP' '// PSP integer overloads' 'static int32 (*const pspRandomRange32)(int32, int32) = &CGeneral::GetRandomNumberInRange;' 'static int GetRandomNumberInRange(int low, int high) { return (int)pspRandomRange32((int32)low, (int32)high); }' 'static int32 GetRandomNumberInRange(int low, int32 high) { return pspRandomRange32((int32)low, high); }' 'static int32 GetRandomNumberInRange(int32 low, int high) { return pspRandomRange32(low, (int32)high); }' '#endif'
-  } > "$GENTMP"
-  mv "$GENTMP" "$GENERAL"
-fi
-
 if [ -f "$FRONTEND" ]; then
   sed -i \
     -e 's@^#if !defined RW_GL3.*@#if 0@' \
