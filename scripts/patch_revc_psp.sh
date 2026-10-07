@@ -23,16 +23,7 @@ if ! grep -q '#define RWDEVICE psp' "$BASE"; then
 fi
 
 # Restore librw engine dependency order after removing desktop device headers.
-sed -i \
-  -e '/#include "rwengine.h"/d' \
-  -e '/#include "d3d\/rwxbox.h"/d' \
-  -e '/#include "d3d\/rwd3d.h"/d' \
-  -e '/#include "d3d\/rwd3d8.h"/d' \
-  -e '/#include "d3d\/rwd3d9.h"/d' \
-  -e '/#include "gl\/rwgl3.h"/d' \
-  -e '/#include "gl\/rwwdgl.h"/d' \
-  "$ENG"
-sed -i '/#include "rwbase.h"/d; /#include "rwerror.h"/d; /#include "rwplg.h"/d; /#include "rwpipeline.h"/d; /#include "rwobjects.h"/d; /#include "rwengine.h"/d' "$ENG"
+sed -i '/#include "rwengine.h"/d; /#include "d3d\\/rwxbox.h"/d; /#include "d3d\\/rwd3d.h"/d; /#include "d3d\\/rwd3d8.h"/d; /#include "d3d\\/rwd3d9.h"/d; /#include "gl\\/rwgl3.h"/d; /#include "gl\\/rwwdgl.h"/d' "$ENG"
 awk 'BEGIN { print "#include \"rwbase.h\""; print "#include \"rwerror.h\""; print "#include \"rwplg.h\""; print "#include \"rwpipeline.h\""; print "#include \"rwobjects.h\""; print "#include \"rwengine.h\"" } { print }' "$ENG" > "$ENG.tmp"
 mv "$ENG.tmp" "$ENG"
 if ! grep -q '#include "psp/rwpsp.h"' "$ENG"; then
