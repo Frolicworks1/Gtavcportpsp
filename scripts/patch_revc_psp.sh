@@ -6,12 +6,21 @@ BASE="upstream-revc/vendor/librw/src/rwbase.h"
 ENG="upstream-revc/vendor/librw/src/engine.cpp"
 CMAKE="upstream-revc/vendor/librw/src/CMakeLists.txt"
 CTRL="upstream-revc/src/core/ControllerConfig.h"
+CTRLC="upstream-revc/src/core/ControllerConfig.cpp"
 
 # PSP uses its own controller path; select the non-DirectInput controller state
 # representation and bypass the Windows-only size assertion.
 if [ -f "$CTRL" ]; then
   sed -i 's/#if defined RW_GL3/#if defined RW_GL3 || defined RW_PSP/' "$CTRL"
   sed -i 's/#ifndef RW_GL3/#if !defined RW_GL3 \&\& !defined RW_PSP/' "$CTRL"
+fi
+
+# ControllerConfig.cpp still contains DirectInput-specific polling branches.
+# PSP input is provided by the platform layer, so make those legacy polling
+# functions no-ops until the PSP Pad integration is wired into the game loop.
+if [ -f "$CTRLC" ]; then
+  sed -i '/#elif defined RW_GL3/i #elif defined RW_PSP\n\treturn 0;' "$CTRLC"
+  sed -i '/#elif defined RW_GL3/i #elif defined RW_PSP\n\treturn;' "$CTRLC"
 fi
 
 # Remove desktop device headers from the common public/engine headers.
