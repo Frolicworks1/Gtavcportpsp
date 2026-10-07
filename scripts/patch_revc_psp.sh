@@ -79,7 +79,10 @@ grep -q 'psp/rwpsp.cpp' "$CMAKE"
 # PSP uses the built-in null audio path. This prevents desktop OpenAL/DirectInput
 # dependencies from entering the Allegrex build; no fake OpenAL headers are used.
 if [ -f "$ROOT" ]; then
-  sed -i 's@set(\${PROJECT}_AUDIO "OAL" CACHE STRING "Audio")@set(\${PROJECT}_AUDIO "NULL" CACHE STRING "Audio")@' "$ROOT"
+  sed -i \
+    -e 's@set(\${PROJECT}_AUDIOS "OAL")@set(\${PROJECT}_AUDIOS "NULL")@' \
+    -e 's@set(\${PROJECT}_AUDIO "OAL" CACHE STRING "Audio")@set(\${PROJECT}_AUDIO "NULL" CACHE STRING "Audio")@' \
+    "$ROOT"
 fi
 sed -i 's@if(NOT TARGET MPG123::libmpg123)@if(NOT RW_PSP AND NOT TARGET MPG123::libmpg123)@' "$SRC_CMAKE"
 sed -i 's@if(\${PROJECT}_WITH_OPUS)@if(NOT RW_PSP AND \${PROJECT}_WITH_OPUS)@' "$SRC_CMAKE"
