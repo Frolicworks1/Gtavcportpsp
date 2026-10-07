@@ -43,7 +43,7 @@ fi
 
 if [ -f "$POP" ]; then
   # Keep Population definitions identical to int32 declarations under PSP.
-  sed -i 's/^CPopulation::ChooseGangOccupation(int gangId)/CPopulation::ChooseGangOccupation(int32 gangId)/; s/^CPopulation::PlaceGangMembers(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembers(ePedType pedType, int32 pedAmount/; s/^CPopulation::PlaceGangMembersInFormation(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembersInFormation(ePedType pedType, int32 pedAmount/; s/^CPopulation::PlaceGangMembersInCircle(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembersInCircle(ePedType pedType, int32 pedAmount/' "$POP"
+  # Use separate substitutions for BusyBox/POSIX sed portability and verify each result.\n  sed -i 's/CPopulation::ChooseGangOccupation(int gangId)/CPopulation::ChooseGangOccupation(int32 gangId)/' "$POP"\n  sed -i 's/CPopulation::PlaceGangMembers(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembers(ePedType pedType, int32 pedAmount/' "$POP"\n  sed -i 's/CPopulation::PlaceGangMembersInFormation(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembersInFormation(ePedType pedType, int32 pedAmount/' "$POP"\n  sed -i 's/CPopulation::PlaceGangMembersInCircle(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembersInCircle(ePedType pedType, int32 pedAmount/' "$POP"\n  grep -Fq 'CPopulation::ChooseGangOccupation(int32 gangId)' "$POP"\n  grep -Fq 'CPopulation::PlaceGangMembers(ePedType pedType, int32 pedAmount' "$POP"\n  grep -Fq 'CPopulation::PlaceGangMembersInFormation(ePedType pedType, int32 pedAmount' "$POP"\n  grep -Fq 'CPopulation::PlaceGangMembersInCircle(ePedType pedType, int32 pedAmount' "$POP"
 fi
 
 if [ -f "$PEDATTR" ]; then
