@@ -1,6 +1,17 @@
 #pragma once
 
-namespace rw { namespace psp {
+namespace rw {
+
+#ifdef RW_PSP
+struct EngineOpenParams {
+    int width;
+    int height;
+    const char *windowtitle;
+    void *window;
+};
+#endif
+
+namespace psp {
 
 struct Im2DVertex {
     float32 x, y, z, w;
