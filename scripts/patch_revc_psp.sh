@@ -43,6 +43,28 @@ if [ -f "$GENERAL" ]; then
   fi
 fi
 if [ -f "$PAD" ]; then
+  sed -i '/^void CPad::UpdatePads(void)/i #ifdef RW_PSP
+void CapturePad(RwInt32 padID)
+{
+  if (padID < 0 || padID >= MAX_PADS) return;
+  SceCtrlData pad;
+  sceCtrlPeekBufferPositive(&pad, 0, 1);
+  CControllerState &s = GetPad(padID)->PCTempJoyState;
+  s.Clear();
+  s.DPadUp = !!(pad.Buttons & PSP_CTRL_UP);
+  s.DPadDown = !!(pad.Buttons & PSP_CTRL_DOWN);
+  s.DPadLeft = !!(pad.Buttons & PSP_CTRL_LEFT);
+  s.DPadRight = !!(pad.Buttons & PSP_CTRL_RIGHT);
+  s.Triangle = !!(pad.Buttons & PSP_CTRL_TRIANGLE);
+  s.Circle = !!(pad.Buttons & PSP_CTRL_CIRCLE);
+  s.Cross = !!(pad.Buttons & PSP_CTRL_CROSS);
+  s.Square = !!(pad.Buttons & PSP_CTRL_SQUARE);
+  s.Start = !!(pad.Buttons & PSP_CTRL_START);
+  s.Select = !!(pad.Buttons & PSP_CTRL_SELECT);
+  s.LeftShoulder1 = !!(pad.Buttons & PSP_CTRL_LTRIGGER);
+  s.RightShoulder1 = !!(pad.Buttons & PSP_CTRL_RTRIGGER);
+}
+#endif' "$PAD"
   # PSP uses the controller path; desktop mouse polling must not be compiled.
   sed -i '/CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()/i #ifndef RW_PSP' "$PAD"
   sed -i '/^void CPad::UpdateMouse()/a #ifdef RW_PSP
