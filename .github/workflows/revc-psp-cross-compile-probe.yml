@@ -73,6 +73,9 @@ jobs:
           grep -q 'static int32 GetRandomNumberInRange(int low, int32 high)' upstream-revc/src/core/General.h
           grep -q 'int32 CCarCtrl::NumLawEnforcerCars;' upstream-revc/src/control/CarCtrl.cpp
           grep -q 'CCarCtrl::RemoveFromLoadedVehicleArray(int32 mi, int32 rating)' upstream-revc/src/control/CarCtrl.cpp
+          grep -q 'CPathFind::CalcNodeCoors(float x, float y, float z, int32 id' upstream-revc/src/control/PathFind.cpp
+          grep -q 'CPathFind::PreparePathDataForType' upstream-revc/src/control/PathFind.cpp
+          grep -q 'CPathInfoForObject *objectpathinfo, int32)' upstream-revc/src/control/PathFind.cpp
 
       - name: Configure native PSP build
         id: configure
