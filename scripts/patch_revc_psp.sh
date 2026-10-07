@@ -17,6 +17,13 @@ PICKUPS="upstream-revc/src/control/Pickups.cpp"
 CAMERA="upstream-revc/src/core/Camera.cpp"
 CDSTREAM="upstream-revc/src/core/CdStream_posix.cpp"
 CDHEADER="upstream-revc/src/core/CdStream.h"
+FRONTEND="upstream-revc/src/core/Frontend.cpp"
+
+if [ -f "$FRONTEND" ]; then
+  sed -i \
+    -e 's/^#if !defined RW_GL3$/#if 0/' \
+    -e 's/^#elif defined(LIBRW_SDL2)/#elif defined(RW_PSP) || defined(LIBRW_SDL2)/' "$FRONTEND"
+fi
 
 # PSP desktop EAX source is never compiled: it requires DirectSound headers.
 if [ -f "$EAX" ]; then
