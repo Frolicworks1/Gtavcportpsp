@@ -64,6 +64,8 @@ jobs:
           grep -q 'PROJECT}_AUDIOS "NULL"' upstream-revc/CMakeLists.txt
           grep -q 'PROJECT}_AUDIO "NULL"' upstream-revc/CMakeLists.txt
           grep -q 'NOT RW_PSP AND NOT TARGET MPG123::libmpg123' upstream-revc/src/CMakeLists.txt
+          grep -q 'list(REMOVE_ITEM' upstream-revc/src/CMakeLists.txt
+          ! grep -q 'audio/eax/eax-util.cpp' upstream-revc/src/CMakeLists.txt
 
       - name: Configure native PSP build
         id: configure
