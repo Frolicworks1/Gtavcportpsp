@@ -68,6 +68,7 @@ jobs:
           grep -q 'list(REMOVE_ITEM' upstream-revc/src/CMakeLists.txt
           grep -q 'audio/eax/eax-util.cpp' upstream-revc/src/CMakeLists.txt
           test "$(head -n 1 upstream-revc/src/audio/eax/eax-util.cpp)" = "#ifndef RW_PSP"
+          grep -q 'CColStore::RemoveColSlot(int32 slot)' upstream-revc/src/collision/ColStore.cpp
 
       - name: Configure native PSP build
         id: configure
