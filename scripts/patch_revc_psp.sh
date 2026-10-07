@@ -8,7 +8,8 @@ CMAKE="upstream-revc/vendor/librw/src/CMakeLists.txt"
 
 # Remove desktop-only platform headers and keep the PSP backend as the
 # concrete device interface for this probe.
-sed -i '/#include "src\\/ps2\\/rwps2.h"/d; /#include "src\\/ps2\\/rwps2plg.h"/d; /#include "src\\/d3d\\/rwxbox.h"/d; /#include "src\\/d3d\\/rwd3d.h"/d; /#include "src\\/d3d\\/rwd3d8.h"/d; /#include "src\\/d3d\\/rwd3d9.h"/d; /#include "src\\/gl\\/rwwdgl.h"/d; /#include "src\\/gl\\/rwgl3.h"/d; /#include "src\\/gl\\/rwgl3shader.h"/d; /#include "src\\/gl\\/rwgl3plg.h"/d' "$RW"
+awk '!/^[[:space:]]*#include "src\\/(ps2\\/(rwps2\\.h|rwps2plg\\.h)|d3d\\/(rwxbox|rwd3d|rwd3d8|rwd3d9)\\.h|gl\\/(rwwdgl|rwgl3|rwgl3shader|rwgl3plg)\\.h)"/ { print }' "$RW" > "$RW.tmp"
+mv "$RW.tmp" "$RW"
 
 # rw.h must expose the PSP device namespace to every game-side include,
 # not just to librw's own compilation unit.
@@ -23,7 +24,8 @@ if ! grep -q '#define RWDEVICE psp' "$BASE"; then
 fi
 
 # Restore librw engine dependency order after removing desktop device headers.
-sed -i '/#include "rwengine.h"/d; /#include "d3d\\/rwxbox.h"/d; /#include "d3d\\/rwd3d.h"/d; /#include "d3d\\/rwd3d8.h"/d; /#include "d3d\\/rwd3d9.h"/d; /#include "gl\\/rwgl3.h"/d; /#include "gl\\/rwwdgl.h"/d' "$ENG"
+awk '!/^[[:space:]]*#include "rwengine\\.h"/ && !/^[[:space:]]*#include "(d3d\\/(rwxbox|rwd3d|rwd3d8|rwd3d9)|gl\\/(rwgl3|rwwdgl))\\.h"/ { print }' "$ENG" > "$ENG.tmp"
+mv "$ENG.tmp" "$ENG"
 awk 'BEGIN { print "#include \"rwbase.h\""; print "#include \"rwerror.h\""; print "#include \"rwplg.h\""; print "#include \"rwpipeline.h\""; print "#include \"rwobjects.h\""; print "#include \"rwengine.h\"" } { print }' "$ENG" > "$ENG.tmp"
 mv "$ENG.tmp" "$ENG"
 if ! grep -q '#include "psp/rwpsp.h"' "$ENG"; then
@@ -87,7 +89,8 @@ fi
 
 # EAX is a desktop DirectSound/OpenAL compatibility layer and is not
 # part of the PSP audio path. Exclude its sources from the PSP compile probe.
-sed -i '/audio\\/eax\\//d' "$SRC_CMAKE"
+awk '!/audio\\/eax\\//' "$SRC_CMAKE" > "$SRC_CMAKE.tmp"
+mv "$SRC_CMAKE.tmp" "$SRC_CMAKE"
 # Select the PSP device in Engine::open.
 if ! grep -q 'engine->device = psp::renderdevice' "$ENG"; then
   awk 'BEGIN { added=0 } { if (!added && $0 == "#ifdef RW_PS2") { print "#ifdef RW_PSP"; print "\tengine->device = psp::renderdevice;"; print "#elif defined(RW_PS2)"; added=1 } else print }' "$ENG" > "$ENG.tmp"
@@ -98,8 +101,13 @@ fi
 # rw.h now includes rwpsp.h, so RWDEVICE psp resolves to rw::psp.
 FAKERW="upstream-revc/src/fakerw/rwcore.h"
 if [ -f "$FAKERW" ]; then
-  sed -i '/^#ifdef RW_PSP$/,/^#endif$/d' "$FAKERW"
-  awk 'BEGIN { print "#ifdef RW_PSP"; print "#define RWDEVICE psp"; print "#endif" } { print }' "$FAKERW" > "$FAKERW.tmp"
+  awk '
+  /^#ifdef RW_PSP$/ { skip=1; next }
+  skip && /^#endif$/ { skip=0; next }
+  !skip { print }
+' "$FAKERW" > "$FAKERW.tmp"
+mv "$FAKERW.tmp" "$FAKERW"
+awk 'BEGIN { print "#ifdef RW_PSP"; print "#define RWDEVICE psp"; print "#endif" } { print }' "$FAKERW" > "$FAKERW.tmp"
   mv "$FAKERW.tmp" "$FAKERW"
 fi
 
