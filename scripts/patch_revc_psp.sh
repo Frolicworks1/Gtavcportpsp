@@ -54,9 +54,8 @@ fi
 if [ -f "$POP" ]; then
   # Keep Population definitions identical to int32 declarations under PSP.
   # Use separate substitutions for BusyBox/POSIX sed portability and verify each result.
-  # Match both the return type and parameter typedef used by Population.h.
-  sed -i 's/^int$/int32/' "$POP"
-  sed -i 's/CPopulation::ChooseGangOccupation(int gangId)/CPopulation::ChooseGangOccupation(int32 gangId)/' "$POP"
+  # Match only ChooseGangOccupation's return type and parameter typedef.
+  sed -i '/^int$/ { N; s/^int\\nCPopulation::ChooseGangOccupation(int gangId)$/int32\\nCPopulation::ChooseGangOccupation(int32 gangId)/; }' "$POP"
   sed -i 's/CPopulation::PlaceGangMembers(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembers(ePedType pedType, int32 pedAmount/' "$POP"
   sed -i 's/CPopulation::PlaceGangMembersInFormation(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembersInFormation(ePedType pedType, int32 pedAmount/' "$POP"
   sed -i 's/CPopulation::PlaceGangMembersInCircle(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembersInCircle(ePedType pedType, int32 pedAmount/' "$POP"
