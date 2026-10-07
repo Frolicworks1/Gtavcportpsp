@@ -3,7 +3,7 @@
 #include <pspctrl.h>
 
 #ifdef RW_PSP
-void CapturePad(RwInt32 padID)
+void CapturePad(int padID)
 {
     if (padID < 0 || padID >= MAX_PADS) return;
     SceCtrlData pad;
