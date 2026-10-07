@@ -116,7 +116,7 @@ jobs:
             -DRW_PSP=ON \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -DM_SQRT2=1.4142135623730951 -I$PSPDEV/psp/sdk/include" \
-            -DLIBRW_PLATFORM=NULL \
+            -DLIBRW_PLATFORM=PSP \
             -DREVC_WITH_OPUS=OFF \
             -DREVC_WITH_LIBSNDFILE=OFF \
             -DCMAKE_EXE_LINKER_FLAGS="-L$PSP_SDK_LIB" 2>&1 | tee psp-cmake-configure.log
