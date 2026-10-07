@@ -89,7 +89,7 @@ fi
 if [ -f "$GENERAL" ]; then
   if ! grep -q 'static int32 GetRandomNumberInRange(int low, int32 high)' "$GENERAL"; then
     sed -i '/static void SetRandomSeed/i\#endif' "$GENERAL"
-    sed -i '/static void SetRandomSeed/i\    static int32 GetRandomNumberInRange(int low, uint32 high) { return (int32)(low + (high - low) * (GetRandomNumber()/float(MYRAND_MAX + 1))); }' "$GENERAL"
+    sed -i '/static void SetRandomSeed/i\    static int32 GetRandomNumberInRange(int low, int32 high) { return (int32)(low + (high - low) * (GetRandomNumber()/float(MYRAND_MAX + 1))); }' "$GENERAL"
     sed -i '/static void SetRandomSeed/i\#ifdef RW_PSP' "$GENERAL"
   fi
 fi
