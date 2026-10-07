@@ -10,7 +10,26 @@
 
 namespace rw { namespace psp {
 
-static void beginUpdate(Camera*) { }
+static void beginUpdate(Camera*) {
+    static bool initialized = false;
+    if(initialized) return;
+    sceGuInit();
+    sceGuStart(GU_DIRECT, (void*)0);
+    sceGuDrawBuffer(GU_PSM_8888, (void*)0, 512);
+    sceGuDispBuffer(480, 272, (void*)0x88000, 512);
+    sceGuDepthBuffer((void*)0x110000, 512);
+    sceGuOffset(2048 - 240, 2048 - 136);
+    sceGuViewport(2048, 2048, 480, 272);
+    sceGuDepthRange(65535, 0);
+    sceGuScissor(0, 0, 480, 272);
+    sceGuEnable(GU_SCISSOR_TEST);
+    sceGuEnable(GU_DEPTH_TEST);
+    sceGuDepthFunc(GU_GEQUAL);
+    sceGuFinish();
+    sceGuSync(0, 0);
+    sceGuDisplay(GU_TRUE);
+    initialized = true;
+}
 static void endUpdate(Camera*) { }
 static void clearCamera(Camera*, RGBA*, uint32) { }
 static void showRaster(Raster*, uint32) { }
