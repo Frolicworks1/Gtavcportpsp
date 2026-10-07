@@ -37,7 +37,7 @@ fi
 if [ -f "$CDSTREAM" ]; then
   CDTMP="$CDSTREAM.psp.tmp"
   {
-    printf '%s\n' '#ifdef RW_PSP' '#ifndef SEM_FAILED' '#define SEM_FAILED ((sem_t*)-1)' '#endif' 'static char* psp_strdup(const char *s) { size_t n = strlen(s) + 1; char *p = (char*)malloc(n); if (p) memcpy(p, s, n); return p; }' '#endif'
+    printf '%s\n' '#ifdef RW_PSP' '#include <string.h>' '#include <stdlib.h>' '#ifndef SEM_FAILED' '#define SEM_FAILED ((sem_t*)-1)' '#endif' 'static char* psp_strdup(const char *s) { size_t n = strlen(s) + 1; char *p = (char*)malloc(n); if (p) memcpy(p, s, n); return p; }' '#endif'
     cat "$CDSTREAM"
   } > "$CDTMP"
   mv "$CDTMP" "$CDSTREAM"
