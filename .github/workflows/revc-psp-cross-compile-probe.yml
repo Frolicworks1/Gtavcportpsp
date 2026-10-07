@@ -49,6 +49,7 @@ jobs:
           cmake -S upstream-revc -B build-revc-psp \
             -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake" \
             -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-fpermissive" \
             -DLIBRW_PLATFORM=NULL \
             -DREVC_WITH_OPUS=OFF \
             -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
@@ -68,6 +69,7 @@ jobs:
             echo
             echo '- Pinned upstream: mrxenginner/reVC @ a26fff4af555a8a425ac9f17d1dd718d00d1f942'
             echo '- PSP toolchain: pspdev/pspdev'
+            echo '- PSP C++ compatibility probe: -fpermissive (temporary diagnostic aid)'
             echo '- CMake configure outcome: ${{ steps.configure.outcome }}'
             echo '- Compile step attempted only if CMake configuration succeeds'
             echo
