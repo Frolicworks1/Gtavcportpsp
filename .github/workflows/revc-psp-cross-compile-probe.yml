@@ -53,6 +53,18 @@ jobs:
           grep -q 'psp/rwpsp.cpp' upstream-revc/vendor/librw/src/CMakeLists.txt
           grep -q 'psp/rwpsp.h' upstream-revc/vendor/librw/src/CMakeLists.txt
 
+      - name: Preflight PSP source isolation before CMake
+        shell: bash
+        run: |
+          set -euxo pipefail
+          test -f upstream-revc/vendor/librw/src/psp/rwpsp.cpp
+          test -f upstream-revc/vendor/librw/src/psp/rwpsp.h
+          ! grep -n 'rwps2plg.h' upstream-revc/vendor/librw/rw.h upstream-revc/vendor/librw/src/engine.cpp
+          grep -n 'RW_PSP' upstream-revc/src/core/ControllerConfig.h
+          grep -n 'JoyState' upstream-revc/src/core/ControllerConfig.h
+          ! grep -n 'DIJOYSTATE2' upstream-revc/src/core/ControllerConfig.h
+          echo 'PSP source/header preflight passed'
+
       - name: Apply temporary PSP header isolation for compile probe
         shell: bash
         run: |
