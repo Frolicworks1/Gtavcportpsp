@@ -31,13 +31,19 @@ jobs:
           git clone https://github.com/mrxenginner/reVC.git upstream-revc
           git -C upstream-revc checkout --detach a26fff4af555a8a425ac9f17d1dd718d00d1f942
           git -C upstream-revc submodule update --init --recursive
+      - name: Apply temporary PSP header isolation for compile probe
+        shell: bash
+        run: |
+          set -euxo pipefail
+          # librw's top-level rw.h unconditionally includes desktop/PS2 platform
+          # headers. PSP needs the core librw headers only at this stage; the
+          # real PSP GU backend will be added separately after the engine compiles.
+          sed -i '/#include "src\/ps2\//d; /#include "src\/d3d\//d; /#include "src\/gl\//d' upstream-revc/vendor/librw/rw.h
+          grep -n '^#include' upstream-revc/vendor/librw/rw.h
       - name: Inspect vendored PNG decoder types
         shell: bash
         run: |
           set -euxo pipefail
-          # Do not fail the probe on an assumed source spelling. First expose
-          # the actual declarations from the pinned librw revision; compiler
-          # diagnostics should drive any compatibility patch we make next.
           grep -n -E 'uint32|unsigned|w[ ,].*h[ ;]' upstream-revc/vendor/librw/src/png.cpp | head -80 || true
       - name: Attempt native PSP cross-configuration
         id: configure
