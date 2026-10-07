@@ -68,6 +68,7 @@ jobs:
           grep -Fq 'static int32 ChooseGangOccupation(int32);' upstream-revc/src/peds/Population.h
           grep -Fq 'static void PlaceGangMembers(ePedType, int32, CVector const&);' upstream-revc/src/peds/Population.h
           grep -Fq 'CPopulation::ChooseGangOccupation(int32 gangId)' upstream-revc/src/peds/Population.cpp
+          awk '/^int32$/ { getline; if ($0 == "CPopulation::ChooseGangOccupation(int32 gangId)") found=1 } END { exit(found ? 0 : 1) }' upstream-revc/src/peds/Population.cpp
           grep -Fq 'CPopulation::PlaceGangMembers(ePedType pedType, int32 pedAmount' upstream-revc/src/peds/Population.cpp
           grep -Fq 'CPopulation::PlaceGangMembersInFormation(ePedType pedType, int32 pedAmount' upstream-revc/src/peds/Population.cpp
           grep -Fq 'CPopulation::PlaceGangMembersInCircle(ePedType pedType, int32 pedAmount' upstream-revc/src/peds/Population.cpp
