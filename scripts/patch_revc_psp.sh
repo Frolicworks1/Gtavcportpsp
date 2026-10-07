@@ -11,6 +11,7 @@ CTRL="upstream-revc/src/core/ControllerConfig.h"
 EAX="upstream-revc/src/audio/eax/eax-util.cpp"
 COLSTORE="upstream-revc/src/collision/ColStore.cpp"
 GENERAL="upstream-revc/src/core/General.h"
+CARCTRL="upstream-revc/src/control/CarCtrl.cpp"
 
 # PSP desktop EAX source is never compiled: it requires DirectSound headers.
 if [ -f "$EAX" ]; then
@@ -20,8 +21,25 @@ fi
 
 # PSP/MIPS exposes int32 as a wider integer type than host int. Add an exact
 # int overload so integer literals do not ambiguously match float vs int32.
-if [ -f "$GENERAL" ] && ! grep -q "static int GetRandomNumberInRange(int low, int high)" "$GENERAL"; then
+if [ -f "$GENERAL" ]; then
+  if ! grep -q "static int GetRandomNumberInRange(int low, int high)" "$GENERAL"; then
+    sed -i '/static void SetRandomSeed/i #ifdef RW_PSP\n\tstatic int GetRandomNumberInRange(int low, int high)\n\t\t{ return GetRandomNumberInRange((int32)low, (int32)high); }\n#endif' "$GENERAL"
+  fi
+  if ! grep -q "static int32 GetRandomNumberInRange(int low, int32 high)" "$GENERAL"; then
+    sed -i '/static void SetRandomSeed/i #ifdef RW_PSP\n\tstatic int32 GetRandomNumberInRange(int low, int32 high)\n\t\t{ return GetRandomNumberInRange((int32)low, high); }\n\tstatic int32 GetRandomNumberInRange(int32 low, int high)\n\t\t{ return GetRandomNumberInRange(low, (int32)high); }\n#endif' "$GENERAL"
+  fi
+fi
   sed -i '/static void SetRandomSeed/i #ifdef RW_PSP\n\tstatic int GetRandomNumberInRange(int low, int high)\n\t\t{ return GetRandomNumberInRange((int32)low, (int32)high); }\n#endif' "$GENERAL"
+fi
+
+if [ -f "$CARCTRL" ]; then
+  sed -i \
+    -e 's/^int CCarCtrl::NumLawEnforcerCars;/int32 CCarCtrl::NumLawEnforcerCars;/' \
+    -e 's/^int CCarCtrl::NumAmbulancesOnDuty;/int32 CCarCtrl::NumAmbulancesOnDuty;/' \
+    -e 's/^int CCarCtrl::NumFiretrucksOnDuty;/int32 CCarCtrl::NumFiretrucksOnDuty;/' \
+    -e 's/CCarCtrl::RemoveFromLoadedVehicleArray(int mi, int32 rating)/CCarCtrl::RemoveFromLoadedVehicleArray(int32 mi, int32 rating)/' \
+    -e 's/CCarCtrl::ChooseCarModelToLoad(int rating)/CCarCtrl::ChooseCarModelToLoad(int32 rating)/' \
+    "$CARCTRL"
 fi
 
 # Keep PSP/MIPS integer typedefs consistent with the class declaration.
