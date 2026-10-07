@@ -38,7 +38,7 @@ fi
 if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; then
   {
     cat "$PADHEADER"
-    printf '%s\n' '' '#ifdef RW_PSP' 'void CapturePad(RwInt32 padID);' '#endif'
+    printf '%s\n' '' '#ifdef RW_PSP' '#endif'
   } > "$PADHEADER.psp.tmp"
   mv "$PADHEADER.psp.tmp" "$PADHEADER"
 fi
