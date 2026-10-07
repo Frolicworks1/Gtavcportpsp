@@ -31,6 +31,7 @@ FRONTEND="upstream-revc/src/core/Frontend.cpp"
 PEDH="upstream-revc/src/peds/Ped.h"
 PEDATTR="upstream-revc/src/peds/PedAttractor.h"
 POP="upstream-revc/src/peds/Population.cpp"
+POPH="upstream-revc/src/peds/Population.h"
 PAD="upstream-revc/src/core/Pad.cpp"
 
 if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; then
@@ -39,6 +40,15 @@ if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; 
     printf '%s\n' '' '#ifdef RW_PSP' '#endif'
   } > "$PADHEADER.psp.tmp"
   mv "$PADHEADER.psp.tmp" "$PADHEADER"
+fi
+
+if [ -f "$POPH" ]; then
+  sed -i \
+    -e 's/static int32 ChooseGangOccupation(int);/static int32 ChooseGangOccupation(int32);/' \
+    -e 's/static void PlaceGangMembers(ePedType pedType, int pedAmount/static void PlaceGangMembers(ePedType pedType, int32 pedAmount/' \
+    -e 's/static void PlaceGangMembersInFormation(ePedType pedType, int pedAmount/static void PlaceGangMembersInFormation(ePedType pedType, int32 pedAmount/' \
+    -e 's/static void PlaceGangMembersInCircle(ePedType pedType, int pedAmount/static void PlaceGangMembersInCircle(ePedType pedType, int32 pedAmount/' \
+    "$POPH"
 fi
 
 if [ -f "$POP" ]; then
