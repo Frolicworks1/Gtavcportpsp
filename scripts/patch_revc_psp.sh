@@ -30,6 +30,12 @@ if [ -f "$GENERAL" ] && ! grep -q "PSP integer overloads" "$GENERAL"; then
   mv "$GENTMP" "$GENERAL"
 fi
 
+if [ -f "$FRONTEND" ]; then
+  sed -i \
+    -e 's@^#if !defined RW_GL3.*@#if 0@' \
+    -e 's@^#elif defined(LIBRW_SDL2).*@#elif defined(RW_PSP) || defined(LIBRW_SDL2)@' "$FRONTEND"
+fi
+
 if [ -f "$PAD" ]; then
   PADTMP="$PAD.psp.tmp"
   {
