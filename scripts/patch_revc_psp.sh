@@ -242,18 +242,28 @@ if [ -f "$SRC_CMAKE" ]; then
 fi
 sed -i 's@if(\${PROJECT}_WITH_OPUS)@if(NOT RW_PSP AND \${PROJECT}_WITH_OPUS)@' "$SRC_CMAKE"
 if [ -f "$SRC_CMAKE" ]; then
-  sed -i '/^file(GLOB_RECURSE /a if(RW_PSP)
-  list(REMOVE_ITEM \${PROJECT}_SOURCES
-    "\${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_d3d9.cpp"
-    "\${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_gl.cpp")\nendif()' "$SRC_CMAKE"
-  sed -i '/^file(GLOB_RECURSE /a if(RW_PSP)
-  list(REMOVE_ITEM \\${PROJECT}_SOURCES
-    "\${CMAKE_CURRENT_SOURCE_DIR}/audio/eax/eax-util.cpp"
-    "\${CMAKE_CURRENT_SOURCE_DIR}/audio/oal/aldlist.cpp"
-    "\${CMAKE_CURRENT_SOURCE_DIR}/audio/oal/channel.cpp"
-    "\${CMAKE_CURRENT_SOURCE_DIR}/audio/oal/oal_utils.cpp"
-    "\${CMAKE_CURRENT_SOURCE_DIR}/audio/oal/stream.cpp"
-    "\${CMAKE_CURRENT_SOURCE_DIR}/audio/sampman_oal.cpp")\nendif()' "$SRC_CMAKE"
+  awk '/^file(GLOB_RECURSE / {
+    print "if(RW_PSP)"
+    print "  list(REMOVE_ITEM ${PROJECT}_SOURCES"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_d3d9.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_gl.cpp"
+    print "  )"
+    print "endif()"
+  } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
+  mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
+  awk '/^file(GLOB_RECURSE / {
+    print "if(RW_PSP)"
+    print "  list(REMOVE_ITEM ${PROJECT}_SOURCES"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/audio/eax/eax-util.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/audio/oal/aldlist.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/audio/oal/channel.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/audio/oal/oal_utils.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/audio/oal/stream.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/audio/sampman_oal.cpp"
+    print "  )"
+    print "endif()"
+  } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
+  mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
 fi
 if [ -f "$RADAR" ]; then
   sed -i     -e 's/^int CRadar::SetCoordBlip(/int32 CRadar::SetCoordBlip(/'     -e 's/^int CRadar::SetShortRangeCoordBlip(/int32 CRadar::SetShortRangeCoordBlip(/'     -e 's/^int CRadar::SetEntityBlip(/int32 CRadar::SetEntityBlip(/'     "$RADAR"
