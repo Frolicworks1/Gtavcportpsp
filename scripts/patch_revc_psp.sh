@@ -18,6 +18,7 @@ CAMERA="upstream-revc/src/core/Camera.cpp"
 CDSTREAM="upstream-revc/src/core/CdStream_posix.cpp"
 CDHEADER="upstream-revc/src/core/CdStream.h"
 PAD="upstream-revc/src/core/Pad.cpp"
+PADHEADER="upstream-revc/src/core/Pad.h"
 FRONTEND="upstream-revc/src/core/Frontend.cpp"
 PAD="upstream-revc/src/core/Pad.cpp"
 
@@ -32,6 +33,14 @@ if [ -f "$GENERAL" ] && ! grep -q "PSP integer overloads" "$GENERAL"; then
     } > "$GENTMP"
     mv "$GENTMP" "$GENERAL"
   fi
+fi
+
+if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(RwInt32 padID);' "$PADHEADER"; then
+  {
+    cat "$PADHEADER"
+    printf '%s\n' '' '#ifdef RW_PSP' 'void CapturePad(RwInt32 padID);' '#endif'
+  } > "$PADHEADER.psp.tmp"
+  mv "$PADHEADER.psp.tmp" "$PADHEADER"
 fi
 
 if [ -f "$FRONTEND" ]; then
