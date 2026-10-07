@@ -1,3 +1,4 @@
+#include "../rwengine.h"
 #include "rwpsp.h"
 #include <pspgu.h>
 #include <pspgum.h>
