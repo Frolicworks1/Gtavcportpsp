@@ -99,9 +99,11 @@ if [ -f "$SRC_CMAKE" ]; then
     !skip { print }
   ' "$SRC_CMAKE" > "$SRC_CMAKE.tmp"
   mv "$SRC_CMAKE.tmp" "$SRC_CMAKE"
-  cat >> "$SRC_CMAKE" <<'EOF'
-list(FILTER ${PROJECT}_SOURCES EXCLUDE REGEX "/audio/oal/|/audio/sampman_oal\\.cpp$")
-EOF
+  # The source list is created near the top of this file, so filter OAL
+  # sources immediately after the GLOB. Filtering after add_executable()
+  # would be too late to affect the target.
+  sed -i '/file(GLOB_RECURSE ${PROJECT}_SOURCES/a\
+list(FILTER ${PROJECT}_SOURCES EXCLUDE REGEX "/audio/oal/|/audio/sampman_oal\\\\.cpp$")' "$SRC_CMAKE"
 fi
 
 # EAX is a desktop DirectSound/OpenAL compatibility layer and is not
