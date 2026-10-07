@@ -98,7 +98,6 @@ fi
 if [ -f "$FAKERW" ]; then
   FKTMP="$FAKERW.psp.tmp"
   {
-    printf '%s\n' '#ifdef RW_PSP' '#include "../../vendor/librw/src/rwengine.h"' '#endif'
     cat "$FAKERW"
   } > "$FKTMP"
   mv "$FKTMP" "$FAKERW"
