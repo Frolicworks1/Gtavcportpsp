@@ -1,6 +1,5 @@
-name: Probe pinned reVC with PSP MIPS toolchain
-# PSP backend scaffold is patched into the pinned librw checkout during CI.
-# Continuous PSP compile iteration enabled.
+name: Build reVC PSP MIPS
+
 on:
   workflow_dispatch:
   push:
@@ -19,6 +18,7 @@ jobs:
     steps:
       - name: Checkout port repository
         uses: actions/checkout@v4
+
       - name: Verify PSP toolchain
         shell: bash
         run: |
@@ -26,8 +26,11 @@ jobs:
           export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
           test -x "$PSPDEV/bin/psp-gcc"
           test -x "$PSPDEV/bin/psp-g++"
+          command -v mksfoex
+          command -v pack-pbp
           "$PSPDEV/bin/psp-gcc" --version
           "$PSPDEV/bin/psp-g++" --version
+
       - name: Fetch pinned upstream engine and submodules
         shell: bash
         run: |
@@ -35,139 +38,67 @@ jobs:
           git clone https://github.com/mrxenginner/reVC.git upstream-revc
           git -C upstream-revc checkout --detach a26fff4af555a8a425ac9f17d1dd718d00d1f942
           git -C upstream-revc submodule update --init --recursive
+
       - name: Apply PSP RenderWare device scaffold
         shell: bash
         run: |
           set -euxo pipefail
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          echo "Port HEAD: $(git rev-parse HEAD)"
           sh -n scripts/patch_revc_psp.sh
           mkdir -p upstream-revc/vendor/librw/src/psp
           cp porting/librw-psp/rwpsp.h upstream-revc/vendor/librw/src/psp/rwpsp.h
           cp porting/librw-psp/rwpsp.cpp upstream-revc/vendor/librw/src/psp/rwpsp.cpp
           sh scripts/patch_revc_psp.sh 2>&1 | tee psp-patch.log
-      - name: Validate generated PSP CMake block
+
+      - name: Preflight patched PSP source
         shell: bash
         run: |
           set -euxo pipefail
+          test -s upstream-revc/vendor/librw/src/psp/rwpsp.cpp
+          test -s upstream-revc/vendor/librw/src/psp/rwpsp.h
           grep -q 'psp/rwpsp.cpp' upstream-revc/vendor/librw/src/CMakeLists.txt
-          grep -q 'psp/rwpsp.h' upstream-revc/vendor/librw/src/CMakeLists.txt
-
-      - name: Preflight PSP source isolation before CMake
-        shell: bash
-        run: |
-          set -euxo pipefail
-          test -f upstream-revc/vendor/librw/src/psp/rwpsp.cpp
-          test -f upstream-revc/vendor/librw/src/psp/rwpsp.h
+          ! grep -q '^[[:space:]]*ps2/' upstream-revc/vendor/librw/src/CMakeLists.txt
+          ! grep -q '^[[:space:]]*d3d/' upstream-revc/vendor/librw/src/CMakeLists.txt
+          ! grep -q '^[[:space:]]*gl/' upstream-revc/vendor/librw/src/CMakeLists.txt
           ! grep -n 'rwps2plg.h' upstream-revc/vendor/librw/rw.h upstream-revc/vendor/librw/src/engine.cpp
-          grep -n '^#if defined RW_GL3 || defined RW_PSP
-          echo 'PSP source/header preflight passed'
+          grep -q '^#if defined RW_GL3 || defined RW_PSP$' upstream-revc/src/core/ControllerConfig.h
+          grep -q 'JoyState' upstream-revc/src/core/ControllerConfig.h
+          ! grep -q 'DIJOYSTATE2' upstream-revc/src/core/ControllerConfig.h
+          echo 'PSP preflight passed'
 
-      - name: Apply temporary PSP header isolation for compile probe
-        shell: bash
-        run: |
-          set -euxo pipefail
-          true
-          grep -n '^#include' upstream-revc/vendor/librw/rw.h
-      - name: Inspect vendored PNG decoder types
-        shell: bash
-        run: |
-          set -euxo pipefail
-          grep -n -E 'uint32|unsigned|w[ ,].*h[ ;]' upstream-revc/vendor/librw/src/png.cpp | head -80 || true
-      - name: Attempt native PSP cross-configuration
+      - name: Configure native PSP build
         id: configure
         shell: bash
         run: |
           set -o pipefail
           export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
           cmake -S upstream-revc -B build-revc-psp             -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake"             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -I$PSPDEV/psp/sdk/include"             -DLIBRW_PLATFORM=NULL             -DREVC_WITH_OPUS=OFF             -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
-      - name: Attempt PSP compile if configuration succeeds
-        if: steps.configure.outcome == 'success'
-        id: compile
-        shell: bash
-        run: |
-          set -o pipefail
-          cmake --build build-revc-psp --parallel 2 2>&1 | tee psp-cross-compile.log
-      - name: Summarize outcome without hiding blockers
-        if: always()
-        shell: bash
-        run: |
-          {
-            echo '# reVC PSP MIPS cross-compile probe'
-            echo
-            echo '- Port repository HEAD: '$(git rev-parse HEAD)
-            echo '- Pinned upstream: mrxenginner/reVC @ a26fff4af555a8a425ac9f17d1dd718d00d1f942'
-            echo '- PSP toolchain: pspdev/pspdev'
-            echo '- PSP C++ compatibility probe: -fpermissive (temporary diagnostic aid)'
-            echo '- CMake configure outcome: ${{ steps.configure.outcome }}'
-            echo '- Compile step attempted only if CMake configuration succeeds'
-            echo
-            echo 'This is a feasibility probe, not a playable EBOOT. PSP GU renderer, platform layer, audio backend, and game-data support remain separate porting work.'
-          } > psp-cross-compile-summary.md
-      - name: Upload logs and summary
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: revc-psp-cross-compile-probe
-          path: |
-            psp-cross-compile-summary.md
-            psp-patch.log
-            psp-cmake-configure.log
-            psp-cross-compile.log
-          if-no-files-found: warn
- upstream-revc/src/core/ControllerConfig.h
-          grep -n 'JoyState' upstream-revc/src/core/ControllerConfig.h
-          ! grep -n 'DIJOYSTATE2' upstream-revc/src/core/ControllerConfig.h
-          echo 'PSP source/header preflight passed'
 
-      - name: Apply temporary PSP header isolation for compile probe
-        shell: bash
-        run: |
-          set -euxo pipefail
-          true
-          grep -n '^#include' upstream-revc/vendor/librw/rw.h
-      - name: Inspect vendored PNG decoder types
-        shell: bash
-        run: |
-          set -euxo pipefail
-          grep -n -E 'uint32|unsigned|w[ ,].*h[ ;]' upstream-revc/vendor/librw/src/png.cpp | head -80 || true
-      - name: Attempt native PSP cross-configuration
-        id: configure
-        shell: bash
-        run: |
-          set -o pipefail
-          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
-          cmake -S upstream-revc -B build-revc-psp             -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake"             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -I$PSPDEV/psp/sdk/include"             -DLIBRW_PLATFORM=NULL             -DREVC_WITH_OPUS=OFF             -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
-      - name: Attempt PSP compile if configuration succeeds
+      - name: Compile reVC for PSP
         if: steps.configure.outcome == 'success'
         id: compile
         shell: bash
         run: |
           set -o pipefail
           cmake --build build-revc-psp --parallel 2 2>&1 | tee psp-cross-compile.log
-      - name: Summarize outcome without hiding blockers
-        if: always()
+
+      - name: Package PSP EBOOT when executable exists
+        if: steps.compile.outcome == 'success'
         shell: bash
         run: |
-          {
-            echo '# reVC PSP MIPS cross-compile probe'
-            echo
-            echo '- Port repository HEAD: '$(git rev-parse HEAD)
-            echo '- Pinned upstream: mrxenginner/reVC @ a26fff4af555a8a425ac9f17d1dd718d00d1f942'
-            echo '- PSP toolchain: pspdev/pspdev'
-            echo '- PSP C++ compatibility probe: -fpermissive (temporary diagnostic aid)'
-            echo '- CMake configure outcome: ${{ steps.configure.outcome }}'
-            echo '- Compile step attempted only if CMake configuration succeeds'
-            echo
-            echo 'This is a feasibility probe, not a playable EBOOT. PSP GU renderer, platform layer, audio backend, and game-data support remain separate porting work.'
-          } > psp-cross-compile-summary.md
-      - name: Upload logs and summary
+          set -euxo pipefail
+          find build-revc-psp -type f \( -name '*.elf' -o -name '*.prx' -o -name 'reVC' \) -print
+          test -n "$(find build-revc-psp -type f \( -name '*.elf' -o -name 'reVC' \) -print -quit)" || {
+            echo 'Compile succeeded but no PSP executable was produced yet; packaging is blocked by missing PSP entry target.'
+            exit 1
+          }
+
+      - name: Upload build diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: revc-psp-cross-compile-probe
+          name: revc-psp-build-diagnostics
           path: |
-            psp-cross-compile-summary.md
             psp-patch.log
             psp-cmake-configure.log
             psp-cross-compile.log
