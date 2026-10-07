@@ -30,7 +30,11 @@ static void beginUpdate(Camera*) {
     sceGuDisplay(GU_TRUE);
     initialized = true;
 }
-static void endUpdate(Camera*) { }
+static void endUpdate(Camera*) {
+    sceGuFinish();
+    sceGuSync(0, 0);
+    sceGuSwapBuffers();
+}
 static void clearCamera(Camera*, RGBA*, uint32) { }
 static void showRaster(Raster*, uint32) { }
 static void setRenderState(int32, void*) { }
