@@ -77,6 +77,13 @@ if [ -f "$POP" ]; then
   grep -Fq 'CPopulation::PlaceGangMembersInCircle(ePedType pedType, int32 pedAmount' "$POP"
 fi
 
+# Keep Fluff scrollbar state declaration identical to its PSP definition.
+FLUFFH="upstream-revc/src/renderer/Fluff.h"
+if [ -f "$FLUFFH" ]; then
+  sed -i 's/^        static int TonightsEvent;/        static int32 TonightsEvent;/' "$FLUFFH"
+  grep -Fq 'static int32 TonightsEvent;' "$FLUFFH"
+fi
+
 if [ -f "$PEDATTR" ]; then
   # Keep PedAttractor declarations identical to PSP int32 definitions.
   sed -i 's/ComputeAttractPos(int qid,/ComputeAttractPos(int32 qid,/g; s/ComputeAttractHeading(int qid,/ComputeAttractHeading(int32 qid,/g' "$PEDATTR"
