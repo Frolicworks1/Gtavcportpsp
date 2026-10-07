@@ -60,6 +60,20 @@ if [ -f "$CAMERA" ]; then
   sed -i 's/CCamera::TryToStartNewCamMode(int obbeMode)/CCamera::TryToStartNewCamMode(int32 obbeMode)/' "$CAMERA"
 fi
 
+if [ -f "$GENERAL" ]; then
+  if ! grep -q 'static int GetRandomNumberInRange(int low, int high)' "$GENERAL"; then
+    sed -i '/static void SetRandomSeed/i\#endif' "$GENERAL"
+    sed -i '/static void SetRandomSeed/i\    static int GetRandomNumberInRange(int low, int high) { return GetRandomNumberInRange((int32)low, (int32)high); }' "$GENERAL"
+    sed -i '/static void SetRandomSeed/i\#ifdef RW_PSP' "$GENERAL"
+  fi
+  if ! grep -q 'static int32 GetRandomNumberInRange(int low, int32 high)' "$GENERAL"; then
+    sed -i '/static void SetRandomSeed/i\#endif' "$GENERAL"
+    sed -i '/static void SetRandomSeed/i\    static int32 GetRandomNumberInRange(int32 low, int high) { return GetRandomNumberInRange(low, (int32)high); }' "$GENERAL"
+    sed -i '/static void SetRandomSeed/i\    static int32 GetRandomNumberInRange(int low, int32 high) { return GetRandomNumberInRange((int32)low, high); }' "$GENERAL"
+    sed -i '/static void SetRandomSeed/i\#ifdef RW_PSP' "$GENERAL"
+  fi
+fi
+
 if [ -f "$PICKUPS" ]; then
   sed -i 's/^int32 CPacManPickups::PillsEatenInRace;/int CPacManPickups::PillsEatenInRace;/' "$PICKUPS"
 fi
