@@ -300,10 +300,23 @@ if [ -f "$SRC_CMAKE" ]; then
   awk '/^file\(GLOB_RECURSE / {
     print "if(RW_PSP)"
     print "  list(REMOVE_ITEM ${PROJECT}_SOURCES"
-    print "    ${CMAKE_CURRENT_SOURCE_DIR} /skel/glfw/glfw.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/skel/glfw/glfw.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/skel/sdl2/sdl2.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/skel/win/win.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/skel/android/AndroidMain.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/core/CdStream_posix.cpp"
     print "  )"
+    print "  list(APPEND ${PROJECT}_SOURCES"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/skel/psp_platform.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/core/CdStream_psp.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_psp.cpp"
+    print "  )"
+    print "endif()"
   } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
   mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
+  grep -q 'psp_platform.cpp' "$SRC_CMAKE"
+  grep -q 'CdStream_psp.cpp' "$SRC_CMAKE"
+  grep -q 'custompipes_psp.cpp' "$SRC_CMAKE"
 fi
 
 # PSP uses the built-in null audio path. This prevents desktop OpenAL/DirectInput
