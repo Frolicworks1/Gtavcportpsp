@@ -44,7 +44,7 @@ jobs:
           mkdir -p upstream-revc/vendor/librw/src/psp
           cp porting/librw-psp/rwpsp.h upstream-revc/vendor/librw/src/psp/rwpsp.h
           cp porting/librw-psp/rwpsp.cpp upstream-revc/vendor/librw/src/psp/rwpsp.cpp
-          python3 scripts/patch_revc_psp.py 2>&1 | tee psp-patch.log
+          sh scripts/patch_revc_psp.sh 2>&1 | tee psp-patch.log
       - name: Validate generated PSP CMake block
         shell: bash
         run: |
