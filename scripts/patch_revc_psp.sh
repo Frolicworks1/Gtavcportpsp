@@ -108,9 +108,10 @@ fi
 CTRL="upstream-revc/src/core/ControllerConfig.h"
 CTRLC="upstream-revc/src/core/ControllerConfig.cpp"
 if [ -f "$CTRL" ]; then
-  sed -i 's/#ifdef RW_GL3/#if defined(RW_GL3) || defined(RW_PSP)/g; s/#if defined RW_GL3/#if defined(RW_GL3) || defined(RW_PSP)/g' "$CTRL"
-  sed -i 's/#if defined RW_GL3/#if defined(RW_GL3) || defined(RW_PSP)/g' "$CTRL"
+  awk '{ gsub(/#ifdef RW_GL3/, "#if defined(RW_GL3) || defined(RW_PSP)"); gsub(/#if defined RW_GL3/, "#if defined(RW_GL3) || defined(RW_PSP)"); print }' "$CTRL" > "$CTRL.tmp"
+  mv "$CTRL.tmp" "$CTRL"
 fi
 if [ -f "$CTRLC" ]; then
-  sed -i 's/#elif defined RW_GL3/#elif defined RW_GL3 || defined(RW_PSP)/g' "$CTRLC"
+  awk '{ gsub(/#elif defined RW_GL3/, "#elif defined RW_GL3 || defined(RW_PSP)"); print }' "$CTRLC" > "$CTRLC.tmp"
+  mv "$CTRLC.tmp" "$CTRLC"
 fi
