@@ -24,6 +24,10 @@ jobs:
           set -euxo pipefail
           export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
           test -x "$PSPDEV/bin/psp-gcc"
+          test -s "$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake"
+          test -s "$GITHUB_WORKSPACE/porting/librw-psp/rwpsp.h"
+          test -s "$GITHUB_WORKSPACE/porting/librw-psp/rwpsp.cpp"
+          test -s "$GITHUB_WORKSPACE/porting/librw-psp/psp_input.cpp"
           test -x "$PSPDEV/bin/psp-g++"
           command -v mksfoex
           command -v pack-pbp
