@@ -14,6 +14,12 @@ set(CMAKE_AR           "${PSPDEV}/bin/psp-ar")
 set(CMAKE_RANLIB       "${PSPDEV}/bin/psp-ranlib")
 set(CMAKE_STRIP        "${PSPDEV}/bin/psp-strip")
 
+# pspgu.h/pspgum.h live in the PSP SDK include tree; make the SDK headers
+# explicit because this project configures CMake in a generic cross-build mode.
+set(PSP_SDK_INCLUDE "${PSPDEV}/psp/sdk/include")
+set(CMAKE_C_FLAGS_INIT   "-I${PSP_SDK_INCLUDE}")
+set(CMAKE_CXX_FLAGS_INIT "-I${PSP_SDK_INCLUDE}")
+
 set(CMAKE_FIND_ROOT_PATH "${PSPDEV}/psp")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
