@@ -17,6 +17,7 @@ PICKUPS="upstream-revc/src/control/Pickups.cpp"
 CAMERA="upstream-revc/src/core/Camera.cpp"
 CDSTREAM="upstream-revc/src/core/CdStream_posix.cpp"
 CDHEADER="upstream-revc/src/core/CdStream.h"
+PAD="upstream-revc/src/core/Pad.cpp"
 FRONTEND="upstream-revc/src/core/Frontend.cpp"
 
 if [ -f "$FRONTEND" ]; then
@@ -41,6 +42,18 @@ if [ -f "$GENERAL" ]; then
     sed -i '/static void SetRandomSeed/i #ifdef RW_PSP\n\tstatic int32 GetRandomNumberInRange(int low, int32 high)\n\t\t{ return GetRandomNumberInRange((int32)low, high); }\n\tstatic int32 GetRandomNumberInRange(int32 low, int high)\n\t\t{ return GetRandomNumberInRange(low, (int32)high); }\n#endif' "$GENERAL"
   fi
 fi
+if [ -f "$PAD" ]; then
+  # PSP uses the controller path; desktop mouse polling must not be compiled.
+  sed -i '/CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()/i #ifndef RW_PSP' "$PAD"
+  sed -i '/^void CPad::UpdateMouse()/i #endif /* RW_PSP */' "$PAD"
+  sed -i '/^void CPad::UpdateMouse()/a #ifdef RW_PSP
+{ PCTempMouseControllerState.Clear(); OldMouseControllerState.Clear(); NewMouseControllerState.Clear(); }
+#else' "$PAD"
+  sed -i '/^void CPad::ProcessPCSpecificStuff()/i #endif /* RW_PSP */' "$PAD"
+  sed -i '/^void CPad::UpdatePads(void)/,/^void CPad::ProcessPCSpecificStuff(void)/ s/GetPad(0)->UpdateMouse();/#ifndef RW_PSP\n\tGetPad(0)->UpdateMouse();\n#endif/' "$PAD"
+  sed -i '/^void CPad::UpdatePads(void)/,/^void CPad::ProcessPCSpecificStuff(void)/ s/#else$/#else\n#ifndef RW_PSP/' "$PAD"
+fi
+
 if [ -f "$CDSTREAM" ]; then
   CDTMP="$CDSTREAM.psp.tmp"
   {
