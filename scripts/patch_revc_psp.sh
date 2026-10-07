@@ -357,15 +357,14 @@ fi
 
 # Link PSP SDK graphics/input libraries into the native executable target.
 if [ -f "$SRC_CMAKE" ]; then
-  if ! grep -q '^    pspgu "$SRC_CMAKE"; then
-    awk '/^target_link_libraries\\(\\$\\{EXECUTABLE\\} PRIVATE/ { print; print "    pspgu"; print "    pspgum"; print "    pspctrl"; print "    pspge"; print "    pspdisplay"; next } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
-    mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
+  if ! grep -q 'pspgu' "$SRC_CMAKE"; then
+    sed -i '/^target_link_libraries(\${EXECUTABLE} PRIVATE/i if(RW_PSP)\ntarget_link_libraries(\${EXECUTABLE} PRIVATE pspgu pspgum pspctrl pspge pspdisplay)\nendif()' "$SRC_CMAKE"
   fi
-  grep -q '^    pspgu "$SRC_CMAKE"
-  grep -q '^    pspgum "$SRC_CMAKE"
-  grep -q '^    pspctrl "$SRC_CMAKE"
-  grep -q '^    pspge "$SRC_CMAKE"
-  grep -q '^    pspdisplay "$SRC_CMAKE"
+  grep -q 'pspgu' "$SRC_CMAKE"
+  grep -q 'pspgum' "$SRC_CMAKE"
+  grep -q 'pspctrl' "$SRC_CMAKE"
+  grep -q 'pspge' "$SRC_CMAKE"
+  grep -q 'pspdisplay' "$SRC_CMAKE"
 fi
 
 exit 0
