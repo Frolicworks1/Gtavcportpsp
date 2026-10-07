@@ -16,6 +16,7 @@ PATHFIND="upstream-revc/src/control/PathFind.cpp"
 PICKUPS="upstream-revc/src/control/Pickups.cpp"
 RADAR="upstream-revc/src/core/Radar.cpp"
 DEBUGMENU="upstream-revc/src/extras/debugmenu.h"
+DEBUGMENUCPP="upstream-revc/src/extras/debugmenu.cpp"
 STREAMING="upstream-revc/src/core/Streaming.cpp"
 RE3="upstream-revc/src/core/re3.cpp"
 DEBUGMENU="upstream-revc/src/extras/debugmenu.h"
@@ -227,6 +228,15 @@ if [ -f "$DEBUGMENU" ]; then
   if ! grep -q 'const char \*path, const char \*name, int \*ptr' "$DEBUGMENU"; then
     sed -i '/^inline DebugMenuEntry \*DebugMenuAddVar(const char \*path, const char \*name, int32_t \*ptr/i\#ifdef RW_PSP\ninline DebugMenuEntry *DebugMenuAddVar(const char *path, const char *name, int *ptr, TriggerFunc triggerFunc, int step, int lowerBound, int upperBound, const char **strings)\n{ return DebugMenuAddInt32(path, name, reinterpret_cast<int32_t *>(ptr), triggerFunc, (int32_t)step, (int32_t)lowerBound, (int32_t)upperBound, strings); }\n#endif' "$DEBUGMENU"
   fi
+fi
+
+if [ -f "$DEBUGMENUCPP" ]; then
+  DMTMP="$DEBUGMENUCPP.psp.tmp"
+  {
+    printf '%s\n' '#include <string.h>' '#include <stdlib.h>' '#ifdef RW_PSP' 'static char *psp_strdup_local(const char *s) { size_t n = strlen(s) + 1; char *p = (char *)malloc(n); if (p) memcpy(p, s, n); return p; }' '#define strdup psp_strdup_local' '#endif'
+    cat "$DEBUGMENUCPP"
+  } > "$DMTMP"
+  mv "$DMTMP" "$DEBUGMENUCPP"
 fi
 
 exit 0
