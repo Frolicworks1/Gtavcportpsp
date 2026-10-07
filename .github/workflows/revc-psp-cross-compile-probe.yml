@@ -54,6 +54,7 @@ jobs:
           set -euxo pipefail
           test -s upstream-revc/vendor/librw/src/psp/rwpsp.cpp
           test -s upstream-revc/src/core/psp_input.cpp
+          grep -q 'PSP integer overloads' upstream-revc/src/core/General.h
           grep -q 'psp/rwpsp.cpp' upstream-revc/vendor/librw/src/CMakeLists.txt
           ! grep -q '^[[:space:]]*ps2/' upstream-revc/vendor/librw/src/CMakeLists.txt
           ! grep -q '^[[:space:]]*d3d/' upstream-revc/vendor/librw/src/CMakeLists.txt
