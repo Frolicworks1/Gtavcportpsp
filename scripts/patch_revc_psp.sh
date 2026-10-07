@@ -26,6 +26,7 @@ CDHEADER="upstream-revc/src/core/CdStream.h"
 PAD="upstream-revc/src/core/Pad.cpp"
 PADHEADER="upstream-revc/src/core/Pad.h"
 FRONTEND="upstream-revc/src/core/Frontend.cpp"
+PEDH="upstream-revc/src/peds/Ped.h"
 PAD="upstream-revc/src/core/Pad.cpp"
 
 if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; then
@@ -34,6 +35,10 @@ if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; 
     printf '%s\n' '' '#ifdef RW_PSP' '#endif'
   } > "$PADHEADER.psp.tmp"
   mv "$PADHEADER.psp.tmp" "$PADHEADER"
+fi
+
+if [ -f "$PEDH" ]; then
+  sed -i 's/CPedAttractor\*, const CVector\&, float, float, int);/CPedAttractor*, const CVector\&, float, float, int32);/' "$PEDH"
 fi
 
 if [ -f "$FRONTEND" ]; then
@@ -82,67 +87,11 @@ if [ -f "$STREAMING" ]; then
 fi
 
 if [ -f "$GENERAL" ]; then
-  if ! grep -q 'static int GetRandomNumberInRange(int low, int high)' "$GENERAL"; then
+  if ! grep -q 'static int32 GetRandomNumberInRange(int low, uint32 high)' "$GENERAL"; then
     sed -i '/static void SetRandomSeed/i\#endif' "$GENERAL"
-    sed -i '/static void SetRandomSeed/i\    static int GetRandomNumberInRange(int low, int high) { return low + (high - low) * (GetRandomNumber()/float(MYRAND_MAX + 1)); }' "$GENERAL"
+    sed -i '/static void SetRandomSeed/i\    static int32 GetRandomNumberInRange(int low, uint32 high) { return (int32)(low + (high - low) * (GetRandomNumber()/float(MYRAND_MAX + 1))); }' "$GENERAL"
     sed -i '/static void SetRandomSeed/i\#ifdef RW_PSP' "$GENERAL"
   fi
-  if ! grep -q 'static int32 GetRandomNumberInRange(int low, int32 high)' "$GENERAL"; then
-    sed -i '/static void SetRandomSeed/i\#endif' "$GENERAL"
-    sed -i '/static void SetRandomSeed/i\    static int32 GetRandomNumberInRange(int32 low, int high) { return low + (high - low) * (GetRandomNumber()/float(MYRAND_MAX + 1)); }' "$GENERAL"
-    sed -i '/static void SetRandomSeed/i\    static int32 GetRandomNumberInRange(int low, int32 high) { return low + (high - low) * (GetRandomNumber()/float(MYRAND_MAX + 1)); }' "$GENERAL"
-    sed -i '/static void SetRandomSeed/i\#ifdef RW_PSP' "$GENERAL"
-  fi
-fi
-
-if [ -f "$FAKERW" ]; then
-  FKTMP="$FAKERW.psp.tmp"
-  {
-    cat "$FAKERW"
-  } > "$FKTMP"
-  mv "$FKTMP" "$FAKERW"
-  sed -i '/rw::d3d::isP8supported = false;/s/^/#ifndef RW_PSP\n/; /#ifndef RW_PSP/{n;}' "$FAKERW"
-  sed -i '/rw::d3d::isP8supported = false;/a #endif' "$FAKERW"
-  sed -i '/rw::xbox::registerVertexFormatPlugin();/s/^/#ifndef RW_PSP\n/; /#ifndef RW_PSP/{n;}' "$FAKERW"
-  sed -i '/rw::xbox::registerVertexFormatPlugin();/a #endif' "$FAKERW"
-fi
-
-if [ -f "$RE3" ]; then
-  sed -i '/^void StoreIni(const char \*cat, const char \*key, float val)/i\#ifdef RW_PSP\nvoid StoreIni(const char *cat, const char *key, bool val) { cfg[cat][key] = val ? "1" : "0"; }\n#endif' "$RE3"
-fi
-
-DEBUGMENUCPP="upstream-revc/src/extras/debugmenu.cpp"
-if [ -f "$DEBUGMENUCPP" ]; then
-  DMTMP="$DEBUGMENUCPP.psp.tmp"
-  {
-    printf '%s\n' '#include <string.h>' '#include <stdlib.h>' '#ifdef RW_PSP' 'static char *psp_strdup_local(const char *s) { size_t n = strlen(s) + 1; char *p = (char *)malloc(n); if (p) memcpy(p, s, n); return p; }' '#define strdup psp_strdup_local' '#endif'
-    cat "$DEBUGMENUCPP"
-  } > "$DMTMP"
-  mv "$DMTMP" "$DEBUGMENUCPP"
-fi
-
-if [ -f "$DEBUGMENU" ]; then
-  DM_TMP="$DEBUGMENU.psp.tmp"
-  {
-    cat "$DEBUGMENU"
-    printf '%s\n' '#ifdef RW_PSP' '#include <stdint.h>' 'inline DebugMenuEntry *DebugMenuAddVar(const char *path, const char *name, int *ptr, TriggerFunc triggerFunc, int step, int lowerBound, int upperBound, const char **strings) {' '  return DebugMenuAddVar(path, name, reinterpret_cast<int32_t *>(ptr), triggerFunc, (int32_t)step, (int32_t)lowerBound, (int32_t)upperBound, strings);' '}' '#endif'
-  } > "$DM_TMP"
-  mv "$DM_TMP" "$DEBUGMENU"
-fi
-
-if [ -f "$RADAR" ]; then
-  RADARTMP="$RADAR.psp.tmp"
-  {
-    printf '%s\n' '#ifndef M_SQRT2' '#define M_SQRT2 1.41421356237309504880'
-    cat "$RADAR"
-    printf '%s\n' '#endif'
-  } > "$RADARTMP"
-  mv "$RADARTMP" "$RADAR"
-  sed -i -e 's/^int CRadar::SetCoordBlip(/int32 CRadar::SetCoordBlip(/' -e 's/^int CRadar::SetShortRangeCoordBlip(/int32 CRadar::SetShortRangeCoordBlip(/' -e 's/^int CRadar::SetEntityBlip(/int32 CRadar::SetEntityBlip(/' "$RADAR"
-fi
-
-if [ -f "$CAMERA" ]; then
-  sed -i 's/CCamera::TryToStartNewCamMode(int obbeMode)/CCamera::TryToStartNewCamMode(int32 obbeMode)/' "$CAMERA"
 fi
 
 if [ -f "$PICKUPS" ]; then
