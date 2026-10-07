@@ -14,6 +14,7 @@ GENERAL="upstream-revc/src/core/General.h"
 CARCTRL="upstream-revc/src/control/CarCtrl.cpp"
 PATHFIND="upstream-revc/src/control/PathFind.cpp"
 PICKUPS="upstream-revc/src/control/Pickups.cpp"
+CAMERA="upstream-revc/src/core/Camera.cpp"
 
 # PSP desktop EAX source is never compiled: it requires DirectSound headers.
 if [ -f "$EAX" ]; then
@@ -31,6 +32,10 @@ if [ -f "$GENERAL" ]; then
     sed -i '/static void SetRandomSeed/i #ifdef RW_PSP\n\tstatic int32 GetRandomNumberInRange(int low, int32 high)\n\t\t{ return GetRandomNumberInRange((int32)low, high); }\n\tstatic int32 GetRandomNumberInRange(int32 low, int high)\n\t\t{ return GetRandomNumberInRange(low, (int32)high); }\n#endif' "$GENERAL"
   fi
 fi
+if [ -f "$CAMERA" ]; then
+  sed -i 's/CCamera::TryToStartNewCamMode(int obbeMode)/CCamera::TryToStartNewCamMode(int32 obbeMode)/' "$CAMERA"
+fi
+
 if [ -f "$PICKUPS" ]; then
   sed -i 's/^int32 CPacManPickups::PillsEatenInRace;/int CPacManPickups::PillsEatenInRace;/' "$PICKUPS"
 fi
