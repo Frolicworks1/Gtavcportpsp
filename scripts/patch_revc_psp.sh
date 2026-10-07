@@ -36,8 +36,7 @@ PAD="upstream-revc/src/core/Pad.cpp"
 if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; then
   {
     cat "$PADHEADER"
-    printf '%s
-' '' '#ifdef RW_PSP' '#endif'
+    printf '%s\n' '' '#ifdef RW_PSP' '#endif'
   } > "$PADHEADER.psp.tmp"
   mv "$PADHEADER.psp.tmp" "$PADHEADER"
 fi
@@ -75,8 +74,7 @@ fi
 if [ -f "$PAD" ]; then
   PADTMP="$PAD.psp.tmp"
   {
-    printf '%s
-' '#ifdef RW_PSP' '#include <pspctrl.h>' 'void CapturePad(int padID);' '#include <string.h>' '#include <stdlib.h>' 'extern void CapturePad(int padID);' 'struct PspPadMouseCompat { void *window; bool cursorIsInWindow; struct { double x; double y; } lastMousePos; float mouseWheel; };' 'static PspPadMouseCompat pspPadMouseCompat = { nullptr, true, { 0.0, 0.0 }, 0.0f };' '#ifndef PSGLOBAL' '#define PSGLOBAL(var) pspPadMouseCompat.var' '#endif' 'static inline void glfwGetCursorPos(void*, double *x, double *y) { if (x) *x = pspPadMouseCompat.lastMousePos.x; if (y) *y = pspPadMouseCompat.lastMousePos.y; }' 'static inline int glfwGetMouseButton(void*, int) { return 0; }' '#define GLFW_MOUSE_BUTTON_LEFT 0' '#define GLFW_MOUSE_BUTTON_RIGHT 1' '#define GLFW_MOUSE_BUTTON_MIDDLE 2' '#define GLFW_MOUSE_BUTTON_4 3' '#define GLFW_MOUSE_BUTTON_5 4' '#endif'
+    printf '%s\n' '#ifdef RW_PSP' '#include <pspctrl.h>' 'void CapturePad(int padID);' '#include <string.h>' '#include <stdlib.h>' 'extern void CapturePad(int padID);' 'struct PspPadMouseCompat { void *window; bool cursorIsInWindow; struct { double x; double y; } lastMousePos; float mouseWheel; };' 'static PspPadMouseCompat pspPadMouseCompat = { nullptr, true, { 0.0, 0.0 }, 0.0f };' '#ifndef PSGLOBAL' '#define PSGLOBAL(var) pspPadMouseCompat.var' '#endif' 'static inline void glfwGetCursorPos(void*, double *x, double *y) { if (x) *x = pspPadMouseCompat.lastMousePos.x; if (y) *y = pspPadMouseCompat.lastMousePos.y; }' 'static inline int glfwGetMouseButton(void*, int) { return 0; }' '#define GLFW_MOUSE_BUTTON_LEFT 0' '#define GLFW_MOUSE_BUTTON_RIGHT 1' '#define GLFW_MOUSE_BUTTON_MIDDLE 2' '#define GLFW_MOUSE_BUTTON_4 3' '#define GLFW_MOUSE_BUTTON_5 4' '#endif'
     cat "$PAD"
   } > "$PADTMP"
   mv "$PADTMP" "$PAD"
@@ -85,11 +83,9 @@ fi
 if [ -f "$EAX" ]; then
   EAXTMP="$EAX.psp.tmp"
   {
-    printf '%s
-' '#ifndef RW_PSP'
+    printf '%s\n' '#ifndef RW_PSP'
     cat "$EAX"
-    printf '%s
-' '#endif'
+    printf '%s\n' '#endif'
   } > "$EAXTMP"
   mv "$EAXTMP" "$EAX"
 fi
@@ -97,24 +93,13 @@ fi
 if [ -f "$CDSTREAM" ]; then
   CDTMP="$CDSTREAM.psp.tmp"
   {
-    printf '%s
-' '#ifdef RW_PSP' '#include <string.h>' '#include <stdlib.h>' '#ifndef SEM_FAILED' '#define SEM_FAILED ((sem_t*)-1)' '#endif' 'static char* psp_strdup(const char *s) { size_t n = strlen(s) + 1; char *p = (char*)malloc(n); if (p) memcpy(p, s, n); return p; }' '#endif'
+    printf '%s\n' '#ifdef RW_PSP' '#include <string.h>' '#include <stdlib.h>' '#ifndef SEM_FAILED' '#define SEM_FAILED ((sem_t*)-1)' '#endif' 'static char* psp_strdup(const char *s) { size_t n = strlen(s) + 1; char *p = (char*)malloc(n); if (p) memcpy(p, s, n); return p; }' '#endif'
     cat "$CDSTREAM"
   } > "$CDTMP"
   mv "$CDTMP" "$CDSTREAM"
   sed -i \
-    -e 's@realpath(gImgNames\[0\], path);@#ifdef RW_PSP
-\tstrncpy(path, gImgNames[0], sizeof(path)-1);
-\tpath[sizeof(path)-1] = 0;
-#else
-\trealpath(gImgNames[0], path);
-#endif@' \
-    -e 's@realpath(real, path);@#ifdef RW_PSP
-\t\t\tstrncpy(path, real, sizeof(path)-1);
-\t\t\tpath[sizeof(path)-1] = 0;
-#else
-\t\t\trealpath(real, path);
-#endif@' \
+    -e 's@realpath(gImgNames\[0\], path);@#ifdef RW_PSP\n\tstrncpy(path, gImgNames[0], sizeof(path)-1);\n\tpath[sizeof(path)-1] = 0;\n#else\n\trealpath(gImgNames[0], path);\n#endif@' \
+    -e 's@realpath(real, path);@#ifdef RW_PSP\n\t\t\tstrncpy(path, real, sizeof(path)-1);\n\t\t\tpath[sizeof(path)-1] = 0;\n#else\n\t\t\trealpath(real, path);\n#endif@' \
     -e 's/strdup(path)/psp_strdup(path)/g' "$CDSTREAM"
 fi
 if [ -f "$CDHEADER" ]; then
@@ -173,15 +158,12 @@ if [ -f "$CTRL" ]; then
   sed -i 's@^#ifndef RW_GL3$@#if 0@' "$CTRL"
 
   if ! grep -q '^#if defined RW_GL3 || defined RW_PSP$' "$CTRL"; then
-    sed -i '/^#define ACTIONNAME_LENGTH 40$/a #if defined RW_PSP
-struct JoyState {
+    sed -i '/^#define ACTIONNAME_LENGTH 40$/a #if defined RW_PSP\nstruct JoyState {
     int8 id;
     bool isGamepad;
     uint8 numButtons;
     uint8 buttons[MAX_BUTTONS];
-    bool mappedButtons[MAX_BUTTONS];
-};
-#endif' "$CTRL"
+    bool mappedButtons[MAX_BUTTONS];\n};\n#endif' "$CTRL"
   fi
 
   grep -q '^#if defined RW_GL3 || defined RW_PSP$' "$CTRL"
@@ -212,9 +194,7 @@ fi
 
 # Select the PSP RenderWare device.
 if ! grep -q '#define RWDEVICE psp' "$BASE"; then
-  sed -i '/#ifdef RW_GL3/i #ifdef RW_PSP
-#define RWDEVICE psp
-#endif' "$BASE"
+  sed -i '/#ifdef RW_GL3/i #ifdef RW_PSP\n#define RWDEVICE psp\n#endif' "$BASE"
 fi
 
 if ! grep -q '#include "psp/rwpsp.h"' "$ENG"; then
@@ -222,8 +202,7 @@ if ! grep -q '#include "psp/rwpsp.h"' "$ENG"; then
 fi
 sed -i 's/ps2::registerPlatformPlugins()/psp::registerPlatformPlugins()/g' "$ENG"
 sed -i '/xbox::registerPlatformPlugins()/d;/d3d8::registerPlatformPlugins()/d;/d3d9::registerPlatformPlugins()/d;/wdgl::registerPlatformPlugins()/d;/gl3::registerPlatformPlugins()/d' "$ENG"
-sed -i '/#ifdef RW_PS2/a #elif defined(RW_PSP)
-\tengine->device = psp::renderdevice;' "$ENG"
+sed -i '/#ifdef RW_PS2/a #elif defined(RW_PSP)\n\tengine->device = psp::renderdevice;' "$ENG"
 
 # Upstream librw lists all desktop/PS2 backend sources unconditionally. PSP must
 # build only the common core plus the native GU backend.
@@ -255,16 +234,14 @@ fi
 sed -i 's@if(NOT TARGET MPG123::libmpg123)@if(NOT RW_PSP AND NOT TARGET MPG123::libmpg123)@' "$SRC_CMAKE"
 if [ -f "$SRC_CMAKE" ]; then
   sed -i '/^target_link_libraries(\${EXECUTABLE} PRIVATE$/i if(RW_PSP AND NOT TARGET MPG123::libmpg123)
-  add_library(MPG123::libmpg123 INTERFACE IMPORTED)
-endif()' "$SRC_CMAKE"
+  add_library(MPG123::libmpg123 INTERFACE IMPORTED)\nendif()' "$SRC_CMAKE"
 fi
 sed -i 's@if(\${PROJECT}_WITH_OPUS)@if(NOT RW_PSP AND \${PROJECT}_WITH_OPUS)@' "$SRC_CMAKE"
 if [ -f "$SRC_CMAKE" ]; then
   sed -i '/^file(GLOB_RECURSE /a if(RW_PSP)
   list(REMOVE_ITEM \${PROJECT}_SOURCES
     "\${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_d3d9.cpp"
-    "\${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_gl.cpp")
-endif()' "$SRC_CMAKE"
+    "\${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_gl.cpp")\nendif()' "$SRC_CMAKE"
   sed -i '/^file(GLOB_RECURSE /a if(RW_PSP)
   list(REMOVE_ITEM \\${PROJECT}_SOURCES
     "\${CMAKE_CURRENT_SOURCE_DIR}/audio/eax/eax-util.cpp"
@@ -272,8 +249,7 @@ endif()' "$SRC_CMAKE"
     "\${CMAKE_CURRENT_SOURCE_DIR}/audio/oal/channel.cpp"
     "\${CMAKE_CURRENT_SOURCE_DIR}/audio/oal/oal_utils.cpp"
     "\${CMAKE_CURRENT_SOURCE_DIR}/audio/oal/stream.cpp"
-    "\${CMAKE_CURRENT_SOURCE_DIR}/audio/sampman_oal.cpp")
-endif()' "$SRC_CMAKE"
+    "\${CMAKE_CURRENT_SOURCE_DIR}/audio/sampman_oal.cpp")\nendif()' "$SRC_CMAKE"
 fi
 if [ -f "$RADAR" ]; then
   sed -i     -e 's/^int CRadar::SetCoordBlip(/int32 CRadar::SetCoordBlip(/'     -e 's/^int CRadar::SetShortRangeCoordBlip(/int32 CRadar::SetShortRangeCoordBlip(/'     -e 's/^int CRadar::SetEntityBlip(/int32 CRadar::SetEntityBlip(/'     "$RADAR"
@@ -284,25 +260,19 @@ if [ -f "$CAMERA" ]; then
 fi
 
 if [ -f "$RE3" ]; then
-  sed -i '/^void StoreIni(const char \*cat, const char \*key, uint32 val)/i\#ifdef RW_PSP
-void StoreIni(const char *cat, const char *key, bool val) { cfg[cat][key] = val ? "1" : "0"; }
-#endif' "$RE3"
+  sed -i '/^void StoreIni(const char \*cat, const char \*key, uint32 val)/i\#ifdef RW_PSP\nvoid StoreIni(const char *cat, const char *key, bool val) { cfg[cat][key] = val ? "1" : "0"; }\n#endif' "$RE3"
 fi
 
 if [ -f "$DEBUGMENU" ]; then
   if ! grep -q 'const char \*path, const char \*name, int \*ptr' "$DEBUGMENU"; then
-    sed -i '/^inline DebugMenuEntry \*DebugMenuAddVar(const char \*path, const char \*name, int32_t \*ptr/i\#ifdef RW_PSP
-inline DebugMenuEntry *DebugMenuAddVar(const char *path, const char *name, int *ptr, TriggerFunc triggerFunc, int step, int lowerBound, int upperBound, const char **strings)
-{ return DebugMenuAddInt32(path, name, reinterpret_cast<int32_t *>(ptr), triggerFunc, (int32_t)step, (int32_t)lowerBound, (int32_t)upperBound, strings); }
-#endif' "$DEBUGMENU"
+    sed -i '/^inline DebugMenuEntry \*DebugMenuAddVar(const char \*path, const char \*name, int32_t \*ptr/i\#ifdef RW_PSP\ninline DebugMenuEntry *DebugMenuAddVar(const char *path, const char *name, int *ptr, TriggerFunc triggerFunc, int step, int lowerBound, int upperBound, const char **strings)\n{ return DebugMenuAddInt32(path, name, reinterpret_cast<int32_t *>(ptr), triggerFunc, (int32_t)step, (int32_t)lowerBound, (int32_t)upperBound, strings); }\n#endif' "$DEBUGMENU"
   fi
 fi
 
 if [ -f "$DEBUGMENUCPP" ]; then
   DMTMP="$DEBUGMENUCPP.psp.tmp"
   {
-    printf '%s
-' '#include <string.h>' '#include <stdlib.h>' '#ifdef RW_PSP' 'static char *psp_strdup_local(const char *s) { size_t n = strlen(s) + 1; char *p = (char *)malloc(n); if (p) memcpy(p, s, n); return p; }' '#define strdup psp_strdup_local' '#endif'
+    printf '%s\n' '#include <string.h>' '#include <stdlib.h>' '#ifdef RW_PSP' 'static char *psp_strdup_local(const char *s) { size_t n = strlen(s) + 1; char *p = (char *)malloc(n); if (p) memcpy(p, s, n); return p; }' '#define strdup psp_strdup_local' '#endif'
     cat "$DEBUGMENUCPP"
   } > "$DMTMP"
   mv "$DMTMP" "$DEBUGMENUCPP"
