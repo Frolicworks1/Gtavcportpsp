@@ -62,6 +62,8 @@ jobs:
           ! grep -q 'DIJOYSTATE2' upstream-revc/src/core/ControllerConfig.h
           grep -q 'JoyState' upstream-revc/src/core/ControllerConfig.h
           grep -Fq 'SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float, float, int32);' upstream-revc/src/peds/Ped.h
+          grep -Fq 'ComputeAttractPos(int32 qid, CVector& pos) const;' upstream-revc/src/peds/PedAttractor.h
+          grep -Fq 'ComputeAttractHeading(int32 qid, float& heading) const;' upstream-revc/src/peds/PedAttractor.h
           ! grep -n 'SetNewAttraction(CPedAttractor.*int);' upstream-revc/src/peds/Ped.h
           grep -q '#define RWDEVICE psp' upstream-revc/vendor/librw/src/rwbase.h
           grep -q 'PROJECT}_AUDIOS "NULL"' upstream-revc/CMakeLists.txt
