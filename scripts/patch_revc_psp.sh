@@ -266,53 +266,26 @@ sed -i 's/ps2::registerPlatformPlugins()/psp::registerPlatformPlugins()/g' "$ENG
 sed -i '/xbox::registerPlatformPlugins()/d;/d3d8::registerPlatformPlugins()/d;/d3d9::registerPlatformPlugins()/d;/wdgl::registerPlatformPlugins()/d;/gl3::registerPlatformPlugins()/d' "$ENG"
 sed -i '/#ifdef RW_PS2/a #elif defined(RW_PSP)\n\tengine->device = psp::renderdevice;' "$ENG"
 
-# Turn the vendored librw platform into a first-class PSP platform so RW_PSP is
-# defined instead of RW_NULL. This keeps PSP charset/core device code enabled.
+# Turn the vendored librw platform into a first-class PSP platform.
 if [ -f "upstream-revc/vendor/librw/CMakeLists.txt" ]; then
-  if ! grep -q '^if(RW_PSP)
-cp "$GITHUB_WORKSPACE/porting/librw-psp/psp_platform.cpp" upstream-revc/src/skel/psp_platform.cpp
-cp "$GITHUB_WORKSPACE/porting/librw-psp/CdStream_psp.cpp" upstream-revc/src/core/CdStream_psp.cpp
-cp "$GITHUB_WORKSPACE/porting/librw-psp/custompipes_psp.cpp" upstream-revc/src/extras/custompipes_psp.cpp
-cp "$GITHUB_WORKSPACE/porting/librw-psp/rwpsp_plugins.cpp" upstream-revc/vendor/librw/src/psp/rwpsp_plugins.cpp
-
-sed -i \
-  -e '/^[[:space:]]*d3d\//d' \
-  -e '/^[[:space:]]*gl\//d' \
-  -e '/^[[:space:]]*ps2\//d' \
-  "$CMAKE"
-
-if ! grep -q 'psp/rwpsp.cpp' "$CMAKE"; then
-  awk '/    lodepng\/lodepng.h/ { print "    psp/rwpsp.cpp"; print "    psp/rwpsp.h"; print "    psp/rwpsp_plugins.cpp" } { print }' "$CMAKE" > "$CMAKE.psp.tmp"
-  mv "$CMAKE.psp.tmp" "$CMAKE"
+  if ! grep -q '^if(RW_PSP)$' upstream-revc/vendor/librw/CMakeLists.txt; then
+    awk 'NR==1 && $0=="if(WIN32)" { print "if(RW_PSP)"; print "    set(LIBRW_PLATFORMS \"PSP\")"; print "elseif(WIN32)" } NR>1 || $0!="if(WIN32)" { print }' upstream-revc/vendor/librw/CMakeLists.txt > upstream-revc/vendor/librw/CMakeLists.txt.psp.tmp
+    mv upstream-revc/vendor/librw/CMakeLists.txt.psp.tmp upstream-revc/vendor/librw/CMakeLists.txt
+  fi
+  grep -q '^if(RW_PSP)$' upstream-revc/vendor/librw/CMakeLists.txt
+  grep -q 'set(LIBRW_PLATFORMS "PSP")' upstream-revc/vendor/librw/CMakeLists.txt
 fi
 
-grep -q 'psp/rwpsp.cpp' "$CMAKE"
-grep -q 'psp/rwpsp_plugins.cpp' "$CMAKE"
-! grep -q '^[[:space:]]*ps2/' "$CMAKE"
-! grep -q '^[[:space:]]*d3d/' "$CMAKE"
-! grep -q '^[[:space:]]*gl/' "$CMAKE"
-
-if [ -f "$SRC_CMAKE" ]; then
-  awk '/^file\(GLOB_RECURSE / {
-    print "if(RW_PSP)"
-    print "  list(REMOVE_ITEM ${PROJECT}_SOURCES"
-    print "    ${CMAKE_CURRENT_SOURCE_DIR}/skel/glfw/glfw.cpp"
-    print "    ${CMAKE_CURRENT_SOURCE_DIR}/skel/sdl2/sdl2.cpp"
-    print "    ${CMAKE_CURRENT_SOURCE_DIR}/skel/win/win.cpp"
-    print "    ${CMAKE_CURRENT_SOURCE_DIR}/skel/android/AndroidMain.cpp"
-    print "    ${CMAKE_CURRENT_SOURCE_DIR}/core/CdStream_posix.cpp"
-    print "  )"
-    print "  list(APPEND ${PROJECT}_SOURCES"
-    print "    ${CMAKE_CURRENT_SOURCE_DIR}/skel/psp_platform.cpp"
-    print "    ${CMAKE_CURRENT_SOURCE_DIR}/core/CdStream_psp.cpp"
-    print "    ${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_psp.cpp"
-    print "  )"
-    print "endif()"
-  } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
-  mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
-  grep -q 'psp_platform.cpp' "$SRC_CMAKE"
-  grep -q 'CdStream_psp.cpp' "$SRC_CMAKE"
-  grep -q 'custompipes_psp.cpp' "$SRC_CMAKE"
+CMAKE="upstream-revc/vendor/librw/src/CMakeLists.txt"
+if [ -f "$CMAKE" ]; then
+  sed -i '/^[[:space:]]*d3d\//d;/^[[:space:]]*gl\//d;/^[[:space:]]*ps2\//d' "$CMAKE"
+  if ! grep -q 'psp/rwpsp.cpp' "$CMAKE"; then
+    sed -i '/^[[:space:]]*world.cpp$/a\    psp/rwpsp.cpp\n    psp/rwpsp.h' "$CMAKE"
+  fi
+  grep -q 'psp/rwpsp.cpp' "$CMAKE"
+  ! grep -q '^[[:space:]]*ps2/' "$CMAKE"
+  ! grep -q '^[[:space:]]*d3d/' "$CMAKE"
+  ! grep -q '^[[:space:]]*gl/' "$CMAKE"
 fi
 
 # PSP uses the built-in null audio path. This prevents desktop OpenAL/DirectInput
