@@ -33,6 +33,11 @@ jobs:
           command -v pack-pbp
           command -v psp-strip
           command -v psp-fixup-imports
+          PSP_SDK_LIB="$(dirname "$(find "$PSPDEV/psp" -type f -name libpspgu.a -print -quit)")"
+          test -n "$PSP_SDK_LIB"
+          test -s "$PSP_SDK_LIB/libpspgu.a"
+          test -s "$PSP_SDK_LIB/libpspgum.a"
+          test -s "$PSP_SDK_LIB/libpspctrl.a"
       - name: Fetch pinned upstream engine and submodules
         shell: bash
         run: |
@@ -103,6 +108,8 @@ jobs:
         run: |
           set -o pipefail
           export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
+          PSP_SDK_LIB="$(dirname "$(find "$PSPDEV/psp" -type f -name libpspgu.a -print -quit)")"
+          test -n "$PSP_SDK_LIB"
           cmake -S upstream-revc -B build-revc-psp \
             -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake" \
             -DRW_PSP=ON \
@@ -110,7 +117,8 @@ jobs:
             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -DM_SQRT2=1.4142135623730951 -I$PSPDEV/psp/sdk/include" \
             -DLIBRW_PLATFORM=NULL \
             -DREVC_WITH_OPUS=OFF \
-            -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
+            -DREVC_WITH_LIBSNDFILE=OFF \
+            -DCMAKE_EXE_LINKER_FLAGS="-L$PSP_SDK_LIB" 2>&1 | tee psp-cmake-configure.log
       - name: Compile reVC for PSP
         if: steps.configure.outcome == 'success'
         id: compile
