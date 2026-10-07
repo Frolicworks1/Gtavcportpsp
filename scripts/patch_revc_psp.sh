@@ -24,66 +24,10 @@ PAD="upstream-revc/src/core/Pad.cpp"
 if [ -f "$PAD" ]; then
   PADTMP="$PAD.psp.tmp"
   {
-    printf '%s\n' '#ifdef RW_PSP' '#include <pspctrl.h>' 'struct PspPadMouseCompat { void *window; bool cursorIsInWindow; struct { double x; double y; } lastMousePos; float mouseWheel; };' 'static PspPadMouseCompat pspPadMouseCompat = { nullptr, true, { 0.0, 0.0 }, 0.0f };' '#ifndef PSGLOBAL' '#define PSGLOBAL(var) pspPadMouseCompat.var' '#endif' 'static inline void glfwGetCursorPos(void*, double *x, double *y) { if (x) *x = pspPadMouseCompat.lastMousePos.x; if (y) *y = pspPadMouseCompat.lastMousePos.y; }' 'static inline int glfwGetMouseButton(void*, int) { return 0; }' '#define GLFW_MOUSE_BUTTON_LEFT 0' '#define GLFW_MOUSE_BUTTON_RIGHT 1' '#define GLFW_MOUSE_BUTTON_MIDDLE 2' '#define GLFW_MOUSE_BUTTON_4 3' '#define GLFW_MOUSE_BUTTON_5 4' '#endif'
+    printf '%s\n' '#ifdef RW_PSP' '#include <pspctrl.h>' '#include <string.h>' '#include <stdlib.h>' 'struct PspPadMouseCompat { void *window; bool cursorIsInWindow; struct { double x; double y; } lastMousePos; float mouseWheel; };' 'static PspPadMouseCompat pspPadMouseCompat = { nullptr, true, { 0.0, 0.0 }, 0.0f };' '#ifndef PSGLOBAL' '#define PSGLOBAL(var) pspPadMouseCompat.var' '#endif' 'static inline void glfwGetCursorPos(void*, double *x, double *y) { if (x) *x = pspPadMouseCompat.lastMousePos.x; if (y) *y = pspPadMouseCompat.lastMousePos.y; }' 'static inline int glfwGetMouseButton(void*, int) { return 0; }' '#define GLFW_MOUSE_BUTTON_LEFT 0' '#define GLFW_MOUSE_BUTTON_RIGHT 1' '#define GLFW_MOUSE_BUTTON_MIDDLE 2' '#define GLFW_MOUSE_BUTTON_4 3' '#define GLFW_MOUSE_BUTTON_5 4' '#endif'
     cat "$PAD"
   } > "$PADTMP"
   mv "$PADTMP" "$PAD"
-fi
-
-if [ -f "$FRONTEND" ]; then
-  sed -i \
-    -e 's/^#if !defined RW_GL3$/#if 0/' \
-    -e 's/^#elif defined(LIBRW_SDL2).*/#elif defined(RW_PSP) || defined(LIBRW_SDL2)/' "$FRONTEND"
-fi
-
-# PSP desktop EAX source is never compiled: it requires DirectSound headers.
-if [ -f "$EAX" ]; then
-  sed -i '1i #ifndef RW_PSP' "$EAX"
-  printf '\n#endif\n' >> "$EAX"
-fi
-
-# PSP/MIPS exposes int32 as a wider integer type than host int. Add an exact
-# int overload so integer literals do not ambiguously match float vs int32.
-if [ -f "$GENERAL" ]; then
-  if ! grep -q "static int GetRandomNumberInRange(int low, int high)" "$GENERAL"; then
-    sed -i '/static void SetRandomSeed/i #ifdef RW_PSP\n\tstatic int GetRandomNumberInRange(int low, int high)\n\t\t{ return GetRandomNumberInRange((int32)low, (int32)high); }\n#endif' "$GENERAL"
-  fi
-  if ! grep -q "static int32 GetRandomNumberInRange(int low, int32 high)" "$GENERAL"; then
-    sed -i '/static void SetRandomSeed/i #ifdef RW_PSP\n\tstatic int32 GetRandomNumberInRange(int low, int32 high)\n\t\t{ return GetRandomNumberInRange((int32)low, high); }\n\tstatic int32 GetRandomNumberInRange(int32 low, int high)\n\t\t{ return GetRandomNumberInRange(low, (int32)high); }\n#endif' "$GENERAL"
-  fi
-fi
-if [ -f "$PAD" ]; then
-  sed -i '/^void CPad::UpdatePads(void)/i #ifdef RW_PSP
-void CapturePad(RwInt32 padID)
-{
-  if (padID < 0 || padID >= MAX_PADS) return;
-  SceCtrlData pad;
-  sceCtrlPeekBufferPositive(&pad, 0, 1);
-  CControllerState &s = GetPad(padID)->PCTempJoyState;
-  s.Clear();
-  s.DPadUp = !!(pad.Buttons & PSP_CTRL_UP);
-  s.DPadDown = !!(pad.Buttons & PSP_CTRL_DOWN);
-  s.DPadLeft = !!(pad.Buttons & PSP_CTRL_LEFT);
-  s.DPadRight = !!(pad.Buttons & PSP_CTRL_RIGHT);
-  s.Triangle = !!(pad.Buttons & PSP_CTRL_TRIANGLE);
-  s.Circle = !!(pad.Buttons & PSP_CTRL_CIRCLE);
-  s.Cross = !!(pad.Buttons & PSP_CTRL_CROSS);
-  s.Square = !!(pad.Buttons & PSP_CTRL_SQUARE);
-  s.Start = !!(pad.Buttons & PSP_CTRL_START);
-  s.Select = !!(pad.Buttons & PSP_CTRL_SELECT);
-  s.LeftShoulder1 = !!(pad.Buttons & PSP_CTRL_LTRIGGER);
-  s.RightShoulder1 = !!(pad.Buttons & PSP_CTRL_RTRIGGER);
-}
-#endif' "$PAD"
-  # PSP uses the controller path; desktop mouse polling must not be compiled.
-  sed -i '/CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()/i #ifndef RW_PSP' "$PAD"
-  sed -i '/^void CPad::UpdateMouse()/a #ifdef RW_PSP
-  PCTempMouseControllerState.Clear();
-  OldMouseControllerState.Clear();
-  NewMouseControllerState.Clear();
-  return;
-#else' "$PAD"
-  sed -i '/^void CPad::UpdatePads(void)/i #endif /* RW_PSP */' "$PAD"
 fi
 
 if [ -f "$CDSTREAM" ]; then
