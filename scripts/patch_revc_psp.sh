@@ -115,7 +115,8 @@ if [ -f "$CDSTREAM" ]; then
     -e 's/strdup(path)/psp_strdup(path)/g' "$CDSTREAM"
 fi
 if [ -f "$CDHEADER" ]; then
-  sed -i 's/^int CdStreamGetLastPosn(void);$/int32 CdStreamGetLastPosn(void);/' "$CDHEADER"
+  sed -i 's/^int32 CdStreamGetLastPosn(void);$/int CdStreamGetLastPosn(void);/' "$CDHEADER"
+  sed -i 's/^int CdStreamGetLastPosn(void);$/int CdStreamGetLastPosn(void);/' "$CDHEADER"
 fi
 
 if [ -f "$STREAMING" ]; then
