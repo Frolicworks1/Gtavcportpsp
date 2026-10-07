@@ -99,7 +99,7 @@ if [ -f "$SRC_CMAKE" ]; then
     !skip { print }
   ' "$SRC_CMAKE" > "$SRC_CMAKE.tmp"
   mv "$SRC_CMAKE.tmp" "$SRC_CMAKE"
-  awk '\n    { print }\n    index($0, "file(GLOB_RECURSE ${PROJECT}_SOURCES") {\n      print "list(FILTER ${PROJECT}_SOURCES EXCLUDE REGEX \\"/audio/oal/|/audio/sampman_oal\\\\.cpp$\\")"\n    }\n  ' "$SRC_CMAKE" > "$SRC_CMAKE.tmp"
+  awk '{print} index($0, "file(GLOB_RECURSE ${PROJECT}_SOURCES") { print "list(FILTER ${PROJECT}_SOURCES EXCLUDE REGEX \\"/audio/oal/|/audio/sampman_oal\\\\.cpp$\\")" }' "$SRC_CMAKE" > "$SRC_CMAKE.tmp"
   mv "$SRC_CMAKE.tmp" "$SRC_CMAKE"
 fi
 
