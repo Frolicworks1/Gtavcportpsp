@@ -19,6 +19,16 @@ CDSTREAM="upstream-revc/src/core/CdStream_posix.cpp"
 CDHEADER="upstream-revc/src/core/CdStream.h"
 PAD="upstream-revc/src/core/Pad.cpp"
 FRONTEND="upstream-revc/src/core/Frontend.cpp"
+PAD="upstream-revc/src/core/Pad.cpp"
+
+if [ -f "$PAD" ]; then
+  PADTMP="$PAD.psp.tmp"
+  {
+    printf '%s\n' '#ifdef RW_PSP' 'struct PspPadMouseCompat { void *window; bool cursorIsInWindow; struct { double x; double y; } lastMousePos; float mouseWheel; };' 'static PspPadMouseCompat pspPadMouseCompat = { nullptr, true, { 0.0, 0.0 }, 0.0f };' '#ifndef PSGLOBAL' '#define PSGLOBAL(var) pspPadMouseCompat.var' '#endif' 'static inline void glfwGetCursorPos(void*, double *x, double *y) { if (x) *x = pspPadMouseCompat.lastMousePos.x; if (y) *y = pspPadMouseCompat.lastMousePos.y; }' 'static inline int glfwGetMouseButton(void*, int) { return 0; }' '#define GLFW_MOUSE_BUTTON_LEFT 0' '#define GLFW_MOUSE_BUTTON_RIGHT 1' '#define GLFW_MOUSE_BUTTON_MIDDLE 2' '#define GLFW_MOUSE_BUTTON_4 3' '#define GLFW_MOUSE_BUTTON_5 4' 'static inline void CapturePad(int) {}' '#endif'
+    cat "$PAD"
+  } > "$PADTMP"
+  mv "$PADTMP" "$PAD"
+fi
 
 if [ -f "$FRONTEND" ]; then
   sed -i \
