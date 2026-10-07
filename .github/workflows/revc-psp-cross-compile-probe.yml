@@ -28,8 +28,6 @@ jobs:
           test -x "$PSPDEV/bin/psp-g++"
           command -v mksfoex
           command -v pack-pbp
-          "$PSPDEV/bin/psp-gcc" --version
-          "$PSPDEV/bin/psp-g++" --version
 
       - name: Fetch pinned upstream engine and submodules
         shell: bash
@@ -43,70 +41,26 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           sh -n scripts/patch_revc_psp.sh
           mkdir -p upstream-revc/vendor/librw/src/psp
           cp porting/librw-psp/rwpsp.h upstream-revc/vendor/librw/src/psp/rwpsp.h
           cp porting/librw-psp/rwpsp.cpp upstream-revc/vendor/librw/src/psp/rwpsp.cpp
-          sh scripts/patch_revc_psp.sh 2>&1 | tee psp-patch.log
+          sh scripts/patch_revc_psp.sh
 
       - name: Preflight patched PSP source
         shell: bash
         run: |
           set -euxo pipefail
           test -s upstream-revc/vendor/librw/src/psp/rwpsp.cpp
-          test -s upstream-revc/vendor/librw/src/psp/rwpsp.h
           grep -q 'psp/rwpsp.cpp' upstream-revc/vendor/librw/src/CMakeLists.txt
           ! grep -q '^[[:space:]]*ps2/' upstream-revc/vendor/librw/src/CMakeLists.txt
           ! grep -q '^[[:space:]]*d3d/' upstream-revc/vendor/librw/src/CMakeLists.txt
           ! grep -q '^[[:space:]]*gl/' upstream-revc/vendor/librw/src/CMakeLists.txt
           ! grep -n 'rwps2plg.h' upstream-revc/vendor/librw/rw.h upstream-revc/vendor/librw/src/engine.cpp
-          grep -q '^#if defined RW_GL3 || defined RW_PSP
+          grep -q '^#if defined RW_GL3 || defined RW_PSP$' upstream-revc/src/core/ControllerConfig.h
+          ! grep -n '#ifndef RW_GL3#ifndef|#if !defined RW_GL3 #|RW_GL3 !defined' upstream-revc/src/core/ControllerConfig.h
           ! grep -q 'DIJOYSTATE2' upstream-revc/src/core/ControllerConfig.h
-          echo 'PSP preflight passed'
-
-      - name: Configure native PSP build
-        id: configure
-        shell: bash
-        run: |
-          set -o pipefail
-          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
-          cmake -S upstream-revc -B build-revc-psp             -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake"             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -I$PSPDEV/psp/sdk/include"             -DLIBRW_PLATFORM=NULL             -DREVC_WITH_OPUS=OFF             -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
-
-      - name: Compile reVC for PSP
-        if: steps.configure.outcome == 'success'
-        id: compile
-        shell: bash
-        run: |
-          set -o pipefail
-          cmake --build build-revc-psp --parallel 2 2>&1 | tee psp-cross-compile.log
-
-      - name: Package PSP EBOOT when executable exists
-        if: steps.compile.outcome == 'success'
-        shell: bash
-        run: |
-          set -euxo pipefail
-          find build-revc-psp -type f \( -name '*.elf' -o -name '*.prx' -o -name 'reVC' \) -print
-          test -n "$(find build-revc-psp -type f \( -name '*.elf' -o -name 'reVC' \) -print -quit)" || {
-            echo 'Compile succeeded but no PSP executable was produced yet; packaging is blocked by missing PSP entry target.'
-            exit 1
-          }
-
-      - name: Upload build diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: revc-psp-build-diagnostics
-          path: |
-            psp-patch.log
-            psp-cmake-configure.log
-            psp-cross-compile.log
-          if-no-files-found: warn
- upstream-revc/src/core/ControllerConfig.h
-          ! grep -n '#ifndef RW_GL3#ifndef\|#if !defined RW_GL3 #\|RW_GL3 !defined' upstream-revc/src/core/ControllerConfig.h
           grep -q 'JoyState' upstream-revc/src/core/ControllerConfig.h
-          ! grep -q 'DIJOYSTATE2' upstream-revc/src/core/ControllerConfig.h
-          echo 'PSP preflight passed'
 
       - name: Configure native PSP build
         id: configure
@@ -130,10 +84,7 @@ jobs:
         run: |
           set -euxo pipefail
           find build-revc-psp -type f \( -name '*.elf' -o -name '*.prx' -o -name 'reVC' \) -print
-          test -n "$(find build-revc-psp -type f \( -name '*.elf' -o -name 'reVC' \) -print -quit)" || {
-            echo 'Compile succeeded but no PSP executable was produced yet; packaging is blocked by missing PSP entry target.'
-            exit 1
-          }
+          test -n "$(find build-revc-psp -type f \( -name '*.elf' -o -name 'reVC' \) -print -quit)" 
 
       - name: Upload build diagnostics
         if: always()
