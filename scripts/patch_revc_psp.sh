@@ -8,7 +8,18 @@ CMAKE="upstream-revc/vendor/librw/src/CMakeLists.txt"
 
 # Remove desktop-only platform headers and keep the PSP backend as the
 # concrete device interface for this probe.
-awk '!/^[[:space:]]*#include "src\\/(ps2\\/(rwps2\\.h|rwps2plg\\.h)|d3d\\/(rwxbox|rwd3d|rwd3d8|rwd3d9)\\.h|gl\\/(rwwdgl|rwgl3|rwgl3shader|rwgl3plg)\\.h)"/ { print }' "$RW" > "$RW.tmp"
+awk '
+  index($0, "#include \"src/ps2/rwps2.h\"") == 0 &&
+  index($0, "#include \"src/ps2/rwps2plg.h\"") == 0 &&
+  index($0, "#include \"src/d3d/rwxbox.h\"") == 0 &&
+  index($0, "#include \"src/d3d/rwd3d.h\"") == 0 &&
+  index($0, "#include \"src/d3d/rwd3d8.h\"") == 0 &&
+  index($0, "#include \"src/d3d/rwd3d9.h\"") == 0 &&
+  index($0, "#include \"src/gl/rwwdgl.h\"") == 0 &&
+  index($0, "#include \"src/gl/rwgl3.h\"") == 0 &&
+  index($0, "#include \"src/gl/rwgl3shader.h\"") == 0 &&
+  index($0, "#include \"src/gl/rwgl3plg.h\"") == 0 { print }
+' "$RW" > "$RW.tmp"
 mv "$RW.tmp" "$RW"
 
 # rw.h must expose the PSP device namespace to every game-side include,
@@ -24,7 +35,15 @@ if ! grep -q '#define RWDEVICE psp' "$BASE"; then
 fi
 
 # Restore librw engine dependency order after removing desktop device headers.
-awk '!/^[[:space:]]*#include "rwengine\\.h"/ && !/^[[:space:]]*#include "(d3d\\/(rwxbox|rwd3d|rwd3d8|rwd3d9)|gl\\/(rwgl3|rwwdgl))\\.h"/ { print }' "$ENG" > "$ENG.tmp"
+awk '
+  index($0, "#include \"rwengine.h\"") == 0 &&
+  index($0, "#include \"d3d/rwxbox.h\"") == 0 &&
+  index($0, "#include \"d3d/rwd3d.h\"") == 0 &&
+  index($0, "#include \"d3d/rwd3d8.h\"") == 0 &&
+  index($0, "#include \"d3d/rwd3d9.h\"") == 0 &&
+  index($0, "#include \"gl/rwgl3.h\"") == 0 &&
+  index($0, "#include \"gl/rwwdgl.h\"") == 0 { print }
+' "$ENG" > "$ENG.tmp"
 mv "$ENG.tmp" "$ENG"
 awk 'BEGIN { print "#include \"rwbase.h\""; print "#include \"rwerror.h\""; print "#include \"rwplg.h\""; print "#include \"rwpipeline.h\""; print "#include \"rwobjects.h\""; print "#include \"rwengine.h\"" } { print }' "$ENG" > "$ENG.tmp"
 mv "$ENG.tmp" "$ENG"
