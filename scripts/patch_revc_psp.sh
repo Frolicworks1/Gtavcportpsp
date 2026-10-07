@@ -35,8 +35,13 @@ if [ -f "$GENERAL" ]; then
   fi
 fi
 if [ -f "$CDSTREAM" ]; then
+  CDTMP="$CDSTREAM.psp.tmp"
+  {
+    printf '%s\n' '#ifdef RW_PSP' '#ifndef SEM_FAILED' '#define SEM_FAILED ((sem_t*)-1)' '#endif' 'static char* psp_strdup(const char *s) { size_t n = strlen(s) + 1; char *p = (char*)malloc(n); if (p) memcpy(p, s, n); return p; }' '#endif'
+    cat "$CDSTREAM"
+  } > "$CDTMP"
+  mv "$CDTMP" "$CDSTREAM"
   sed -i \
-    -e '/#include "CdStream.h"/a #ifdef RW_PSP\n#ifndef SEM_FAILED\n#define SEM_FAILED ((sem_t*)-1)\n#endif\nstatic char* psp_strdup(const char *s) { size_t n = strlen(s) + 1; char *p = (char*)malloc(n); if (p) memcpy(p, s, n); return p; }\n#endif' \
     -e 's@realpath(gImgNames\[0\], path);@#ifdef RW_PSP\n\tstrncpy(path, gImgNames[0], sizeof(path)-1);\n\tpath[sizeof(path)-1] = 0;\n#else\n\trealpath(gImgNames[0], path);\n#endif@' \
     -e 's@realpath(real, path);@#ifdef RW_PSP\n\t\t\tstrncpy(path, real, sizeof(path)-1);\n\t\t\tpath[sizeof(path)-1] = 0;\n#else\n\t\t\trealpath(real, path);\n#endif@' \
     -e 's/strdup(path)/psp_strdup(path)/g' "$CDSTREAM"
