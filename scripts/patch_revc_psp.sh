@@ -21,6 +21,15 @@ PAD="upstream-revc/src/core/Pad.cpp"
 FRONTEND="upstream-revc/src/core/Frontend.cpp"
 PAD="upstream-revc/src/core/Pad.cpp"
 
+if [ -f "$GENERAL" ] && ! grep -q "PSP integer overloads" "$GENERAL"; then
+  GENTMP="$GENERAL.psp.tmp"
+  {
+    cat "$GENERAL"
+    printf '%s\n' '' '#ifdef RW_PSP' '// PSP integer overloads' 'static int GetRandomNumberInRange(int low, int high) { return GetRandomNumberInRange((int32)low, (int32)high); }' 'static int32 GetRandomNumberInRange(int low, int32 high) { return GetRandomNumberInRange((int32)low, high); }' 'static int32 GetRandomNumberInRange(int32 low, int high) { return GetRandomNumberInRange(low, (int32)high); }' '#endif'
+  } > "$GENTMP"
+  mv "$GENTMP" "$GENERAL"
+fi
+
 if [ -f "$PAD" ]; then
   PADTMP="$PAD.psp.tmp"
   {
