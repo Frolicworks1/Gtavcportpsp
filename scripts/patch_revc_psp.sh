@@ -82,7 +82,7 @@ if grep -q '^add_library(librw' "$CMAKE" && ! grep -q 'pspgu pspgum pspge pspdis
 
 if(RW_PSP)
   target_link_libraries(librw PRIVATE pspgu pspgum pspge pspdisplay)
-endif
+endif()
 EOF
 fi
 
