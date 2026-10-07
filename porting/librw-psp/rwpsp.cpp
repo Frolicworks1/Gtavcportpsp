@@ -1,3 +1,8 @@
+#include "../rwbase.h"
+#include "../rwerror.h"
+#include "../rwplg.h"
+#include "../rwpipeline.h"
+#include "../rwobjects.h"
 #include "../rwengine.h"
 #include "rwpsp.h"
 #include <pspgu.h>
