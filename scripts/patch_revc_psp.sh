@@ -33,7 +33,7 @@ if ! grep -q '#include "psp/rwpsp.h"' "$ENG"; then
 fi
 sed -i 's/ps2::registerPlatformPlugins()/psp::registerPlatformPlugins()/g' "$ENG"
 sed -i '/xbox::registerPlatformPlugins()/d;/d3d8::registerPlatformPlugins()/d;/d3d9::registerPlatformPlugins()/d;/wdgl::registerPlatformPlugins()/d;/gl3::registerPlatformPlugins()/d' "$ENG"
-sed -i '/#ifdef RW_PS2/a #elif defined(RW_PSP)\n\tengine->device = psp::renderdevice' "$ENG"
+sed -i '/#ifdef RW_PS2/a #elif defined(RW_PSP)\n\tengine->device = psp::renderdevice;' "$ENG"
 
 # Add PSP backend files to librw's source list immediately before ps2 sources.
 if ! grep -q 'psp/rwpsp.cpp' "$CMAKE"; then
