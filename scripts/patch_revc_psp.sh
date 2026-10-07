@@ -12,6 +12,7 @@ EAX="upstream-revc/src/audio/eax/eax-util.cpp"
 COLSTORE="upstream-revc/src/collision/ColStore.cpp"
 GENERAL="upstream-revc/src/core/General.h"
 CARCTRL="upstream-revc/src/control/CarCtrl.cpp"
+PATHFIND="upstream-revc/src/control/PathFind.cpp"
 
 # PSP desktop EAX source is never compiled: it requires DirectSound headers.
 if [ -f "$EAX" ]; then
@@ -29,6 +30,14 @@ if [ -f "$GENERAL" ]; then
     sed -i '/static void SetRandomSeed/i #ifdef RW_PSP\n\tstatic int32 GetRandomNumberInRange(int low, int32 high)\n\t\t{ return GetRandomNumberInRange((int32)low, high); }\n\tstatic int32 GetRandomNumberInRange(int32 low, int high)\n\t\t{ return GetRandomNumberInRange(low, (int32)high); }\n#endif' "$GENERAL"
   fi
 fi
+if [ -f "$PATHFIND" ]; then
+  sed -i \
+    -e 's/CPathFind::CalcNodeCoors(float x, float y, float z, int id,/CPathFind::CalcNodeCoors(float x, float y, float z, int32 id,/' \
+    -e 's/CPathFind::PreparePathDataForType(uint8 type, CTempNode \*tempnodes, CPathInfoForObject \*objectpathinfo,/CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoForObject *objectpathinfo,/' \
+    -e 's/float, CPathInfoForObject \*objectpathinfo, int)/float, CPathInfoForObject *objectpathinfo, int32)/' \
+    "$PATHFIND"
+fi
+
 if [ -f "$CARCTRL" ]; then
   sed -i \
     -e 's/^int CCarCtrl::NumLawEnforcerCars;/int32 CCarCtrl::NumLawEnforcerCars;/' \
