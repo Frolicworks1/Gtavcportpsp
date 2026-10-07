@@ -43,7 +43,7 @@ jobs:
           cp porting/librw-psp/rwpsp.h upstream-revc/vendor/librw/src/psp/rwpsp.h
           cp porting/librw-psp/rwpsp.cpp upstream-revc/vendor/librw/src/psp/rwpsp.cpp
           cp porting/librw-psp/psp_input.cpp upstream-revc/src/core/psp_input.cpp
-          sh scripts/patch_revc_psp.sh 2>&1 | tee psp-patch.log
+          sh -x scripts/patch_revc_psp.sh 2>&1 | tee psp-patch.log
           test ${PIPESTATUS[0]} -eq 0
       - name: Preflight patched PSP source
         shell: bash
