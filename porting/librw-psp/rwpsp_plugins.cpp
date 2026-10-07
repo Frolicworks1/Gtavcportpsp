@@ -1,6 +1,4 @@
-#include "../rwbase.h"
-#include "../rwobjects.h"
-#include "../rwengine.h"
+#include "../rw.h"
 #include "rwpsp.h"
 
 namespace rw { namespace psp {
