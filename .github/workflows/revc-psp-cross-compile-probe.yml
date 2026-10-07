@@ -1,6 +1,7 @@
 name: Build reVC PSP MIPS
 
 on:
+  # frontend PSP input patch trigger
   workflow_dispatch:
   push:
     paths:
