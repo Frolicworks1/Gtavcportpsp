@@ -31,13 +31,21 @@ jobs:
           git clone https://github.com/mrxenginner/reVC.git upstream-revc
           git -C upstream-revc checkout --detach a26fff4af555a8a425ac9f17d1dd718d00d1f942
           git -C upstream-revc submodule update --init --recursive
+      - name: Apply PSP RenderWare device scaffold
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p upstream-revc/vendor/librw/src/psp
+          cp porting/librw-psp/rwpsp.h upstream-revc/vendor/librw/src/psp/rwpsp.h
+          cp porting/librw-psp/rwpsp.cpp upstream-revc/vendor/librw/src/psp/rwpsp.cpp
+          python3 scripts/patch_revc_psp.py
       - name: Apply temporary PSP header isolation for compile probe
         shell: bash
         run: |
           set -euxo pipefail
           # librw's top-level rw.h unconditionally includes platform
           # headers. PSP needs a concrete librw device type; NULL is used here only to expose the missing device interface. The final backend will be PSP GU.
-          sed -i '/#include "src\/ps2\//d; /#include "src\/d3d\//d; /#include "src\/gl\//d' upstream-revc/vendor/librw/rw.h
+          true
           grep -n '^#include' upstream-revc/vendor/librw/rw.h
       - name: Inspect vendored PNG decoder types
         shell: bash
@@ -54,7 +62,7 @@ jobs:
           cmake -S upstream-revc -B build-revc-psp \
             -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake" \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h" \
+            -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1" \
             -DLIBRW_PLATFORM=NULL \
             -DREVC_WITH_OPUS=OFF \
             -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
