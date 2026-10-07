@@ -60,7 +60,7 @@ jobs:
         run: |
           set -o pipefail
           export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
-          cmake -S upstream-revc -B build-revc-psp             -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake"             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1"             -DLIBRW_PLATFORM=NULL             -DREVC_WITH_OPUS=OFF             -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
+          cmake -S upstream-revc -B build-revc-psp             -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake"             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -I$PSPDEV/psp/sdk/include"             -DLIBRW_PLATFORM=NULL             -DREVC_WITH_OPUS=OFF             -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
       - name: Attempt PSP compile if configuration succeeds
         if: steps.configure.outcome == 'success'
         id: compile
