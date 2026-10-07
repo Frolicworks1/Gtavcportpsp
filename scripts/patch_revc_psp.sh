@@ -40,7 +40,9 @@ if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; 
 fi
 
 if [ -f "$PEDH" ]; then
+  # Keep declaration and definition identical under PSP's int32 typedef.
   sed -i 's/CPedAttractor\*, const CVector\&, float, float, int);/CPedAttractor*, const CVector\&, float, float, int32);/' "$PEDH"
+  grep -q 'SetNewAttraction(CPedAttractor\\*, const CVector\\&, float, float, int32)' "$PEDH"
 fi
 
 if [ -f "$FRONTEND" ]; then
