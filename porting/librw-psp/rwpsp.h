@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../rwengine.h"
-
 namespace rw { namespace psp {
 
 struct Im2DVertex {
