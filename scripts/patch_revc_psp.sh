@@ -103,6 +103,9 @@ if [ -f "$SRC_CMAKE" ]; then
 list(FILTER \${PROJECT}_SOURCES EXCLUDE REGEX "/audio/oal/|/audio/sampman_oal\\.cpp$")' "$SRC_CMAKE"
 fi
 
+# EAX is a desktop DirectSound/OpenAL compatibility layer and is not
+# part of the PSP audio path. Exclude its sources from the PSP compile probe.
+sed -i '/audio\\/eax\\//d' "$SRC_CMAKE"
 # Select the PSP device in Engine::open.
 if ! grep -q 'engine->device = psp::renderdevice' "$ENG"; then
   sed -i '/#ifdef RW_PS2/i\\
