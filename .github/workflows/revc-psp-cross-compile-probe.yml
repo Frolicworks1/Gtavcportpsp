@@ -80,8 +80,7 @@ jobs:
           grep -q 'CCamera::TryToStartNewCamMode(int32 obbeMode)' upstream-revc/src/core/Camera.cpp
           grep -q 'psp_strdup' upstream-revc/src/core/CdStream_posix.cpp
           grep -q 'int32 CdStreamGetLastPosn(void);' upstream-revc/src/core/CdStream.h
-          grep -q '^#if 0$' upstream-revc/src/core/Frontend.cpp
-          grep -q '^#elif defined(RW_PSP) || defined(LIBRW_SDL2)$' upstream-revc/src/core/Frontend.cpp
+          grep -q '#if !defined RW_GL3 && !defined RW_PSP' upstream-revc/src/core/Frontend.cpp
 
       - name: Configure native PSP build
         id: configure
