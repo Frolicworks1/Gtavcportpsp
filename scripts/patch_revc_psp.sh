@@ -18,6 +18,7 @@ RADAR="upstream-revc/src/core/Radar.cpp"
 DEBUGMENU="upstream-revc/src/extras/debugmenu.h"
 STREAMING="upstream-revc/src/core/Streaming.cpp"
 RE3="upstream-revc/src/core/re3.cpp"
+FAKERW="upstream-revc/src/fakerw/fake.cpp"
 CAMERA="upstream-revc/src/core/Camera.cpp"
 RADAR="upstream-revc/src/core/Radar.cpp"
 CDSTREAM="upstream-revc/src/core/CdStream_posix.cpp"
@@ -92,6 +93,19 @@ if [ -f "$GENERAL" ]; then
     sed -i '/static void SetRandomSeed/i\    static int32 GetRandomNumberInRange(int low, int32 high) { return low + (high - low) * (GetRandomNumber()/float(MYRAND_MAX + 1)); }' "$GENERAL"
     sed -i '/static void SetRandomSeed/i\#ifdef RW_PSP' "$GENERAL"
   fi
+fi
+
+if [ -f "$FAKERW" ]; then
+  FKTMP="$FAKERW.psp.tmp"
+  {
+    printf '%s\n' '#ifdef RW_PSP' '#include <rwengine.h>' '#endif'
+    cat "$FAKERW"
+  } > "$FKTMP"
+  mv "$FKTMP" "$FAKERW"
+  sed -i '/rw::d3d::isP8supported = false;/s/^/#ifndef RW_PSP\n/; /#ifndef RW_PSP/{n;}' "$FAKERW"
+  sed -i '/rw::d3d::isP8supported = false;/a #endif' "$FAKERW"
+  sed -i '/rw::xbox::registerVertexFormatPlugin();/s/^/#ifndef RW_PSP\n/; /#ifndef RW_PSP/{n;}' "$FAKERW"
+  sed -i '/rw::xbox::registerVertexFormatPlugin();/a #endif' "$FAKERW"
 fi
 
 if [ -f "$RE3" ]; then
