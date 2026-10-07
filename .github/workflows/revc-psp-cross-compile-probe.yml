@@ -81,7 +81,80 @@ jobs:
           grep -q 'CCamera::TryToStartNewCamMode(int32 obbeMode)' upstream-revc/src/core/Camera.cpp
           grep -q 'psp_strdup' upstream-revc/src/core/CdStream_posix.cpp
           grep -q 'int32 CdStreamGetLastPosn(void);' upstream-revc/src/core/CdStream.h
-          grep -q '#if !defined RW_GL3 && !defined RW_PSP' upstream-revc/src/core/Frontend.cpp
+          grep -q '^#if 0
+
+      - name: Configure native PSP build
+        id: configure
+        shell: bash
+        run: |
+          set -o pipefail
+          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
+          cmake -S upstream-revc -B build-revc-psp             -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake"             -DRW_PSP=ON             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -I$PSPDEV/psp/sdk/include"             -DLIBRW_PLATFORM=NULL             -DREVC_WITH_OPUS=OFF             -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
+
+      - name: Compile reVC for PSP
+        if: steps.configure.outcome == 'success'
+        id: compile
+        shell: bash
+        run: |
+          set -o pipefail
+          cmake --build build-revc-psp --parallel 2 2>&1 | tee psp-cross-compile.log
+
+      - name: Package PSP EBOOT when executable exists
+        if: steps.compile.outcome == 'success'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          find build-revc-psp -type f \( -name '*.elf' -o -name '*.prx' -o -name 'reVC' \) -print
+          test -n "$(find build-revc-psp -type f \( -name '*.elf' -o -name 'reVC' \) -print -quit)"
+
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: revc-psp-build-diagnostics
+          path: |
+            psp-patch.log
+            psp-cmake-configure.log
+            psp-cross-compile.log
+          if-no-files-found: warn
+ upstream-revc/src/core/Frontend.cpp
+          grep -q '^#elif defined(RW_PSP) || defined(LIBRW_SDL2)
+
+      - name: Configure native PSP build
+        id: configure
+        shell: bash
+        run: |
+          set -o pipefail
+          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
+          cmake -S upstream-revc -B build-revc-psp             -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake"             -DRW_PSP=ON             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -I$PSPDEV/psp/sdk/include"             -DLIBRW_PLATFORM=NULL             -DREVC_WITH_OPUS=OFF             -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
+
+      - name: Compile reVC for PSP
+        if: steps.configure.outcome == 'success'
+        id: compile
+        shell: bash
+        run: |
+          set -o pipefail
+          cmake --build build-revc-psp --parallel 2 2>&1 | tee psp-cross-compile.log
+
+      - name: Package PSP EBOOT when executable exists
+        if: steps.compile.outcome == 'success'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          find build-revc-psp -type f \( -name '*.elf' -o -name '*.prx' -o -name 'reVC' \) -print
+          test -n "$(find build-revc-psp -type f \( -name '*.elf' -o -name 'reVC' \) -print -quit)"
+
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: revc-psp-build-diagnostics
+          path: |
+            psp-patch.log
+            psp-cmake-configure.log
+            psp-cross-compile.log
+          if-no-files-found: warn
+ upstream-revc/src/core/Frontend.cpp
 
       - name: Configure native PSP build
         id: configure
