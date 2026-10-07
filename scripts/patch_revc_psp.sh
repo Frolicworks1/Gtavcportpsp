@@ -55,18 +55,7 @@ if [ -f "$POP" ]; then
   # Keep Population definitions identical to int32 declarations under PSP.
   # Use separate substitutions for BusyBox/POSIX sed portability and verify each result.
   # Match only ChooseGangOccupation's return type and parameter typedef.
-  awk '
-    $0 == "int" { pending_int=1; next }
-    pending_int && $0 == "CPopulation::ChooseGangOccupation(int gangId)" {
-      print "int32"
-      print "CPopulation::ChooseGangOccupation(int32 gangId)"
-      pending_int=0
-      next
-    }
-    pending_int { print "int"; pending_int=0 }
-    { print }
-    END { if (pending_int) print "int" }
-  ' "$POP" > "$POP.psp.tmp"
+  awk 'prev == "int" && $0 == "CPopulation::ChooseGangOccupation(int gangId)" { print "int32"; print "CPopulation::ChooseGangOccupation(int32 gangId)"; prev=""; next } { if (prev != "") print prev; prev=$0 } END { if (prev != "") print prev }' "$POP" > "$POP.psp.tmp"
   mv "$POP.psp.tmp" "$POP"
   sed -i 's/CPopulation::PlaceGangMembers(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembers(ePedType pedType, int32 pedAmount/' "$POP"
   sed -i 's/CPopulation::PlaceGangMembersInFormation(ePedType pedType, int pedAmount/CPopulation::PlaceGangMembersInFormation(ePedType pedType, int32 pedAmount/' "$POP"
@@ -75,20 +64,6 @@ if [ -f "$POP" ]; then
   grep -Fq 'CPopulation::PlaceGangMembers(ePedType pedType, int32 pedAmount' "$POP"
   grep -Fq 'CPopulation::PlaceGangMembersInFormation(ePedType pedType, int32 pedAmount' "$POP"
   grep -Fq 'CPopulation::PlaceGangMembersInCircle(ePedType pedType, int32 pedAmount' "$POP"
-fi
-
-# Keep Fluff scrollbar state declaration identical to its PSP definition.
-FLUFFH="upstream-revc/src/renderer/Fluff.h"
-if [ -f "$FLUFFH" ]; then
-  sed -i 's/static int TonightsEvent;/static int32 TonightsEvent;/' "$FLUFFH"
-  grep -Fq 'static int32 TonightsEvent;' "$FLUFFH"
-fi
-
-# Keep Font button-slot state identical to the PSP int32 declaration.
-FONTCPP="upstream-revc/src/renderer/Font.cpp"
-if [ -f "$FONTCPP" ]; then
-  sed -i 's/^int CFont::ButtonsSlot = -1;/int32 CFont::ButtonsSlot = -1;/' "$FONTCPP"
-  grep -Fq 'int32 CFont::ButtonsSlot = -1;' "$FONTCPP"
 fi
 
 if [ -f "$PEDATTR" ]; then
@@ -341,83 +316,16 @@ if [ -f "$FAKERW" ]; then
   sed -i '/rw::xbox::registerVertexFormatPlugin();/a #endif' "$FAKERW"
 fi
 
-# Final PSP linker sources are added by the workflow after patching.
-# PSP POSIX filesystem declarations required by crossplatform.cpp.
-CROSSPLATFORM="upstream-revc/src/skel/crossplatform.cpp"
-if [ -f "$CROSSPLATFORM" ]; then
-  if ! grep -q '^#include <alloca.h>if [ -f "$SRC_CMAKE" ]; then
-  if ! grep -q '^    pspgu$' "$SRC_CMAKE"; then
-    awk '/^target_link_libraries\(\$\{EXECUTABLE\} PRIVATE/ { print; print "    pspgu"; print "    pspgum"; print "    pspctrl"; print "    pspge"; print "    pspdisplay"; next } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
-    mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
-  fi
-  grep -q '^    pspgu$' "$SRC_CMAKE"
-  grep -q '^    pspgum$' "$SRC_CMAKE"
-  grep -q '^    pspctrl$' "$SRC_CMAKE"
-  grep -q '^    pspge$' "$SRC_CMAKE"
-  grep -q '^    pspdisplay$' "$SRC_CMAKE"
-  if ! grep -q 'psp_link_stubs.cpp' "$SRC_CMAKE"; then
-    sed -i '/^target_link_libraries/i target_sources(\${EXECUTABLE} PRIVATE "\${CMAKE_SOURCE_DIR}/../../../porting/librw-psp/psp_link_stubs.cpp")' "$SRC_CMAKE"
-  fi
-  grep -q 'psp_link_stubs.cpp' "$SRC_CMAKE"
+# Font declaration/definition consistency for PSP.
+FONTCPP="upstream-revc/src/renderer/Font.cpp"
+if [ -f "$FONTCPP" ]; then
+  sed -i 's/^int CFont::ButtonsSlot = -1;/int32 CFont::ButtonsSlot = -1;/' "$FONTCPP"
+  grep -Fq 'int32 CFont::ButtonsSlot = -1;' "$FONTCPP"
 fi
-
-exit 0
- "$CROSSPLATFORM"; then
-    sed -i '1a #ifdef RW_PSP\n#include <alloca.h>\n#include <stdlib.h>\n#include <string.h>\n#include <strings.h>\n#include <unistd.h>\n#endif' "$CROSSPLATFORM"
-  fi
-  grep -q '^#include <alloca.h>if [ -f "$SRC_CMAKE" ]; then
-  if ! grep -q '^    pspgu$' "$SRC_CMAKE"; then
-    awk '/^target_link_libraries\(\$\{EXECUTABLE\} PRIVATE/ { print; print "    pspgu"; print "    pspgum"; print "    pspctrl"; print "    pspge"; print "    pspdisplay"; next } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
-    mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
-  fi
-  grep -q '^    pspgu$' "$SRC_CMAKE"
-  grep -q '^    pspgum$' "$SRC_CMAKE"
-  grep -q '^    pspctrl$' "$SRC_CMAKE"
-  grep -q '^    pspge$' "$SRC_CMAKE"
-  grep -q '^    pspdisplay$' "$SRC_CMAKE"
-  if ! grep -q 'psp_link_stubs.cpp' "$SRC_CMAKE"; then
-    sed -i '/^target_link_libraries/i target_sources(\${EXECUTABLE} PRIVATE "\${CMAKE_SOURCE_DIR}/../../../porting/librw-psp/psp_link_stubs.cpp")' "$SRC_CMAKE"
-  fi
-  grep -q 'psp_link_stubs.cpp' "$SRC_CMAKE"
-fi
-
-exit 0
- "$CROSSPLATFORM"
-  grep -q '^#include <unistd.h>if [ -f "$SRC_CMAKE" ]; then
-  if ! grep -q '^    pspgu$' "$SRC_CMAKE"; then
-    awk '/^target_link_libraries\(\$\{EXECUTABLE\} PRIVATE/ { print; print "    pspgu"; print "    pspgum"; print "    pspctrl"; print "    pspge"; print "    pspdisplay"; next } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
-    mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
-  fi
-  grep -q '^    pspgu$' "$SRC_CMAKE"
-  grep -q '^    pspgum$' "$SRC_CMAKE"
-  grep -q '^    pspctrl$' "$SRC_CMAKE"
-  grep -q '^    pspge$' "$SRC_CMAKE"
-  grep -q '^    pspdisplay$' "$SRC_CMAKE"
-  if ! grep -q 'psp_link_stubs.cpp' "$SRC_CMAKE"; then
-    sed -i '/^target_link_libraries/i target_sources(\${EXECUTABLE} PRIVATE "\${CMAKE_SOURCE_DIR}/../../../porting/librw-psp/psp_link_stubs.cpp")' "$SRC_CMAKE"
-  fi
-  grep -q 'psp_link_stubs.cpp' "$SRC_CMAKE"
-fi
-
-exit 0
- "$CROSSPLATFORM"
-fi
-
-# Final PSP RenderWare target closure.
-if [ -f "$SRC_CMAKE" ]; then
-  if ! grep -q '^    pspgu$' "$SRC_CMAKE"; then
-    awk '/^target_link_libraries\(\$\{EXECUTABLE\} PRIVATE/ { print; print "    pspgu"; print "    pspgum"; print "    pspctrl"; print "    pspge"; print "    pspdisplay"; next } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
-    mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
-  fi
-  grep -q '^    pspgu$' "$SRC_CMAKE"
-  grep -q '^    pspgum$' "$SRC_CMAKE"
-  grep -q '^    pspctrl$' "$SRC_CMAKE"
-  grep -q '^    pspge$' "$SRC_CMAKE"
-  grep -q '^    pspdisplay$' "$SRC_CMAKE"
-  if ! grep -q 'psp_link_stubs.cpp' "$SRC_CMAKE"; then
-    sed -i '/^target_link_libraries/i target_sources(\${EXECUTABLE} PRIVATE "\${CMAKE_SOURCE_DIR}/../../../porting/librw-psp/psp_link_stubs.cpp")' "$SRC_CMAKE"
-  fi
-  grep -q 'psp_link_stubs.cpp' "$SRC_CMAKE"
+FLUFFH="upstream-revc/src/renderer/Fluff.h"
+if [ -f "$FLUFFH" ]; then
+  sed -i 's/static int TonightsEvent;/static int32 TonightsEvent;/' "$FLUFFH"
+  grep -Fq 'static int32 TonightsEvent;' "$FLUFFH"
 fi
 
 exit 0
