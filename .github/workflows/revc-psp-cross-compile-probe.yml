@@ -1,5 +1,6 @@
 name: Probe pinned reVC with PSP MIPS toolchain
 # PSP backend scaffold is patched into the pinned librw checkout during CI.
+# Continuous PSP compile iteration enabled.
 on:
   workflow_dispatch:
   push:
