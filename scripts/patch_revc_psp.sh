@@ -39,6 +39,11 @@ if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; 
   mv "$PADHEADER.psp.tmp" "$PADHEADER"
 fi
 
+if [ -f "$PEDATTR" ]; then
+  # Keep PedAttractor declarations identical to PSP int32 definitions.
+  sed -i 's/ComputeAttractPos(int qid,/ComputeAttractPos(int32 qid,/g; s/ComputeAttractHeading(int qid,/ComputeAttractHeading(int32 qid,/g' "$PEDATTR"
+fi
+
 if [ -f "$PEDH" ]; then
   # Keep declaration and definition identical under PSP's int32 typedef.
   sed -i '/SetNewAttraction/s/, int);/, int32);/' "$PEDH"
