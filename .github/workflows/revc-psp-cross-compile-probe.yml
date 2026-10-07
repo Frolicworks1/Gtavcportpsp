@@ -75,7 +75,7 @@ jobs:
           grep -q 'CCarCtrl::RemoveFromLoadedVehicleArray(int32 mi, int32 rating)' upstream-revc/src/control/CarCtrl.cpp
           grep -q 'CPathFind::CalcNodeCoors(float x, float y, float z, int32 id' upstream-revc/src/control/PathFind.cpp
           grep -q 'CPathFind::PreparePathDataForType' upstream-revc/src/control/PathFind.cpp
-          grep -Fq 'CPathInfoForObject *objectpathinfo, int32)' upstream-revc/src/control/PathFind.cpp
+          grep -Fq 'CPathInfoForObject *detachednodes, int32 numDetached' upstream-revc/src/control/PathFind.cpp
 
       - name: Configure native PSP build
         id: configure
