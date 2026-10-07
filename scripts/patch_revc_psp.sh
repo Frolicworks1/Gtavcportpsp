@@ -14,6 +14,7 @@ GENERAL="upstream-revc/src/core/General.h"
 CARCTRL="upstream-revc/src/control/CarCtrl.cpp"
 PATHFIND="upstream-revc/src/control/PathFind.cpp"
 PICKUPS="upstream-revc/src/control/Pickups.cpp"
+RADAR="upstream-revc/src/core/Radar.cpp"
 CAMERA="upstream-revc/src/core/Camera.cpp"
 CDSTREAM="upstream-revc/src/core/CdStream_posix.cpp"
 CDHEADER="upstream-revc/src/core/CdStream.h"
@@ -100,6 +101,11 @@ if [ -f "$GENERAL" ]; then
     sed -i '/static void SetRandomSeed/i\    static int32 GetRandomNumberInRange(int low, int32 high) { return low + (high - low) * (GetRandomNumber()/float(MYRAND_MAX + 1)); }' "$GENERAL"
     sed -i '/static void SetRandomSeed/i\#ifdef RW_PSP' "$GENERAL"
   fi
+fi
+
+if [ -f "$RADAR" ]; then
+  sed -i     -e '1i #ifndef M_SQRT2'     -e '2i #define M_SQRT2 1.41421356237309504880'     -e 's/^int CRadar::SetCoordBlip(/int32 CRadar::SetCoordBlip(/'     -e 's/^int CRadar::SetShortRangeCoordBlip(/int32 CRadar::SetShortRangeCoordBlip(/'     -e 's/^int CRadar::SetEntityBlip(/int32 CRadar::SetEntityBlip(/'     "$RADAR"
+  printf '%s\n' '#endif' >> "$RADAR"
 fi
 
 if [ -f "$PICKUPS" ]; then
