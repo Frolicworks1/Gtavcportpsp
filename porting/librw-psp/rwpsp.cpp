@@ -274,7 +274,7 @@ static void im3DRenderPrimitive(PrimitiveType prim) {
     if(!im3DBuffer || im3DCount <= 0) return;
     int p = guPrimitive(prim);
     if(p < 0) return;
-    sceGuDrawArray(p, GU_TEXTURE_32BITF | GU_COLOR_8888 |
+    sceGuDrawArray(p, GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_NORMAL_32BITF |
         GU_VERTEX_32BITF | GU_TRANSFORM_3D, im3DCount, 0, im3DBuffer);
 }
 
@@ -286,7 +286,7 @@ static void im3DRenderIndexedPrimitive(PrimitiveType prim, void *indices, int32 
     GU3DVertex *dst = (GU3DVertex*)sceGuGetMemory(sizeof(GU3DVertex) * count);
     for(int32 i = 0; i < count; ++i)
         dst[i] = im3DBuffer[idx[i]];
-    sceGuDrawArray(p, GU_TEXTURE_32BITF | GU_COLOR_8888 |
+    sceGuDrawArray(p, GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_NORMAL_32BITF |
         GU_VERTEX_32BITF | GU_TRANSFORM_3D, count, 0, dst);
 }
 
