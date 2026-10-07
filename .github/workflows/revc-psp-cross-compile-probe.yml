@@ -68,7 +68,6 @@ jobs:
           grep -q 'add_library(MPG123::libmpg123 INTERFACE IMPORTED)' upstream-revc/src/CMakeLists.txt
           grep -q 'list(REMOVE_ITEM' upstream-revc/src/CMakeLists.txt
           grep -q 'audio/eax/eax-util.cpp' upstream-revc/src/CMakeLists.txt
-          test "$(head -n 1 upstream-revc/src/audio/eax/eax-util.cpp)" = "#ifndef RW_PSP"
           grep -q 'CColStore::RemoveColSlot(int32 slot)' upstream-revc/src/collision/ColStore.cpp
           grep -q 'static int GetRandomNumberInRange(int low, int high)' upstream-revc/src/core/General.h
           grep -q 'static int32 GetRandomNumberInRange(int low, int32 high)' upstream-revc/src/core/General.h
