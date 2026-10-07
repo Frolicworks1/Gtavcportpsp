@@ -213,8 +213,10 @@ sed -i \
   "$CMAKE"
 
 if ! grep -q 'psp/rwpsp.cpp' "$CMAKE"; then
-  sed -i '/    lodepng\/lodepng.h/i\\    psp/rwpsp.cpp
-    psp/rwpsp.h' "$CMAKE"
+  sed -i \
+    -e '/    lodepng\\/lodepng.h/i\\    psp/rwpsp.cpp' \
+    -e '/    lodepng\\/lodepng.h/i\\    psp/rwpsp.h' \
+    "$CMAKE"
 fi
 
 grep -q 'psp/rwpsp.cpp' "$CMAKE"
