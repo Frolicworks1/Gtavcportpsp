@@ -10,9 +10,9 @@ CTRL="upstream-revc/src/core/ControllerConfig.h"
 # PSP controller path: reuse the GL3-style JoyState representation and disable
 # the Windows DirectInput layout/size validation.
 if [ -f "$CTRL" ]; then
-  sed -i 's/^#if defined RW_GL3$/#if defined RW_GL3 || defined RW_PSP/g' "$CTRL"
-  sed -i 's/^#ifdef RW_GL3$/#if defined RW_GL3 || defined RW_PSP/g' "$CTRL"
-  sed -i 's/^#ifndef RW_GL3$/#if !defined RW_GL3 && !defined RW_PSP/g' "$CTRL"
+  sed -i 's|^#if defined RW_GL3$|#if defined RW_GL3 || defined RW_PSP|' "$CTRL"
+  sed -i 's|^#ifdef RW_GL3$|#if defined RW_GL3 || defined RW_PSP|' "$CTRL"
+  sed -i 's|^#ifndef RW_GL3$|#if !defined RW_GL3 \\&\\& !defined RW_PSP|' "$CTRL"
 
   if ! grep -q '^#if defined RW_GL3 || defined RW_PSP$' "$CTRL"; then
     sed -i '/^#define ACTIONNAME_LENGTH 40$/a #if defined RW_PSP\nstruct JoyState {\n    int8 id;\n    bool isGamepad;\n    uint8 numButtons;\n    uint8 buttons[MAX_BUTTONS];\n    bool mappedButtons[MAX_BUTTONS];\n};\n#endif' "$CTRL"
