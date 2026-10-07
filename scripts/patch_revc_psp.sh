@@ -34,7 +34,7 @@ if [ -f "$PATHFIND" ]; then
   sed -i \
     -e 's/CPathFind::CalcNodeCoors(float x, float y, float z, int id,/CPathFind::CalcNodeCoors(float x, float y, float z, int32 id,/' \
     -e 's/CPathFind::PreparePathDataForType(uint8 type, CTempNode \*tempnodes, CPathInfoForObject \*objectpathinfo,/CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoForObject *objectpathinfo,/' \
-    -e 's/float, CPathInfoForObject \*objectpathinfo, int)/float, CPathInfoForObject *objectpathinfo, int32)/' \
+    -e 's/float maxdist, CPathInfoForObject \*detachednodes, int numDetached/float maxdist, CPathInfoForObject *detachednodes, int32 numDetached/' \
     "$PATHFIND"
 fi
 
