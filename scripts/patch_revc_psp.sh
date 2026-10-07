@@ -45,13 +45,13 @@ fi
 if [ -f "$PAD" ]; then
   # PSP uses the controller path; desktop mouse polling must not be compiled.
   sed -i '/CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()/i #ifndef RW_PSP' "$PAD"
-  sed -i '/^void CPad::UpdateMouse()/i #endif /* RW_PSP */' "$PAD"
   sed -i '/^void CPad::UpdateMouse()/a #ifdef RW_PSP
-{ PCTempMouseControllerState.Clear(); OldMouseControllerState.Clear(); NewMouseControllerState.Clear(); }
+  PCTempMouseControllerState.Clear();
+  OldMouseControllerState.Clear();
+  NewMouseControllerState.Clear();
+  return;
 #else' "$PAD"
-  sed -i '/^void CPad::ProcessPCSpecificStuff()/i #endif /* RW_PSP */' "$PAD"
-  sed -i '/^void CPad::UpdatePads(void)/,/^void CPad::ProcessPCSpecificStuff(void)/ s/GetPad(0)->UpdateMouse();/#ifndef RW_PSP\n\tGetPad(0)->UpdateMouse();\n#endif/' "$PAD"
-  sed -i '/^void CPad::UpdatePads(void)/,/^void CPad::ProcessPCSpecificStuff(void)/ s/#else$/#else\n#ifndef RW_PSP/' "$PAD"
+  sed -i '/^void CPad::UpdatePads(void)/i #endif /* RW_PSP */' "$PAD"
 fi
 
 if [ -f "$CDSTREAM" ]; then
