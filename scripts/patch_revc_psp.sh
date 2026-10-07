@@ -376,7 +376,14 @@ if [ -f "$SRC_CMAKE" ]; then
   grep -q '^    pspgum$' "$SRC_CMAKE"
   grep -q '^    pspctrl$' "$SRC_CMAKE"
   grep -q '^    pspge$' "$SRC_CMAKE"
-  grep -q '^    pspdisplay$' "$SRC_CMAKE"
+  grep -q '^    pspdisplay
+exit 0
+ "$SRC_CMAKE"
+fi
+  if ! grep -q 'psp_link_stubs.cpp' "$SRC_CMAKE"; then
+    sed -i '/target_link_libraries/i list(APPEND REVC_SOURCES "${CMAKE_SOURCE_DIR}\/..\/porting\/librw-psp\/psp_link_stubs.cpp")' "$SRC_CMAKE"
+  fi
+  grep -q 'psp_link_stubs.cpp' "$SRC_CMAKE"
 fi
 
 exit 0
