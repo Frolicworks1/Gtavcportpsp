@@ -32,7 +32,15 @@ if ! grep -q '#include "psp/rwpsp.h"' "$ENG"; then
 fi
 
 # Keep PSP plugin/device registration only.
-sed -i 's/ps2::registerPlatformPlugins()/psp::registerPlatformPlugins()/g; /xbox::registerPlatformPlugins()/d; /d3d8::registerPlatformPlugins()/d; /d3d9::registerPlatformPlugins()/d; /wdgl::registerPlatformPlugins()/d; /gl3::registerPlatformPlugins()/d; s/ps2::renderdevice/psp::renderdevice/g; /xbox::renderdevice/d; /d3d8::renderdevice/d; /d3d9::renderdevice/d; /wdgl::renderdevice/d; /gl3::renderdevice/d; /d3d::nativeRasterOffset = 0;/d' "$ENG"
+awk '{
+  gsub(/ps2::registerPlatformPlugins\(\)/, "psp::registerPlatformPlugins()");
+  gsub(/ps2::renderdevice/, "psp::renderdevice");
+  if ($0 ~ /xbox::registerPlatformPlugins\(\)|d3d8::registerPlatformPlugins\(\)|d3d9::registerPlatformPlugins\(\)|wdgl::registerPlatformPlugins\(\)|gl3::registerPlatformPlugins\(\)/) next;
+  if ($0 ~ /xbox::renderdevice|d3d8::renderdevice|d3d9::renderdevice|wdgl::renderdevice|gl3::renderdevice/) next;
+  if ($0 ~ /d3d::nativeRasterOffset = 0;/) next;
+  print;
+}' "$ENG" > "$ENG.tmp"
+mv "$ENG.tmp" "$ENG"
 
 if ! grep -q 'psp/rwpsp.cpp' "$CMAKE"; then
   awk '
