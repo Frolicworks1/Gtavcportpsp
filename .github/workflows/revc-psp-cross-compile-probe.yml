@@ -42,6 +42,13 @@ jobs:
           cp porting/librw-psp/rwpsp.h upstream-revc/vendor/librw/src/psp/rwpsp.h
           cp porting/librw-psp/rwpsp.cpp upstream-revc/vendor/librw/src/psp/rwpsp.cpp
           sh scripts/patch_revc_psp.sh
+      - name: Validate generated PSP CMake block
+        shell: bash
+        run: |
+          set -euxo pipefail
+          grep -A4 -B2 'if(RW_PSP)' upstream-revc/vendor/librw/src/CMakeLists.txt
+          grep -A4 -B2 'if(RW_PSP)' upstream-revc/vendor/librw/src/CMakeLists.txt | grep -q 'endif()'
+
       - name: Apply temporary PSP header isolation for compile probe
         shell: bash
         run: |
