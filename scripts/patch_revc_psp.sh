@@ -39,7 +39,9 @@ sed -i \
   "$ENG"
 
 # rwengine.h must be included before the PSP device header so the Device types exist.
-grep -q '#include "rwengine.h"' "$ENG" || sed -i '1i#include "rwengine.h"' "$ENG"
+if ! grep -q '#include "rwbase.h"' "$ENG"; then
+  sed -i '1i#include "rwbase.h"\n#include "rwerror.h"\n#include "rwplg.h"\n#include "rwpipeline.h"\n#include "rwobjects.h"\n#include "rwengine.h"' "$ENG"
+fi
 grep -q '#include "psp/rwpsp.h"' "$ENG" || sed -i '/#include "rwengine.h"/a#include "psp/rwpsp.h"' "$ENG"
 
 # Keep only the PSP platform plugin registration and remove desktop registrations.
