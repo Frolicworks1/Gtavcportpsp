@@ -22,7 +22,7 @@ sed -i   -e '/#include "rwengine.h"/d'   -e '/#include "d3d\/rwxbox.h"/d'   -e '
 grep -q '#include "psp/rwpsp.h"' "$ENG" || sed -i '/#include "rwengine.h"/a\
 #include "psp/rwpsp.h"' "$ENG"
 
-sed -i \
+# Select the PSP device in Engine::open and keep only the PSP platform plugin registration.\nsed -i \
   -e 's/ps2::registerPlatformPlugins()/psp::registerPlatformPlugins()/g' \
   -e '/xbox::registerPlatformPlugins()/d' \
   -e '/d3d8::registerPlatformPlugins()/d' \
@@ -59,4 +59,12 @@ if(RW_PSP)
   target_link_libraries(librw PRIVATE pspgu pspgum pspge pspdisplay)
 endif()
 EOF
+fi
+
+
+# Make Engine::open select the PSP device instead of falling back to null.
+if ! grep -q 'RW_PSP.*psp::renderdevice' "$ENG"; then
+  sed -i '/#ifdef RW_PS2/i\#ifdef RW_PSP\
+\tengine->device = psp::renderdevice;\
+#elif defined(RW_PS2)' "$ENG"
 fi
