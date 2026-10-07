@@ -242,7 +242,7 @@ if [ -f "$SRC_CMAKE" ]; then
 fi
 sed -i 's@if(\${PROJECT}_WITH_OPUS)@if(NOT RW_PSP AND \${PROJECT}_WITH_OPUS)@' "$SRC_CMAKE"
 if [ -f "$SRC_CMAKE" ]; then
-  awk '/^file(GLOB_RECURSE / {
+  awk '/^file\(GLOB_RECURSE / {
     print "if(RW_PSP)"
     print "  list(REMOVE_ITEM ${PROJECT}_SOURCES"
     print "    ${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_d3d9.cpp"
@@ -251,7 +251,7 @@ if [ -f "$SRC_CMAKE" ]; then
     print "endif()"
   } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
   mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
-  awk '/^file(GLOB_RECURSE / {
+  awk '/^file\(GLOB_RECURSE / {
     print "if(RW_PSP)"
     print "  list(REMOVE_ITEM ${PROJECT}_SOURCES"
     print "    ${CMAKE_CURRENT_SOURCE_DIR}/audio/eax/eax-util.cpp"
