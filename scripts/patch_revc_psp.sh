@@ -102,7 +102,6 @@ if [ -f "$SRC_CMAKE" ]; then
   cat >> "$SRC_CMAKE" <<'EOF'
 list(FILTER ${PROJECT}_SOURCES EXCLUDE REGEX "/audio/oal/|/audio/sampman_oal\\.cpp$")
 EOF
-  mv "$SRC_CMAKE.tmp" "$SRC_CMAKE"
 fi
 
 # EAX is a desktop DirectSound/OpenAL compatibility layer and is not
