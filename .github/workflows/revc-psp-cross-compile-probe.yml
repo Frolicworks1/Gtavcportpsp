@@ -78,7 +78,7 @@ jobs:
           grep -Fq 'CPathInfoForObject *detachednodes, int32 numDetached' upstream-revc/src/control/PathFind.cpp
           grep -q '^int CPacManPickups::PillsEatenInRace;' upstream-revc/src/control/Pickups.cpp
           grep -q 'CCamera::TryToStartNewCamMode(int32 obbeMode)' upstream-revc/src/core/Camera.cpp
-          grep -q '#define SEM_FAILED ((sem_t*)-1)' upstream-revc/src/core/CdStream_posix.cpp
+          grep -q 'psp_strdup' upstream-revc/src/core/CdStream_posix.cpp
           grep -q 'int32 CdStreamGetLastPosn(void);' upstream-revc/src/core/CdStream.h
 
       - name: Configure native PSP build
