@@ -65,6 +65,16 @@ jobs:
           grep -Fq 'virtual void ComputeAttractPos(int32 qid, CVector& pos) const;' upstream-revc/src/peds/PedAttractor.h
           grep -Fq 'virtual void ComputeAttractHeading(int32 qid, float& heading) const;' upstream-revc/src/peds/PedAttractor.h
           ! grep -n 'SetNewAttraction(CPedAttractor.*int);' upstream-revc/src/peds/Ped.h
+          grep -Fq 'static int32 ChooseGangOccupation(int);' upstream-revc/src/peds/Population.h
+          grep -Fq 'static void PlaceGangMembers(ePedType, int32, CVector const&);' upstream-revc/src/peds/Population.h
+          grep -Fq 'CPopulation::ChooseGangOccupation(int32 gangId)' upstream-revc/src/peds/Population.cpp
+          grep -Fq 'CPopulation::PlaceGangMembers(ePedType pedType, int32 pedAmount' upstream-revc/src/peds/Population.cpp
+          grep -Fq 'CPopulation::PlaceGangMembersInFormation(ePedType pedType, int32 pedAmount' upstream-revc/src/peds/Population.cpp
+          grep -Fq 'CPopulation::PlaceGangMembersInCircle(ePedType pedType, int32 pedAmount' upstream-revc/src/peds/Population.cpp
+          ! grep -Fq 'CPopulation::ChooseGangOccupation(int gangId)' upstream-revc/src/peds/Population.cpp
+          ! grep -Fq 'CPopulation::PlaceGangMembers(ePedType pedType, int pedAmount' upstream-revc/src/peds/Population.cpp
+          ! grep -Fq 'CPopulation::PlaceGangMembersInFormation(ePedType pedType, int pedAmount' upstream-revc/src/peds/Population.cpp
+          ! grep -Fq 'CPopulation::PlaceGangMembersInCircle(ePedType pedType, int pedAmount' upstream-revc/src/peds/Population.cpp
           grep -q '#define RWDEVICE psp' upstream-revc/vendor/librw/src/rwbase.h
           grep -q 'PROJECT}_AUDIOS "NULL"' upstream-revc/CMakeLists.txt
           grep -q 'PROJECT}_AUDIO "NULL"' upstream-revc/CMakeLists.txt
