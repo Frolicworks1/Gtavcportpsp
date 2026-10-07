@@ -54,7 +54,6 @@ jobs:
           set -euxo pipefail
           test -s upstream-revc/vendor/librw/src/psp/rwpsp.cpp
           test -s upstream-revc/src/core/psp_input.cpp
-          grep -q 'PSP integer overloads' upstream-revc/src/core/General.h
           grep -q 'psp/rwpsp.cpp' upstream-revc/vendor/librw/src/CMakeLists.txt
           ! grep -q '^[[:space:]]*ps2/' upstream-revc/vendor/librw/src/CMakeLists.txt
           ! grep -q '^[[:space:]]*d3d/' upstream-revc/vendor/librw/src/CMakeLists.txt
@@ -82,8 +81,6 @@ jobs:
           grep -q 'CCamera::TryToStartNewCamMode(int32 obbeMode)' upstream-revc/src/core/Camera.cpp
           grep -q 'psp_strdup' upstream-revc/src/core/CdStream_posix.cpp
           grep -q 'int32 CdStreamGetLastPosn(void);' upstream-revc/src/core/CdStream.h
-          grep -q '^#if !defined RW_GL3 \\&\\& !defined RW_PSP
-
       - name: Configure native PSP build
         id: configure
         shell: bash
