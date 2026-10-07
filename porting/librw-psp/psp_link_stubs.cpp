@@ -55,5 +55,6 @@ extern "C" long extra_stub_1012(...){return 0;}
 extern "C" long extra_stub_1013(...) __asm__("CdStreamGetStatus");
 extern "C" long extra_stub_1013(...){return 0;}
 
-extern "C" long extra_stub_1014(...) __asm__("_ZN11WorldRender13numBlendInstsE");
-extern "C" long extra_stub_1014(...){return 0;}
+
+extern "C" int psp_native_raster_offset __asm__("_ZN2rw4xbox18nativeRasterOffsetE"); int psp_native_raster_offset=0;
+extern "C" int psp_num_blend_insts __asm__("_ZN11WorldRender13numBlendInstsE"); int psp_num_blend_insts=0;
