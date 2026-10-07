@@ -91,6 +91,13 @@ if [ -f "$FONTCPP" ]; then
   grep -Fq 'int32 CFont::ButtonsSlot = -1;' "$FONTCPP"
 fi
 
+# Keep WaterCreatures active-count state identical to its int32 class declaration.
+WATERCREATURESCPP="upstream-revc/src/renderer/WaterCreatures.cpp"
+if [ -f "$WATERCREATURESCPP" ]; then
+  sed -i 's/^int CWaterCreatures::nNumActiveSeaLifeForms;/int32 CWaterCreatures::nNumActiveSeaLifeForms;/' "$WATERCREATURESCPP"
+  grep -Fq 'int32 CWaterCreatures::nNumActiveSeaLifeForms;' "$WATERCREATURESCPP"
+fi
+
 if [ -f "$PEDATTR" ]; then
   # Keep PedAttractor declarations identical to PSP int32 definitions.
   sed -i 's/ComputeAttractPos(int qid,/ComputeAttractPos(int32 qid,/g; s/ComputeAttractHeading(int qid,/ComputeAttractHeading(int32 qid,/g' "$PEDATTR"
