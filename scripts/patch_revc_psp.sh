@@ -88,6 +88,11 @@ if [ -f "$COLSTORE" ]; then
   sed -i 's/CColStore::RemoveColSlot(int slot)/CColStore::RemoveColSlot(int32 slot)/' "$COLSTORE"
 fi
 
+FRONTEND="upstream-revc/src/core/Frontend.cpp"
+if [ -f "$FRONTEND" ]; then
+  sed -i 's/#if !defined RW_GL3/#if !defined RW_GL3 \\&\\& !defined RW_PSP/' "$FRONTEND"
+fi
+
 # PSP controller path: reuse the GL3-style JoyState representation and disable
 # the Windows DirectInput layout/size validation.
 if [ -f "$CTRL" ]; then
