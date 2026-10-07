@@ -98,6 +98,17 @@ if [ -f "$RADAR" ]; then
     -e 's/^int CRadar::SetEntityBlip(/int32 CRadar::SetEntityBlip(/' "$RADAR"
 fi
 
+if [ -f "$RADAR" ]; then
+  RADARTMP="$RADAR.psp.tmp"
+  {
+    printf '%s\n' '#ifndef M_SQRT2' '#define M_SQRT2 1.41421356237309504880'
+    cat "$RADAR"
+    printf '%s\n' '#endif'
+  } > "$RADARTMP"
+  mv "$RADARTMP" "$RADAR"
+  sed -i     -e 's/^int CRadar::SetCoordBlip(/int32 CRadar::SetCoordBlip(/'     -e 's/^int CRadar::SetShortRangeCoordBlip(/int32 CRadar::SetShortRangeCoordBlip(/'     -e 's/^int CRadar::SetEntityBlip(/int32 CRadar::SetEntityBlip(/'     "$RADAR"
+fi
+
 if [ -f "$CAMERA" ]; then
   sed -i 's/CCamera::TryToStartNewCamMode(int obbeMode)/CCamera::TryToStartNewCamMode(int32 obbeMode)/' "$CAMERA"
 fi
