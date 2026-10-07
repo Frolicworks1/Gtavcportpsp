@@ -61,6 +61,8 @@ jobs:
           ! grep -n '#ifndef RW_GL3#ifndef|#if !defined RW_GL3 #|RW_GL3 !defined' upstream-revc/src/core/ControllerConfig.h
           ! grep -q 'DIJOYSTATE2' upstream-revc/src/core/ControllerConfig.h
           grep -q 'JoyState' upstream-revc/src/core/ControllerConfig.h
+          grep -q 'PROJECT}_AUDIO "NULL"' upstream-revc/CMakeLists.txt
+          grep -q 'NOT RW_PSP AND NOT TARGET MPG123::libmpg123' upstream-revc/src/CMakeLists.txt
 
       - name: Configure native PSP build
         id: configure
