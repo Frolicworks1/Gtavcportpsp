@@ -15,6 +15,8 @@ CARCTRL="upstream-revc/src/control/CarCtrl.cpp"
 PATHFIND="upstream-revc/src/control/PathFind.cpp"
 PICKUPS="upstream-revc/src/control/Pickups.cpp"
 CAMERA="upstream-revc/src/core/Camera.cpp"
+CDSTREAM="upstream-revc/src/core/CdStream_posix.cpp"
+CDHEADER="upstream-revc/src/core/CdStream.h"
 
 # PSP desktop EAX source is never compiled: it requires DirectSound headers.
 if [ -f "$EAX" ]; then
@@ -32,6 +34,17 @@ if [ -f "$GENERAL" ]; then
     sed -i '/static void SetRandomSeed/i #ifdef RW_PSP\n\tstatic int32 GetRandomNumberInRange(int low, int32 high)\n\t\t{ return GetRandomNumberInRange((int32)low, high); }\n\tstatic int32 GetRandomNumberInRange(int32 low, int high)\n\t\t{ return GetRandomNumberInRange(low, (int32)high); }\n#endif' "$GENERAL"
   fi
 fi
+if [ -f "$CDSTREAM" ]; then
+  sed -i \
+    -e '/#include "CdStream.h"/a #ifdef RW_PSP\n#ifndef SEM_FAILED\n#define SEM_FAILED ((sem_t*)-1)\n#endif\nstatic char* psp_strdup(const char *s) { size_t n = strlen(s) + 1; char *p = (char*)malloc(n); if (p) memcpy(p, s, n); return p; }\n#endif' \
+    -e 's@realpath(gImgNames\[0\], path);@#ifdef RW_PSP\n\tstrncpy(path, gImgNames[0], sizeof(path)-1);\n\tpath[sizeof(path)-1] = 0;\n#else\n\trealpath(gImgNames[0], path);\n#endif@' \
+    -e 's@realpath(real, path);@#ifdef RW_PSP\n\t\t\tstrncpy(path, real, sizeof(path)-1);\n\t\t\tpath[sizeof(path)-1] = 0;\n#else\n\t\t\trealpath(real, path);\n#endif@' \
+    -e 's/strdup(path)/psp_strdup(path)/g' "$CDSTREAM"
+fi
+if [ -f "$CDHEADER" ]; then
+  sed -i 's/^int CdStreamGetLastPosn(void);$/int32 CdStreamGetLastPosn(void);/' "$CDHEADER"
+fi
+
 if [ -f "$CAMERA" ]; then
   sed -i 's/CCamera::TryToStartNewCamMode(int obbeMode)/CCamera::TryToStartNewCamMode(int32 obbeMode)/' "$CAMERA"
 fi
