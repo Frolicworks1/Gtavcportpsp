@@ -10,11 +10,18 @@ ROOT="upstream-revc/CMakeLists.txt"
 CTRL="upstream-revc/src/core/ControllerConfig.h"
 EAX="upstream-revc/src/audio/eax/eax-util.cpp"
 COLSTORE="upstream-revc/src/collision/ColStore.cpp"
+GENERAL="upstream-revc/src/core/General.h"
 
 # PSP desktop EAX source is never compiled: it requires DirectSound headers.
 if [ -f "$EAX" ]; then
   sed -i '1i #ifndef RW_PSP' "$EAX"
   printf '\n#endif\n' >> "$EAX"
+fi
+
+# PSP/MIPS exposes int32 as a wider integer type than host int. Add an exact
+# int overload so integer literals do not ambiguously match float vs int32.
+if [ -f "$GENERAL" ] && ! grep -q "static int GetRandomNumberInRange(int low, int high)" "$GENERAL"; then
+  sed -i '/static void SetRandomSeed/i #ifdef RW_PSP\n\tstatic int GetRandomNumberInRange(int low, int high)\n\t\t{ return GetRandomNumberInRange((int32)low, (int32)high); }\n#endif' "$GENERAL"
 fi
 
 # Keep PSP/MIPS integer typedefs consistent with the class declaration.
