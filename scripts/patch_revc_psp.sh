@@ -267,6 +267,7 @@ if [ -f "$SRC_CMAKE" ]; then
     print "  list(REMOVE_ITEM ${PROJECT}_SOURCES"
     print "    ${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_d3d9.cpp"
     print "    ${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_gl.cpp"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR}/core/CdStream_posix.cpp"
     print "  )"
     print "endif()"
   } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
