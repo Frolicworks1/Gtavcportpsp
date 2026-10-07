@@ -25,11 +25,6 @@ CAMERA="upstream-revc/src/core/Camera.cpp"
 RADAR="upstream-revc/src/core/Radar.cpp"
 CDSTREAM="upstream-revc/src/core/CdStream_posix.cpp"
 CDHEADER="upstream-revc/src/core/CdStream.h"
-CDPOSIX="upstream-revc/src/core/CdStream_posix.cpp"
-if [ -f "$CDPOSIX" ]; then
-  sed -i '/^int32$/ { N; s/int32\nCdStreamGetLastPosn(void)/int\nCdStreamGetLastPosn(void)/; }' "$CDPOSIX"
-  grep -Fq 'int\nCdStreamGetLastPosn(void)' "$CDPOSIX" || grep -Fq 'int CdStreamGetLastPosn(void)' "$CDPOSIX"
-fi
 PAD="upstream-revc/src/core/Pad.cpp"
 PADHEADER="upstream-revc/src/core/Pad.h"
 FRONTEND="upstream-revc/src/core/Frontend.cpp"
