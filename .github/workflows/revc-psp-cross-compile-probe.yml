@@ -31,15 +31,14 @@ jobs:
           git clone https://github.com/mrxenginner/reVC.git upstream-revc
           git -C upstream-revc checkout --detach a26fff4af555a8a425ac9f17d1dd718d00d1f942
           git -C upstream-revc submodule update --init --recursive
-      - name: Apply narrow PSP type-compatibility patch for PNG decoder
+      - name: Inspect vendored PNG decoder types
         shell: bash
         run: |
           set -euxo pipefail
-          # PSP GCC's uint32 typedef is not the same C++ type as the unsigned
-          # dimensions expected by vendored lodepng. Keep decoder dimensions in
-          # lodepng's declared type; downstream APIs accept their numeric values.
-          sed -i '0,/uint32 w, h;/s//unsigned w, h;/' upstream-revc/vendor/librw/src/png.cpp
-          grep -n 'unsigned w, h;' upstream-revc/vendor/librw/src/png.cpp
+          # Do not fail the probe on an assumed source spelling. First expose
+          # the actual declarations from the pinned librw revision; compiler
+          # diagnostics should drive any compatibility patch we make next.
+          grep -n -E 'uint32|unsigned|w[ ,].*h[ ;]' upstream-revc/vendor/librw/src/png.cpp | head -80 || true
       - name: Attempt native PSP cross-configuration
         id: configure
         continue-on-error: true
