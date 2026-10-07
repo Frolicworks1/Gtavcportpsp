@@ -29,6 +29,7 @@ PAD="upstream-revc/src/core/Pad.cpp"
 PADHEADER="upstream-revc/src/core/Pad.h"
 FRONTEND="upstream-revc/src/core/Frontend.cpp"
 PEDH="upstream-revc/src/peds/Ped.h"
+PEDATTR="upstream-revc/src/peds/PedAttractor.h"
 PAD="upstream-revc/src/core/Pad.cpp"
 
 if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; then
