@@ -38,10 +38,11 @@ sed -i \
   -e '/#include "gl\/rwwdgl.h"/d' \
   "$ENG"
 
-# rwengine.h must be included before the PSP device header so the Device types exist.
-if ! grep -q '#include "rwbase.h"' "$ENG"; then
-  sed -i '1i#include "rwbase.h"\n#include "rwerror.h"\n#include "rwplg.h"\n#include "rwpipeline.h"\n#include "rwobjects.h"\n#include "rwengine.h"' "$ENG"
-fi
+# Restore the original librw dependency order after removing desktop device headers.
+# The earlier cleanup deletes rwengine.h, so this must be enforced independently
+# of whether rwbase.h was already present.
+sed -i '/#include "rwbase.h"/d; /#include "rwerror.h"/d; /#include "rwplg.h"/d; /#include "rwpipeline.h"/d; /#include "rwobjects.h"/d; /#include "rwengine.h"/d' "$ENG"
+sed -i '1i#include "rwbase.h"\n#include "rwerror.h"\n#include "rwplg.h"\n#include "rwpipeline.h"\n#include "rwobjects.h"\n#include "rwengine.h"' "$ENG"
 grep -q '#include "psp/rwpsp.h"' "$ENG" || sed -i '/#include "rwengine.h"/a#include "psp/rwpsp.h"' "$ENG"
 
 # Keep only the PSP platform plugin registration and remove desktop registrations.
