@@ -270,7 +270,15 @@ sed -i '/#ifdef RW_PS2/a #elif defined(RW_PSP)\n\tengine->device = psp::renderde
 # defined instead of RW_NULL. This keeps PSP charset/core device code enabled.
 if [ -f "upstream-revc/vendor/librw/CMakeLists.txt" ]; then
   sed -i '0,/^if(WIN32)$/s//if(RW_PSP)\n    set(LIBRW_PLATFORMS "PSP")\nelseif(WIN32)/' upstream-revc/vendor/librw/CMakeLists.txt
-  grep -q '^if(RW_PSP)# build only the common core plus the native GU backend.
+  grep -q '^if(RW_PSP)$' upstream-revc/vendor/librw/CMakeLists.txt
+  grep -q 'set(LIBRW_PLATFORMS "PSP")' upstream-revc/vendor/librw/CMakeLists.txt
+fi
+
+cp "$GITHUB_WORKSPACE/porting/librw-psp/psp_platform.cpp" upstream-revc/src/skel/psp_platform.cpp
+cp "$GITHUB_WORKSPACE/porting/librw-psp/CdStream_psp.cpp" upstream-revc/src/core/CdStream_psp.cpp
+cp "$GITHUB_WORKSPACE/porting/librw-psp/custompipes_psp.cpp" upstream-revc/src/extras/custompipes_psp.cpp
+cp "$GITHUB_WORKSPACE/porting/librw-psp/rwpsp_plugins.cpp" upstream-revc/vendor/librw/src/psp/rwpsp_plugins.cpp
+
 sed -i \
   -e '/^[[:space:]]*d3d\//d' \
   -e '/^[[:space:]]*gl\//d' \
@@ -278,15 +286,25 @@ sed -i \
   "$CMAKE"
 
 if ! grep -q 'psp/rwpsp.cpp' "$CMAKE"; then
-  awk '/    lodepng\/lodepng.h/ { print "    psp/rwpsp.cpp"; print "    psp/rwpsp.h" } { print }' "$CMAKE" > "$CMAKE.psp.tmp"
+  awk '/    lodepng\/lodepng.h/ { print "    psp/rwpsp.cpp"; print "    psp/rwpsp.h"; print "    psp/rwpsp_plugins.cpp" } { print }' "$CMAKE" > "$CMAKE.psp.tmp"
   mv "$CMAKE.psp.tmp" "$CMAKE"
 fi
 
 grep -q 'psp/rwpsp.cpp' "$CMAKE"
+grep -q 'psp/rwpsp_plugins.cpp' "$CMAKE"
 ! grep -q '^[[:space:]]*ps2/' "$CMAKE"
 ! grep -q '^[[:space:]]*d3d/' "$CMAKE"
 ! grep -q '^[[:space:]]*gl/' "$CMAKE"
 
+if [ -f "$SRC_CMAKE" ]; then
+  awk '/^file\(GLOB_RECURSE / {
+    print "if(RW_PSP)"
+    print "  list(REMOVE_ITEM ${PROJECT}_SOURCES"
+    print "    ${CMAKE_CURRENT_SOURCE_DIR} /skel/glfw/glfw.cpp"
+    print "  )"
+  } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
+  mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
+fi
 
 # PSP uses the built-in null audio path. This prevents desktop OpenAL/DirectInput
 # dependencies from entering the Allegrex build; no fake OpenAL headers are used.
