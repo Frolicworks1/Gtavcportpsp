@@ -225,11 +225,12 @@ sed -i \
   "$CMAKE"
 
 if ! grep -q 'psp/rwpsp.cpp' "$CMAKE"; then
-  awk '/    lodepng\/lodepng.h/ { print "    psp/rwpsp.cpp"; print "    psp/rwpsp.h" } { print }' "$CMAKE" > "$CMAKE.psp.tmp"
+  awk '/    lodepng\/lodepng.h/ { print "    psp/rwpsp.cpp"; print "    psp/rwpsp.h"; print "    psp/rwpsp_plugins.cpp" } { print }' "$CMAKE" > "$CMAKE.psp.tmp"
   mv "$CMAKE.psp.tmp" "$CMAKE"
 fi
 
 grep -q 'psp/rwpsp.cpp' "$CMAKE"
+grep -q 'psp/rwpsp_plugins.cpp' "$CMAKE"
 ! grep -q '^[[:space:]]*ps2/' "$CMAKE"
 ! grep -q '^[[:space:]]*d3d/' "$CMAKE"
 ! grep -q '^[[:space:]]*gl/' "$CMAKE"
