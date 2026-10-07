@@ -10,7 +10,7 @@
 
 namespace rw { namespace psp {
 
-static void beginUpdate(Camera*) {
+static void beginUpdate(Camera *cam) {
     static bool initialized = false;
     if(!initialized) {
         sceGuInit();
@@ -25,6 +25,8 @@ static void beginUpdate(Camera*) {
         sceGuEnable(GU_SCISSOR_TEST);
         sceGuEnable(GU_DEPTH_TEST);
         sceGuDepthFunc(GU_GEQUAL);
+        sceGumMatrixMode(GU_MODEL);
+        sceGumLoadIdentity();
         sceGuFrontFace(GU_CW);
         sceGuShadeModel(GU_SMOOTH);
         sceGuFinish();
@@ -32,7 +34,26 @@ static void beginUpdate(Camera*) {
         sceGuDisplay(GU_TRUE);
         initialized = true;
     }
-    // A new direct list is required for every rendered frame.
+    if(cam) {
+        ScePspFMatrix4 view = {{
+            { cam->devView.right.x, cam->devView.up.x, cam->devView.at.x, cam->devView.pos.x },
+            { cam->devView.right.y, cam->devView.up.y, cam->devView.at.y, cam->devView.pos.y },
+            { cam->devView.right.z, cam->devView.up.z, cam->devView.at.z, cam->devView.pos.z },
+            { 0.0f, 0.0f, 0.0f, 1.0f }
+        }};
+        ScePspFMatrix4 proj = {{
+            { cam->devProj.right.x, cam->devProj.up.x, cam->devProj.at.x, cam->devProj.pos.x },
+            { cam->devProj.right.y, cam->devProj.up.y, cam->devProj.at.y, cam->devProj.pos.y },
+            { cam->devProj.right.z, cam->devProj.up.z, cam->devProj.at.z, cam->devProj.pos.z },
+            { 0.0f, 0.0f, 0.0f, 1.0f }
+        }};
+        sceGumMatrixMode(GU_PROJECTION);
+        sceGumLoadMatrix(&proj);
+        sceGumMatrixMode(GU_VIEW);
+        sceGumLoadMatrix(&view);
+        sceGumMatrixMode(GU_MODEL);
+        sceGumLoadIdentity();
+    }
     sceGuStart(GU_DIRECT, (void*)0);
 }
 static void endUpdate(Camera*) {
@@ -203,10 +224,77 @@ static void im2DRenderIndexedPrimitive(PrimitiveType prim, void *vertices, int32
         GU_VERTEX_32BITF | GU_TRANSFORM_2D, indexCount, 0, dst);
 }
 
-static void im3DTransform(void*, int32, Matrix*, uint32) { }
-static void im3DRenderPrimitive(PrimitiveType) { }
-static void im3DRenderIndexedPrimitive(PrimitiveType, void*, int32) { }
-static void im3DEnd(void) { }
+struct GU3DVertex {
+    float u, v;
+    uint32 color;
+    float nx, ny, nz;
+    float x, y, z;
+};
+
+static GU3DVertex *im3DBuffer = 0;
+static int32 im3DCount = 0;
+static uint32 im3DFlags = 0;
+
+static void im3DTransform(void *vertices, int32 count, Matrix *world, uint32 flags) {
+    const Im3DVertex *src = (const Im3DVertex*)vertices;
+    if(!src || count <= 0) {
+        im3DBuffer = 0;
+        im3DCount = 0;
+        im3DFlags = flags;
+        return;
+    }
+    im3DCount = count;
+    im3DFlags = flags;
+    im3DBuffer = (GU3DVertex*)sceGuGetMemory(sizeof(GU3DVertex) * count);
+    for(int32 i = 0; i < count; ++i) {
+        V3d p = src[i].position;
+        if(world) {
+            V3d q;
+            q.x = p.x*world->right.x + p.y*world->up.x + p.z*world->at.x + world->pos.x;
+            q.y = p.x*world->right.y + p.y*world->up.y + p.z*world->at.y + world->pos.y;
+            q.z = p.x*world->right.z + p.y*world->up.z + p.z*world->at.z + world->pos.z;
+            p = q;
+        }
+        im3DBuffer[i].u = src[i].u;
+        im3DBuffer[i].v = src[i].v;
+        im3DBuffer[i].color = ((uint32)src[i].r << 24) |
+                              ((uint32)src[i].g << 16) |
+                              ((uint32)src[i].b << 8) |
+                              (uint32)src[i].a;
+        im3DBuffer[i].nx = src[i].normal.x;
+        im3DBuffer[i].ny = src[i].normal.y;
+        im3DBuffer[i].nz = src[i].normal.z;
+        im3DBuffer[i].x = p.x;
+        im3DBuffer[i].y = p.y;
+        im3DBuffer[i].z = p.z;
+    }
+}
+
+static void im3DRenderPrimitive(PrimitiveType prim) {
+    if(!im3DBuffer || im3DCount <= 0) return;
+    int p = guPrimitive(prim);
+    if(p < 0) return;
+    sceGuDrawArray(p, GU_TEXTURE_32BITF | GU_COLOR_8888 |
+        GU_VERTEX_32BITF | GU_TRANSFORM_3D, im3DCount, 0, im3DBuffer);
+}
+
+static void im3DRenderIndexedPrimitive(PrimitiveType prim, void *indices, int32 count) {
+    if(!im3DBuffer || !indices || count <= 0) return;
+    int p = guPrimitive(prim);
+    if(p < 0) return;
+    const uint16 *idx = (const uint16*)indices;
+    GU3DVertex *dst = (GU3DVertex*)sceGuGetMemory(sizeof(GU3DVertex) * count);
+    for(int32 i = 0; i < count; ++i)
+        dst[i] = im3DBuffer[idx[i]];
+    sceGuDrawArray(p, GU_TEXTURE_32BITF | GU_COLOR_8888 |
+        GU_VERTEX_32BITF | GU_TRANSFORM_3D, count, 0, dst);
+}
+
+static void im3DEnd(void) {
+    im3DBuffer = 0;
+    im3DCount = 0;
+    im3DFlags = 0;
+}
 
 static int deviceSystem(DeviceReq req, void *arg, int32 n)
 {
