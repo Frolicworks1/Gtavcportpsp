@@ -339,4 +339,13 @@ if [ -f "$WATERCREATURESCPP" ]; then
   grep -Fq 'int32 CWaterCreatures::nNumActiveSeaLifeForms;' "$WATERCREATURESCPP"
 fi
 
+CROSSPLATFORM="upstream-revc/src/skel/crossplatform.cpp"
+if [ -f "$CROSSPLATFORM" ]; then
+  sed -i '1a #ifdef RW_PSP\n#include <alloca.h>\n#include <stdlib.h>\n#include <string.h>\n#include <strings.h>\n#include <unistd.h>\n#define alloca __builtin_alloca\nstatic char *psp_strsep_local(char **sp, const char *delim) { if (!sp || !*sp) return 0; char *s=*sp; char *p=s; while (*p && !strchr(delim,*p)) ++p; if (*p) { *p=0; *sp=p+1; } else { *sp=0; } return s; }\n#endif' "$CROSSPLATFORM"
+  sed -i 's@realpath(relativepath, path);@#ifdef RW_PSP\n\t\t\tstrncpy(path, relativepath, sizeof(path)-1);\n\t\t\tpath[sizeof(path)-1] = 0;\n#else\n\t\t\trealpath(relativepath, path);\n#endif@' "$CROSSPLATFORM"
+  sed -i 's/strsep(&p, "\/\\\\")/psp_strsep_local(\&p, "\/\\\\")/' "$CROSSPLATFORM"
+  grep -q '#include <alloca.h>' "$CROSSPLATFORM"
+  grep -q 'psp_strsep_local' "$CROSSPLATFORM"
+fi
+
 exit 0
