@@ -44,7 +44,7 @@ jobs:
           mkdir -p upstream-revc/vendor/librw/src/psp
           cp porting/librw-psp/rwpsp.h upstream-revc/vendor/librw/src/psp/rwpsp.h
           cp porting/librw-psp/rwpsp.cpp upstream-revc/vendor/librw/src/psp/rwpsp.cpp
-          sh scripts/patch_revc_psp.sh
+          sh scripts/patch_revc_psp.sh 2>&1 | tee psp-patch.log
       - name: Validate generated PSP CMake block
         shell: bash
         run: |
@@ -100,6 +100,7 @@ jobs:
           name: revc-psp-cross-compile-probe
           path: |
             psp-cross-compile-summary.md
+            psp-patch.log
             psp-cmake-configure.log
             psp-cross-compile.log
           if-no-files-found: warn
