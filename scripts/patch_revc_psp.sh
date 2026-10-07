@@ -322,6 +322,11 @@ if [ -f "$FONTCPP" ]; then
   sed -i 's/^int CFont::ButtonsSlot = -1;/int32 CFont::ButtonsSlot = -1;/' "$FONTCPP"
   grep -Fq 'int32 CFont::ButtonsSlot = -1;' "$FONTCPP"
 fi
+WATERCREATURESCPP="upstream-revc/src/renderer/WaterCreatures.cpp"
+if [ -f "$WATERCREATURESCPP" ]; then
+  sed -i "s/^int CWaterCreatures::nNumActiveSeaLifeForms;/int32 CWaterCreatures::nNumActiveSeaLifeForms;/" "$WATERCREATURESCPP"
+  grep -Fq "int32 CWaterCreatures::nNumActiveSeaLifeForms;" "$WATERCREATURESCPP"
+fi
 FLUFFH="upstream-revc/src/renderer/Fluff.h"
 if [ -f "$FLUFFH" ]; then
   sed -i 's/static int TonightsEvent;/static int32 TonightsEvent;/' "$FLUFFH"
