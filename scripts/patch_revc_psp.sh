@@ -41,8 +41,8 @@ fi
 
 if [ -f "$PEDH" ]; then
   # Keep declaration and definition identical under PSP's int32 typedef.
-  sed -i 's/CPedAttractor\*, const CVector\&, float, float, int);/CPedAttractor*, const CVector\&, float, float, int32);/' "$PEDH"
-  grep -Fq 'SetNewAttraction(CPedAttractor*, const CVector&, float, float, int32)' "$PEDH"
+  sed -i '/SetNewAttraction/s/, int);/, int32);/' "$PEDH"
+  grep -Fq 'SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float, float, int32);' "$PEDH"
 fi
 
 if [ -f "$FRONTEND" ]; then
