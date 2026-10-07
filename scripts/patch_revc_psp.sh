@@ -244,4 +244,11 @@ if [ -f "$FAKERW" ]; then
   sed -i '/rw::d3d::/d; /rw::xbox::registerVertexFormatPlugin()/d' "$FAKERW"
 fi
 
+if [ -f "$FAKERW" ]; then
+  sed -i '/rw::d3d::isP8supported = false;/s/^/#ifndef RW_PSP/' "$FAKERW"
+  sed -i '/rw::d3d::isP8supported = false;/a #endif' "$FAKERW"
+  sed -i '/rw::xbox::registerVertexFormatPlugin();/s/^/#ifndef RW_PSP/' "$FAKERW"
+  sed -i '/rw::xbox::registerVertexFormatPlugin();/a #endif' "$FAKERW"
+fi
+
 exit 0
