@@ -9,21 +9,21 @@ CMAKE="upstream-revc/vendor/librw/src/CMakeLists.txt"
 # Remove desktop-only platform headers and keep the PSP backend as the
 # concrete device interface for this probe.
 sed -i \
-  -e '/#include "src\\/ps2\\/rwps2.h"/d' \
-  -e '/#include "src\\/ps2\\/rwps2plg.h"/d' \
-  -e '/#include "src\\/d3d\\/rwxbox.h"/d' \
-  -e '/#include "src\\/d3d\\/rwd3d.h"/d' \
-  -e '/#include "src\\/d3d\\/rwd3d8.h"/d' \
-  -e '/#include "src\\/d3d\\/rwd3d9.h"/d' \
-  -e '/#include "src\\/gl\\/rwwdgl.h"/d' \
-  -e '/#include "src\\/gl\\/rwgl3.h"/d' \
-  -e '/#include "src\\/gl\\/rwgl3shader.h"/d' \
-  -e '/#include "src\\/gl\\/rwgl3plg.h"/d' \
+  -e '/#include "src\/ps2\/rwps2.h"/d' \
+  -e '/#include "src\/ps2\/rwps2plg.h"/d' \
+  -e '/#include "src\/d3d\/rwxbox.h"/d' \
+  -e '/#include "src\/d3d\/rwd3d.h"/d' \
+  -e '/#include "src\/d3d\/rwd3d8.h"/d' \
+  -e '/#include "src\/d3d\/rwd3d9.h"/d' \
+  -e '/#include "src\/gl\/rwwdgl.h"/d' \
+  -e '/#include "src\/gl\/rwgl3.h"/d' \
+  -e '/#include "src\/gl\/rwgl3shader.h"/d' \
+  -e '/#include "src\/gl\/rwgl3plg.h"/d' \
   "$RW"
 
 # rw.h must expose the PSP device namespace to every game-side include,
 # not just to librw's own compilation unit.
-sed -i '/#include "src\\/rwobjects.h"/a#include "src/psp/rwpsp.h"' "$RW"
+sed -i '/#include "src\/rwobjects.h"/a#include "src/psp/rwpsp.h"' "$RW"
 
 if ! grep -q '#define RWDEVICE psp' "$BASE"; then
   sed -i '/#ifdef RW_GL3/i\\
@@ -35,12 +35,12 @@ fi
 # Restore librw engine dependency order after removing desktop device headers.
 sed -i \
   -e '/#include "rwengine.h"/d' \
-  -e '/#include "d3d\\/rwxbox.h"/d' \
-  -e '/#include "d3d\\/rwd3d.h"/d' \
-  -e '/#include "d3d\\/rwd3d8.h"/d' \
-  -e '/#include "d3d\\/rwd3d9.h"/d' \
-  -e '/#include "gl\\/rwgl3.h"/d' \
-  -e '/#include "gl\\/rwwdgl.h"/d' \
+  -e '/#include "d3d\/rwxbox.h"/d' \
+  -e '/#include "d3d\/rwd3d.h"/d' \
+  -e '/#include "d3d\/rwd3d8.h"/d' \
+  -e '/#include "d3d\/rwd3d9.h"/d' \
+  -e '/#include "gl\/rwgl3.h"/d' \
+  -e '/#include "gl\/rwwdgl.h"/d' \
   "$ENG"
 sed -i '/#include "rwbase.h"/d; /#include "rwerror.h"/d; /#include "rwplg.h"/d; /#include "rwpipeline.h"/d; /#include "rwobjects.h"/d; /#include "rwengine.h"/d' "$ENG"
 sed -i '1i#include "rwbase.h"\n#include "rwerror.h"\n#include "rwplg.h"\n#include "rwpipeline.h"\n#include "rwobjects.h"\n#include "rwengine.h"' "$ENG"
@@ -65,7 +65,7 @@ sed -i \
 
 if ! grep -q 'psp/rwpsp.cpp' "$CMAKE"; then
   awk '
-    /ps2\\/rwps2plg\\.h/ && !done {
+    /ps2\/rwps2plg\\.h/ && !done {
       print
       print "    psp/rwpsp.cpp"
       print "    psp/rwpsp.h"
