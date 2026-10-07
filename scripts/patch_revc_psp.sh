@@ -98,6 +98,16 @@ if [ -f "$RE3" ]; then
   sed -i '/^void StoreIni(const char \*cat, const char \*key, float val)/i\#ifdef RW_PSP\nvoid StoreIni(const char *cat, const char *key, bool val) { cfg[cat][key] = val ? "1" : "0"; }\n#endif' "$RE3"
 fi
 
+DEBUGMENUCPP="upstream-revc/src/extras/debugmenu.cpp"
+if [ -f "$DEBUGMENUCPP" ]; then
+  DMTMP="$DEBUGMENUCPP.psp.tmp"
+  {
+    printf '%s\n' '#include <string.h>'
+    cat "$DEBUGMENUCPP"
+  } > "$DMTMP"
+  mv "$DMTMP" "$DEBUGMENUCPP"
+fi
+
 if [ -f "$DEBUGMENU" ]; then
   DM_TMP="$DEBUGMENU.psp.tmp"
   {
