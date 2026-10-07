@@ -239,4 +239,9 @@ if [ -f "$DEBUGMENUCPP" ]; then
   mv "$DMTMP" "$DEBUGMENUCPP"
 fi
 
+FAKERW="upstream-revc/src/fakerw/fake.cpp"
+if [ -f "$FAKERW" ]; then
+  sed -i '/rw::d3d::/d; /rw::xbox::registerVertexFormatPlugin()/d' "$FAKERW"
+fi
+
 exit 0
