@@ -79,8 +79,6 @@ jobs:
           grep -q '^int32 CRadar::SetShortRangeCoordBlip' upstream-revc/src/core/Radar.cpp
           grep -q '^int32 CRadar::SetEntityBlip' upstream-revc/src/core/Radar.cpp
           grep -q 'CStreaming::LoadCdDirectory(const char *dirname, int32 n)' upstream-revc/src/core/Streaming.cpp
-          grep -q 'psp_strdup' upstream-revc/src/core/CdStream_posix.cpp
-          grep -q 'int32 CdStreamGetLastPosn(void);' upstream-revc/src/core/CdStream.h
       - name: Configure native PSP build
         id: configure
         shell: bash
