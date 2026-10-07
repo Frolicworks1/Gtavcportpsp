@@ -96,8 +96,8 @@ fi
 if [ -f "$DEBUGMENU" ]; then
   DM_TMP="$DEBUGMENU.psp.tmp"
   {
-    printf '%s\n' '#ifdef RW_PSP' '#include <stdint.h>' 'inline DebugMenuEntry *DebugMenuAddVar(const char *path, const char *name, int *ptr, TriggerFunc triggerFunc, int step, int lowerBound, int upperBound, const char **strings) {' '  return DebugMenuAddVar(path, name, reinterpret_cast<int32_t *>(ptr), triggerFunc, (int32_t)step, (int32_t)lowerBound, (int32_t)upperBound, strings);' '}' '#endif'
     cat "$DEBUGMENU"
+    printf '%s\n' '#ifdef RW_PSP' '#include <stdint.h>' 'inline DebugMenuEntry *DebugMenuAddVar(const char *path, const char *name, int *ptr, TriggerFunc triggerFunc, int step, int lowerBound, int upperBound, const char **strings) {' '  return DebugMenuAddVar(path, name, reinterpret_cast<int32_t *>(ptr), triggerFunc, (int32_t)step, (int32_t)lowerBound, (int32_t)upperBound, strings);' '}' '#endif'
   } > "$DM_TMP"
   mv "$DM_TMP" "$DEBUGMENU"
 fi
