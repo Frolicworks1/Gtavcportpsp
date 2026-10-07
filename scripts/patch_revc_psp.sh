@@ -29,9 +29,6 @@ if [ -f "$GENERAL" ]; then
     sed -i '/static void SetRandomSeed/i #ifdef RW_PSP\n\tstatic int32 GetRandomNumberInRange(int low, int32 high)\n\t\t{ return GetRandomNumberInRange((int32)low, high); }\n\tstatic int32 GetRandomNumberInRange(int32 low, int high)\n\t\t{ return GetRandomNumberInRange(low, (int32)high); }\n#endif' "$GENERAL"
   fi
 fi
-  sed -i '/static void SetRandomSeed/i #ifdef RW_PSP\n\tstatic int GetRandomNumberInRange(int low, int high)\n\t\t{ return GetRandomNumberInRange((int32)low, (int32)high); }\n#endif' "$GENERAL"
-fi
-
 if [ -f "$CARCTRL" ]; then
   sed -i \
     -e 's/^int CCarCtrl::NumLawEnforcerCars;/int32 CCarCtrl::NumLawEnforcerCars;/' \
