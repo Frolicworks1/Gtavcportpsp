@@ -25,19 +25,6 @@ PADHEADER="upstream-revc/src/core/Pad.h"
 FRONTEND="upstream-revc/src/core/Frontend.cpp"
 PAD="upstream-revc/src/core/Pad.cpp"
 
-if [ -f "$GENERAL" ] && ! grep -q "PSP integer overloads" "$GENERAL"; then
-  GENLINE="$(grep -n 'static void SetRandomSeed' "$GENERAL" | head -n 1 | cut -d: -f1)"
-  if [ -n "$GENLINE" ]; then
-    GENTMP="$GENERAL.psp.tmp"
-    {
-      head -n $((GENLINE - 1)) "$GENERAL"
-      printf '%s\n' '#ifdef RW_PSP' '// PSP integer overloads' 'static int GetRandomNumberInRange(int low, int high) { return (int)GetRandomNumberInRange((int32)low, (int32)high); }' 'static int32 GetRandomNumberInRange(int low, int32 high) { return GetRandomNumberInRange((int32)low, high); }' 'static int32 GetRandomNumberInRange(int32 low, int high) { return GetRandomNumberInRange(low, (int32)high); }' '#endif'
-      tail -n +$GENLINE "$GENERAL"
-    } > "$GENTMP"
-    mv "$GENTMP" "$GENERAL"
-  fi
-fi
-
 if [ -f "$PADHEADER" ] && ! grep -q 'void CapturePad(int padID);' "$PADHEADER"; then
   {
     cat "$PADHEADER"
