@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eux
+set -eu
 
 RW="upstream-revc/vendor/librw/rw.h"
 BASE="upstream-revc/vendor/librw/src/rwbase.h"
