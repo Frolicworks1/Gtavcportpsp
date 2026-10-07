@@ -4,6 +4,7 @@
 #include "../rwpipeline.h"
 #include "../rwobjects.h"
 #include "../rwengine.h"
+#include "../rwrender.h"
 #include "rwpsp.h"
 #include <pspgu.h>
 #include <pspgum.h>
@@ -35,18 +36,18 @@ static void beginUpdate(Camera *cam) {
         initialized = true;
     }
     if(cam) {
-        ScePspFMatrix4 view = {{
+        ScePspFMatrix4 view = {
             { cam->devView.right.x, cam->devView.up.x, cam->devView.at.x, cam->devView.pos.x },
             { cam->devView.right.y, cam->devView.up.y, cam->devView.at.y, cam->devView.pos.y },
             { cam->devView.right.z, cam->devView.up.z, cam->devView.at.z, cam->devView.pos.z },
             { 0.0f, 0.0f, 0.0f, 1.0f }
-        }};
-        ScePspFMatrix4 proj = {{
+        };
+        ScePspFMatrix4 proj = {
             { cam->devProj.right.x, cam->devProj.up.x, cam->devProj.at.x, cam->devProj.pos.x },
             { cam->devProj.right.y, cam->devProj.up.y, cam->devProj.at.y, cam->devProj.pos.y },
             { cam->devProj.right.z, cam->devProj.up.z, cam->devProj.at.z, cam->devProj.pos.z },
             { 0.0f, 0.0f, 0.0f, 1.0f }
-        }};
+        };
         sceGumMatrixMode(GU_PROJECTION);
         sceGumLoadMatrix(&proj);
         sceGumMatrixMode(GU_VIEW);
