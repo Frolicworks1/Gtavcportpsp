@@ -65,7 +65,7 @@ jobs:
           grep -Fq 'virtual void ComputeAttractPos(int32 qid, CVector& pos) const;' upstream-revc/src/peds/PedAttractor.h
           grep -Fq 'virtual void ComputeAttractHeading(int32 qid, float& heading) const;' upstream-revc/src/peds/PedAttractor.h
           ! grep -n 'SetNewAttraction(CPedAttractor.*int);' upstream-revc/src/peds/Ped.h
-          grep -Fq 'static int32 ChooseGangOccupation(int);' upstream-revc/src/peds/Population.h
+          grep -Fq 'static int32 ChooseGangOccupation(int32);' upstream-revc/src/peds/Population.h
           grep -Fq 'static void PlaceGangMembers(ePedType, int32, CVector const&);' upstream-revc/src/peds/Population.h
           grep -Fq 'CPopulation::ChooseGangOccupation(int32 gangId)' upstream-revc/src/peds/Population.cpp
           grep -Fq 'CPopulation::PlaceGangMembers(ePedType pedType, int32 pedAmount' upstream-revc/src/peds/Population.cpp
