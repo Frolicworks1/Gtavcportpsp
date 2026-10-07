@@ -366,15 +366,14 @@ if [ -f "$FAKERW" ]; then
   sed -i '/rw::xbox::registerVertexFormatPlugin();/a #endif' "$FAKERW"
 fi
 
-# Link the native PSP GU/GUM/controller libraries required by the real engine target.
+# Link the native PSP libraries after the engine target has been created.
 if [ -f "$SRC_CMAKE" ]; then
-  if ! grep -q '^    pspgu$' "$SRC_CMAKE"; then
-    awk '/^target_link_libraries\(\$\{EXECUTABLE\} PRIVATE/ { print; print "    pspgu"; print "    pspgum"; print "    pspctrl"; print "    pspge"; print "    pspdisplay"; next } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
-    mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
+  if grep -q 'target_link_libraries(\\${EXECUTABLE} PRIVATE' "$SRC_CMAKE"; then
+    sed -i '/target_link_libraries(\\${EXECUTABLE} PRIVATE/,/)/ { /pspgu/d; /pspgum/d; /pspctrl/d; }' "$SRC_CMAKE"
+    sed -i '/target_link_libraries(\\${EXECUTABLE} PRIVATE/a\    pspgu\n    pspgum\n    pspctrl' "$SRC_CMAKE"
   fi
-  grep -q '^    pspgu$' "$SRC_CMAKE"
-  grep -q '^    pspgum$' "$SRC_CMAKE"
-  grep -q '^    pspctrl
+fi
+
 exit 0
 
  "$SRC_CMAKE"
