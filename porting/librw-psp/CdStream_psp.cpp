@@ -1,4 +1,8 @@
+#include "common.h"
 #include "CdStream.h"
+#ifndef MAX_CDIMAGES
+#define MAX_CDIMAGES 8
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
