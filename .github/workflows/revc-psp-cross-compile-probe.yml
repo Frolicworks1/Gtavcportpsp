@@ -18,7 +18,6 @@ jobs:
     steps:
       - name: Checkout port repository
         uses: actions/checkout@v4
-
       - name: Verify PSP toolchain
         shell: bash
         run: |
@@ -28,7 +27,6 @@ jobs:
           test -x "$PSPDEV/bin/psp-g++"
           command -v mksfoex
           command -v pack-pbp
-
       - name: Fetch pinned upstream engine and submodules
         shell: bash
         run: |
@@ -36,7 +34,6 @@ jobs:
           git clone https://github.com/mrxenginner/reVC.git upstream-revc
           git -C upstream-revc checkout --detach a26fff4af555a8a425ac9f17d1dd718d00d1f942
           git -C upstream-revc submodule update --init --recursive
-
       - name: Apply PSP RenderWare device scaffold
         shell: bash
         run: |
@@ -47,7 +44,6 @@ jobs:
           cp porting/librw-psp/rwpsp.cpp upstream-revc/vendor/librw/src/psp/rwpsp.cpp
           cp porting/librw-psp/psp_input.cpp upstream-revc/src/core/psp_input.cpp
           sh scripts/patch_revc_psp.sh
-
       - name: Preflight patched PSP source
         shell: bash
         run: |
@@ -75,12 +71,13 @@ jobs:
           grep -q 'int32 CCarCtrl::NumLawEnforcerCars;' upstream-revc/src/control/CarCtrl.cpp
           grep -q 'CCarCtrl::RemoveFromLoadedVehicleArray(int32 mi, int32 rating)' upstream-revc/src/control/CarCtrl.cpp
           grep -q 'CPathFind::CalcNodeCoors(float x, float y, float z, int32 id' upstream-revc/src/control/PathFind.cpp
-          grep -q 'CPathFind::PreparePathDataForType' upstream-revc/src/control/PathFind.cpp
           grep -Fq 'CPathInfoForObject *detachednodes, int32 numDetached' upstream-revc/src/control/PathFind.cpp
           grep -q '^int CPacManPickups::PillsEatenInRace;' upstream-revc/src/control/Pickups.cpp
           grep -q 'CCamera::TryToStartNewCamMode(int32 obbeMode)' upstream-revc/src/core/Camera.cpp
           grep -q 'psp_strdup' upstream-revc/src/core/CdStream_posix.cpp
           grep -q 'int32 CdStreamGetLastPosn(void);' upstream-revc/src/core/CdStream.h
+          grep -q '^#if 0$' upstream-revc/src/core/Frontend.cpp
+          grep -q '^#elif defined(RW_PSP) || defined(LIBRW_SDL2)$' upstream-revc/src/core/Frontend.cpp
       - name: Configure native PSP build
         id: configure
         shell: bash
@@ -95,7 +92,6 @@ jobs:
             -DLIBRW_PLATFORM=NULL \
             -DREVC_WITH_OPUS=OFF \
             -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
-
       - name: Compile reVC for PSP
         if: steps.configure.outcome == 'success'
         id: compile
@@ -103,7 +99,6 @@ jobs:
         run: |
           set -o pipefail
           cmake --build build-revc-psp --parallel 2 2>&1 | tee psp-cross-compile.log
-
       - name: Package PSP EBOOT when executable exists
         if: steps.compile.outcome == 'success'
         shell: bash
@@ -111,94 +106,6 @@ jobs:
           set -euxo pipefail
           find build-revc-psp -type f \( -name '*.elf' -o -name '*.prx' -o -name 'reVC' \) -print
           test -n "$(find build-revc-psp -type f \( -name '*.elf' -o -name 'reVC' \) -print -quit)"
-
-      - name: Upload build diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: revc-psp-build-diagnostics
-          path: |
-            psp-patch.log
-            psp-cmake-configure.log
-            psp-cross-compile.log
-          if-no-files-found: warn
- upstream-revc/src/core/Frontend.cpp
-          grep -q '^#elif defined(RW_PSP) || defined(LIBRW_SDL2)
-
-      - name: Configure native PSP build
-        id: configure
-        shell: bash
-        run: |
-          set -o pipefail
-          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
-          cmake -S upstream-revc -B build-revc-psp \
-            -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake" \
-            -DRW_PSP=ON \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -I$PSPDEV/psp/sdk/include" \
-            -DLIBRW_PLATFORM=NULL \
-            -DREVC_WITH_OPUS=OFF \
-            -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
-
-      - name: Compile reVC for PSP
-        if: steps.configure.outcome == 'success'
-        id: compile
-        shell: bash
-        run: |
-          set -o pipefail
-          cmake --build build-revc-psp --parallel 2 2>&1 | tee psp-cross-compile.log
-
-      - name: Package PSP EBOOT when executable exists
-        if: steps.compile.outcome == 'success'
-        shell: bash
-        run: |
-          set -euxo pipefail
-          find build-revc-psp -type f \( -name '*.elf' -o -name '*.prx' -o -name 'reVC' \) -print
-          test -n "$(find build-revc-psp -type f \( -name '*.elf' -o -name 'reVC' \) -print -quit)"
-
-      - name: Upload build diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: revc-psp-build-diagnostics
-          path: |
-            psp-patch.log
-            psp-cmake-configure.log
-            psp-cross-compile.log
-          if-no-files-found: warn
- upstream-revc/src/core/Frontend.cpp
-
-      - name: Configure native PSP build
-        id: configure
-        shell: bash
-        run: |
-          set -o pipefail
-          export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
-          cmake -S upstream-revc -B build-revc-psp \
-            -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake" \
-            -DRW_PSP=ON \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -I$PSPDEV/psp/sdk/include" \
-            -DLIBRW_PLATFORM=NULL \
-            -DREVC_WITH_OPUS=OFF \
-            -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
-
-      - name: Compile reVC for PSP
-        if: steps.configure.outcome == 'success'
-        id: compile
-        shell: bash
-        run: |
-          set -o pipefail
-          cmake --build build-revc-psp --parallel 2 2>&1 | tee psp-cross-compile.log
-
-      - name: Package PSP EBOOT when executable exists
-        if: steps.compile.outcome == 'success'
-        shell: bash
-        run: |
-          set -euxo pipefail
-          find build-revc-psp -type f \( -name '*.elf' -o -name '*.prx' -o -name 'reVC' \) -print
-          test -n "$(find build-revc-psp -type f \( -name '*.elf' -o -name 'reVC' \) -print -quit)"
-
       - name: Upload build diagnostics
         if: always()
         uses: actions/upload-artifact@v4
