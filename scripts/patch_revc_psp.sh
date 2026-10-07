@@ -32,21 +32,7 @@ if ! grep -q '#include "psp/rwpsp.h"' "$ENG"; then
 fi
 
 # Keep PSP plugin/device registration only.
-sed -i \
-  -e 's/ps2::registerPlatformPlugins()/psp::registerPlatformPlugins()/g' \
-  -e '/xbox::registerPlatformPlugins()/d' \
-  -e '/d3d8::registerPlatformPlugins()/d' \
-  -e '/d3d9::registerPlatformPlugins()/d' \
-  -e '/wdgl::registerPlatformPlugins()/d' \
-  -e '/gl3::registerPlatformPlugins()/d' \
-  -e 's/ps2::renderdevice/psp::renderdevice/g' \
-  -e '/xbox::renderdevice/d' \
-  -e '/d3d8::renderdevice/d' \
-  -e '/d3d9::renderdevice/d' \
-  -e '/wdgl::renderdevice/d' \
-  -e '/gl3::renderdevice/d' \
-  -e '/d3d::nativeRasterOffset = 0;/d' \
-  "$ENG"
+sed -i 's/ps2::registerPlatformPlugins()/psp::registerPlatformPlugins()/g; /xbox::registerPlatformPlugins()/d; /d3d8::registerPlatformPlugins()/d; /d3d9::registerPlatformPlugins()/d; /wdgl::registerPlatformPlugins()/d; /gl3::registerPlatformPlugins()/d; s/ps2::renderdevice/psp::renderdevice/g; /xbox::renderdevice/d; /d3d8::renderdevice/d; /d3d9::renderdevice/d; /wdgl::renderdevice/d; /gl3::renderdevice/d; /d3d::nativeRasterOffset = 0;/d' "$ENG"
 
 if ! grep -q 'psp/rwpsp.cpp' "$CMAKE"; then
   awk '
