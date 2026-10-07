@@ -9,11 +9,17 @@ SRC_CMAKE="upstream-revc/src/CMakeLists.txt"
 ROOT="upstream-revc/CMakeLists.txt"
 CTRL="upstream-revc/src/core/ControllerConfig.h"
 EAX="upstream-revc/src/audio/eax/eax-util.cpp"
+COLSTORE="upstream-revc/src/collision/ColStore.cpp"
 
 # PSP desktop EAX source is never compiled: it requires DirectSound headers.
 if [ -f "$EAX" ]; then
   sed -i '1i #ifndef RW_PSP' "$EAX"
   printf '\n#endif\n' >> "$EAX"
+fi
+
+# Keep PSP/MIPS integer typedefs consistent with the class declaration.
+if [ -f "$COLSTORE" ]; then
+  sed -i 's/CColStore::RemoveColSlot(int slot)/CColStore::RemoveColSlot(int32 slot)/' "$COLSTORE"
 fi
 
 # PSP controller path: reuse the GL3-style JoyState representation and disable
