@@ -8,6 +8,7 @@ on:
       - 'cmake/toolchains/psp-allegrex.cmake'
       - 'UPSTREAM_ENGINE.md'
       - 'scripts/patch_revc_psp.sh'
+      - 'porting/librw-psp/**'
 
 jobs:
   cross-compile-probe:
@@ -45,8 +46,6 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          # librw's top-level rw.h unconditionally includes platform
-          # headers. PSP needs a concrete librw device type; NULL is used here only to expose the missing device interface. The final backend will be PSP GU.
           true
           grep -n '^#include' upstream-revc/vendor/librw/rw.h
       - name: Inspect vendored PNG decoder types
@@ -61,13 +60,7 @@ jobs:
         run: |
           set -o pipefail
           export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
-          cmake -S upstream-revc -B build-revc-psp \
-            -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1" \
-            -DLIBRW_PLATFORM=NULL \
-            -DREVC_WITH_OPUS=OFF \
-            -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
+          cmake -S upstream-revc -B build-revc-psp             -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake"             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1"             -DLIBRW_PLATFORM=NULL             -DREVC_WITH_OPUS=OFF             -DREVC_WITH_LIBSNDFILE=OFF 2>&1 | tee psp-cmake-configure.log
       - name: Attempt PSP compile if configuration succeeds
         if: steps.configure.outcome == 'success'
         id: compile
