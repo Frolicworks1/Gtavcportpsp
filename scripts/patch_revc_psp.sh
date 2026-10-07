@@ -15,6 +15,7 @@ CARCTRL="upstream-revc/src/control/CarCtrl.cpp"
 PATHFIND="upstream-revc/src/control/PathFind.cpp"
 PICKUPS="upstream-revc/src/control/Pickups.cpp"
 RADAR="upstream-revc/src/core/Radar.cpp"
+DEBUGMENU="upstream-revc/src/extras/debugmenu.h"
 STREAMING="upstream-revc/src/core/Streaming.cpp"
 CAMERA="upstream-revc/src/core/Camera.cpp"
 RADAR="upstream-revc/src/core/Radar.cpp"
@@ -90,6 +91,15 @@ if [ -f "$GENERAL" ]; then
     sed -i '/static void SetRandomSeed/i\    static int32 GetRandomNumberInRange(int low, int32 high) { return low + (high - low) * (GetRandomNumber()/float(MYRAND_MAX + 1)); }' "$GENERAL"
     sed -i '/static void SetRandomSeed/i\#ifdef RW_PSP' "$GENERAL"
   fi
+fi
+
+if [ -f "$DEBUGMENU" ]; then
+  DM_TMP="$DEBUGMENU.psp.tmp"
+  {
+    printf '%s\n' '#ifdef RW_PSP' '#include <stdint.h>' 'inline DebugMenuEntry *DebugMenuAddVar(const char *path, const char *name, int *ptr, TriggerFunc triggerFunc, int step, int lowerBound, int upperBound, const char **strings) {' '  return DebugMenuAddVar(path, name, reinterpret_cast<int32_t *>(ptr), triggerFunc, (int32_t)step, (int32_t)lowerBound, (int32_t)upperBound, strings);' '}' '#endif'
+    cat "$DEBUGMENU"
+  } > "$DM_TMP"
+  mv "$DM_TMP" "$DEBUGMENU"
 fi
 
 if [ -f "$RADAR" ]; then
