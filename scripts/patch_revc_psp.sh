@@ -213,10 +213,8 @@ sed -i \
   "$CMAKE"
 
 if ! grep -q 'psp/rwpsp.cpp' "$CMAKE"; then
-  sed -i \
-    -e '/    lodepng\\/lodepng.h/i\\    psp/rwpsp.cpp' \
-    -e '/    lodepng\\/lodepng.h/i\\    psp/rwpsp.h' \
-    "$CMAKE"
+  awk '/    lodepng\/lodepng.h/ { print "    psp/rwpsp.cpp"; print "    psp/rwpsp.h" } { print }' "$CMAKE" > "$CMAKE.psp.tmp"
+  mv "$CMAKE.psp.tmp" "$CMAKE"
 fi
 
 grep -q 'psp/rwpsp.cpp' "$CMAKE"
@@ -235,8 +233,12 @@ if [ -f "$ROOT" ]; then
 fi
 sed -i 's@if(NOT TARGET MPG123::libmpg123)@if(NOT RW_PSP AND NOT TARGET MPG123::libmpg123)@' "$SRC_CMAKE"
 if [ -f "$SRC_CMAKE" ]; then
-  sed -i '/^target_link_libraries(\${EXECUTABLE} PRIVATE$/i if(RW_PSP AND NOT TARGET MPG123::libmpg123)
-  add_library(MPG123::libmpg123 INTERFACE IMPORTED)\nendif()' "$SRC_CMAKE"
+  awk '/^target_link_libraries/ {
+    print "if(RW_PSP AND NOT TARGET MPG123::libmpg123)"
+    print "  add_library(MPG123::libmpg123 INTERFACE IMPORTED)"
+    print "endif()"
+  } { print }' "$SRC_CMAKE" > "$SRC_CMAKE.psp.tmp"
+  mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
 fi
 sed -i 's@if(\${PROJECT}_WITH_OPUS)@if(NOT RW_PSP AND \${PROJECT}_WITH_OPUS)@' "$SRC_CMAKE"
 if [ -f "$SRC_CMAKE" ]; then
