@@ -30,6 +30,16 @@ if [ -f "$PAD" ]; then
   mv "$PADTMP" "$PAD"
 fi
 
+if [ -f "$EAX" ]; then
+  EAXTMP="$EAX.psp.tmp"
+  {
+    printf '%s\n' '#ifndef RW_PSP'
+    cat "$EAX"
+    printf '%s\n' '#endif'
+  } > "$EAXTMP"
+  mv "$EAXTMP" "$EAX"
+fi
+
 if [ -f "$CDSTREAM" ]; then
   CDTMP="$CDSTREAM.psp.tmp"
   {
