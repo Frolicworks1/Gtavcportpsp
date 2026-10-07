@@ -47,9 +47,16 @@ sed -i 's/ps2::registerPlatformPlugins()/psp::registerPlatformPlugins()/g' "$ENG
 sed -i '/xbox::registerPlatformPlugins()/d;/d3d8::registerPlatformPlugins()/d;/d3d9::registerPlatformPlugins()/d;/wdgl::registerPlatformPlugins()/d;/gl3::registerPlatformPlugins()/d' "$ENG"
 sed -i '/#ifdef RW_PS2/a #elif defined(RW_PSP)\n\tengine->device = psp::renderdevice;' "$ENG"
 
-# Add PSP backend files to librw's source list immediately before ps2 sources.
+# librw's upstream source list contains every desktop/PS2 backend unconditionally.
+# PSP must compile only the common core plus the native GU backend; compiling the PS2
+# backend here creates unrelated symbols and can hide the real PSP integration blockers.
+sed -i \\
+  -e '/^[[:space:]]*d3d\\//d' \\
+  -e '/^[[:space:]]*gl\\//d' \\
+  -e '/^[[:space:]]*ps2\\//d' \\
+  "$CMAKE"
 if ! grep -q 'psp/rwpsp.cpp' "$CMAKE"; then
-  sed -i '/    ps2\/pds.cpp/i\    psp/rwpsp.cpp\n    psp/rwpsp.h' "$CMAKE"
+  sed -i '/    lodepng\/lodepng.h/i\\    psp/rwpsp.cpp\\n    psp/rwpsp.h' "$CMAKE"
 fi
 
 # Select PSP platform definition without adding a fragile custom linker block.
