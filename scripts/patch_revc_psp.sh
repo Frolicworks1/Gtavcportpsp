@@ -5,6 +5,8 @@ RW="upstream-revc/vendor/librw/rw.h"
 BASE="upstream-revc/vendor/librw/src/rwbase.h"
 ENG="upstream-revc/vendor/librw/src/engine.cpp"
 CMAKE="upstream-revc/vendor/librw/src/CMakeLists.txt"
+SRC_CMAKE="upstream-revc/src/CMakeLists.txt"
+ROOT="upstream-revc/CMakeLists.txt"
 CTRL="upstream-revc/src/core/ControllerConfig.h"
 
 # PSP controller path: reuse the GL3-style JoyState representation and disable
@@ -72,5 +74,14 @@ grep -q 'psp/rwpsp.cpp' "$CMAKE"
 ! grep -q '^[[:space:]]*ps2/' "$CMAKE"
 ! grep -q '^[[:space:]]*d3d/' "$CMAKE"
 ! grep -q '^[[:space:]]*gl/' "$CMAKE"
+
+
+# PSP uses the built-in null audio path. This prevents desktop OpenAL/DirectInput
+# dependencies from entering the Allegrex build; no fake OpenAL headers are used.
+if [ -f "$ROOT" ]; then
+  sed -i 's@set(\${PROJECT}_AUDIO "OAL" CACHE STRING "Audio")@set(\${PROJECT}_AUDIO "NULL" CACHE STRING "Audio")@' "$ROOT"
+fi
+sed -i 's@if(NOT TARGET MPG123::libmpg123)@if(NOT RW_PSP AND NOT TARGET MPG123::libmpg123)@' "$SRC_CMAKE"
+sed -i 's@if(\${PROJECT}_WITH_OPUS)@if(NOT RW_PSP AND \${PROJECT}_WITH_OPUS)@' "$SRC_CMAKE"
 
 exit 0
