@@ -7,6 +7,7 @@ on:
       - '.github/workflows/revc-psp-cross-compile-probe.yml'
       - 'cmake/toolchains/psp-allegrex.cmake'
       - 'UPSTREAM_ENGINE.md'
+      - 'scripts/patch_revc_psp.sh'
 
 jobs:
   cross-compile-probe:
@@ -32,13 +33,6 @@ jobs:
           git clone https://github.com/mrxenginner/reVC.git upstream-revc
           git -C upstream-revc checkout --detach a26fff4af555a8a425ac9f17d1dd718d00d1f942
           git -C upstream-revc submodule update --init --recursive
-      - name: Install patcher runtime
-        shell: bash
-        run: |
-          set -euxo pipefail
-          apt-get update
-          apt-get install -y --no-install-recommends python3
-
       - name: Apply PSP RenderWare device scaffold
         shell: bash
         run: |
@@ -46,7 +40,7 @@ jobs:
           mkdir -p upstream-revc/vendor/librw/src/psp
           cp porting/librw-psp/rwpsp.h upstream-revc/vendor/librw/src/psp/rwpsp.h
           cp porting/librw-psp/rwpsp.cpp upstream-revc/vendor/librw/src/psp/rwpsp.cpp
-          python3 scripts/patch_revc_psp.py
+          sh scripts/patch_revc_psp.sh
       - name: Apply temporary PSP header isolation for compile probe
         shell: bash
         run: |
