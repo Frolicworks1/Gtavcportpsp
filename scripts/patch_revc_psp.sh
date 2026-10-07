@@ -6,7 +6,18 @@ BASE="upstream-revc/vendor/librw/src/rwbase.h"
 ENG="upstream-revc/vendor/librw/src/engine.cpp"
 CMAKE="upstream-revc/vendor/librw/src/CMakeLists.txt"
 
-sed -i   -e '/#include "src\/ps2\/rwps2.h"/d'   -e '/#include "src\/ps2\/rwps2plg.h"/d'   -e '/#include "src\/d3d\/rwxbox.h"/d'   -e '/#include "src\/d3d\/rwd3d.h"/d'   -e '/#include "src\/d3d\/rwd3d8.h"/d'   -e '/#include "src\/d3d\/rwd3d9.h"/d'   -e '/#include "src\/gl\/rwwdgl.h"/d'   -e '/#include "src\/gl\/rwgl3.h"/d'   -e '/#include "src\/gl\/rwgl3shader.h"/d'   -e '/#include "src\/gl\/rwgl3plg.h"/d'   "$RW"
+sed -i \
+  -e '/#include "src\/ps2\/rwps2.h"/d' \
+  -e '/#include "src\/ps2\/rwps2plg.h"/d' \
+  -e '/#include "src\/d3d\/rwxbox.h"/d' \
+  -e '/#include "src\/d3d\/rwd3d.h"/d' \
+  -e '/#include "src\/d3d\/rwd3d8.h"/d' \
+  -e '/#include "src\/d3d\/rwd3d9.h"/d' \
+  -e '/#include "src\/gl\/rwwdgl.h"/d' \
+  -e '/#include "src\/gl\/rwgl3.h"/d' \
+  -e '/#include "src\/gl\/rwgl3shader.h"/d' \
+  -e '/#include "src\/gl\/rwgl3plg.h"/d' \
+  "$RW"
 
 grep -q '#include "src/psp/rwpsp.h"' "$RW" || printf '\n#include "src/psp/rwpsp.h"\n' >> "$RW"
 
@@ -17,12 +28,22 @@ if ! grep -q '#define RWDEVICE psp' "$BASE"; then
 #endif' "$BASE"
 fi
 
-sed -i   -e '/#include "rwengine.h"/d'   -e '/#include "d3d\/rwxbox.h"/d'   -e '/#include "d3d\/rwd3d.h"/d'   -e '/#include "d3d\/rwd3d8.h"/d'   -e '/#include "d3d\/rwd3d9.h"/d'   -e '/#include "gl\/rwgl3.h"/d'   -e '/#include "gl\/rwwdgl.h"/d'   "$ENG"
+sed -i \
+  -e '/#include "rwengine.h"/d' \
+  -e '/#include "d3d\/rwxbox.h"/d' \
+  -e '/#include "d3d\/rwd3d.h"/d' \
+  -e '/#include "d3d\/rwd3d8.h"/d' \
+  -e '/#include "d3d\/rwd3d9.h"/d' \
+  -e '/#include "gl\/rwgl3.h"/d' \
+  -e '/#include "gl\/rwwdgl.h"/d' \
+  "$ENG"
 
-grep -q '#include "psp/rwpsp.h"' "$ENG" || sed -i '/#include "rwengine.h"/a\
-#include "psp/rwpsp.h"' "$ENG"
+# rwengine.h must be included before the PSP device header so the Device types exist.
+grep -q '#include "rwengine.h"' "$ENG" || sed -i '1i#include "rwengine.h"' "$ENG"
+grep -q '#include "psp/rwpsp.h"' "$ENG" || sed -i '/#include "rwengine.h"/a#include "psp/rwpsp.h"' "$ENG"
 
-# Select the PSP device in Engine::open and keep only the PSP platform plugin registration.\nsed -i \
+# Keep only the PSP platform plugin registration and remove desktop registrations.
+sed -i \
   -e 's/ps2::registerPlatformPlugins()/psp::registerPlatformPlugins()/g' \
   -e '/xbox::registerPlatformPlugins()/d' \
   -e '/d3d8::registerPlatformPlugins()/d' \
@@ -61,10 +82,10 @@ endif()
 EOF
 fi
 
-
 # Make Engine::open select the PSP device instead of falling back to null.
-if ! grep -q 'RW_PSP.*psp::renderdevice' "$ENG"; then
-  sed -i '/#ifdef RW_PS2/i\#ifdef RW_PSP\
+if ! grep -q 'engine->device = psp::renderdevice' "$ENG"; then
+  sed -i '/#ifdef RW_PS2/i\
+#ifdef RW_PSP\
 \tengine->device = psp::renderdevice;\
 #elif defined(RW_PS2)' "$ENG"
 fi
