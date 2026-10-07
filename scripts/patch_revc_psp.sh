@@ -328,4 +328,10 @@ if [ -f "$FLUFFH" ]; then
   grep -Fq 'static int32 TonightsEvent;' "$FLUFFH"
 fi
 
+WATERCREATURESCPP="upstream-revc/src/renderer/WaterCreatures.cpp"
+if [ -f "$WATERCREATURESCPP" ]; then
+  sed -i 's/^int CWaterCreatures::nNumActiveSeaLifeForms;/int32 CWaterCreatures::nNumActiveSeaLifeForms;/' "$WATERCREATURESCPP"
+  grep -Fq 'int32 CWaterCreatures::nNumActiveSeaLifeForms;' "$WATERCREATURESCPP"
+fi
+
 exit 0
