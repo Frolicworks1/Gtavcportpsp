@@ -9,6 +9,7 @@ CMAKE="upstream-revc/vendor/librw/src/CMakeLists.txt"
 # Remove desktop device headers from the common public/engine headers.
 for f in "$RW" "$ENG"; do
   sed -i \
+    -e '/rwps2plg\.h/d' \
     -e '/src\/ps2\/rwps2.h/d' \
     -e '/src\/d3d\/rwxbox.h/d' -e '/src\/d3d\/rwd3d.h/d' \
     -e '/src\/d3d\/rwd3d8.h/d' -e '/src\/d3d\/rwd3d9.h/d' \
