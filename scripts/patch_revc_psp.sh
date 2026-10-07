@@ -683,3 +683,5 @@ if [ -f "$SRC_CMAKE" ]; then
 fi
 
 exit 0
+
+# syntax guard trigger
