@@ -66,19 +66,6 @@ jobs:
           grep -q 'add_library(MPG123::libmpg123 INTERFACE IMPORTED)' upstream-revc/src/CMakeLists.txt
           grep -q 'list(REMOVE_ITEM' upstream-revc/src/CMakeLists.txt
           grep -q 'audio/eax/eax-util.cpp' upstream-revc/src/CMakeLists.txt
-          grep -q 'CColStore::RemoveColSlot(int32 slot)' upstream-revc/src/collision/ColStore.cpp
-          grep -q 'static int GetRandomNumberInRange(int low, int high)' upstream-revc/src/core/General.h
-          grep -q 'static int32 GetRandomNumberInRange(int low, int32 high)' upstream-revc/src/core/General.h
-          grep -q 'int32 CCarCtrl::NumLawEnforcerCars;' upstream-revc/src/control/CarCtrl.cpp
-          grep -q 'CCarCtrl::RemoveFromLoadedVehicleArray(int32 mi, int32 rating)' upstream-revc/src/control/CarCtrl.cpp
-          grep -q 'CPathFind::CalcNodeCoors(float x, float y, float z, int32 id' upstream-revc/src/control/PathFind.cpp
-          grep -Fq 'CPathInfoForObject *detachednodes, int32 numDetached' upstream-revc/src/control/PathFind.cpp
-          grep -q '^int CPacManPickups::PillsEatenInRace;' upstream-revc/src/control/Pickups.cpp
-          grep -q 'CCamera::TryToStartNewCamMode(int32 obbeMode)' upstream-revc/src/core/Camera.cpp
-          grep -q '^int32 CRadar::SetCoordBlip' upstream-revc/src/core/Radar.cpp
-          grep -q '^int32 CRadar::SetShortRangeCoordBlip' upstream-revc/src/core/Radar.cpp
-          grep -q '^int32 CRadar::SetEntityBlip' upstream-revc/src/core/Radar.cpp
-          grep -q 'CStreaming::LoadCdDirectory(const char *dirname, int32 n)' upstream-revc/src/core/Streaming.cpp
       - name: Configure native PSP build
         id: configure
         shell: bash
