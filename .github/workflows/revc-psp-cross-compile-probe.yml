@@ -101,11 +101,11 @@ jobs:
           grep -q 'add_library(MPG123::libmpg123 INTERFACE IMPORTED)' upstream-revc/src/CMakeLists.txt
           grep -q 'list(REMOVE_ITEM' upstream-revc/src/CMakeLists.txt
           grep -q 'audio/eax/eax-util.cpp' upstream-revc/src/CMakeLists.txt
-          grep -q '^    pspgu$' upstream-revc/src/CMakeLists.txt
-          grep -q '^    pspgum$' upstream-revc/src/CMakeLists.txt
-          grep -q '^    pspctrl$' upstream-revc/src/CMakeLists.txt
-          grep -q '^    pspge$' upstream-revc/src/CMakeLists.txt
-          grep -q '^    pspdisplay$' upstream-revc/src/CMakeLists.txt
+          grep -q 'pspgu' upstream-revc/src/CMakeLists.txt
+          grep -q 'pspgum' upstream-revc/src/CMakeLists.txt
+          grep -q 'pspctrl' upstream-revc/src/CMakeLists.txt
+          grep -q 'pspge' upstream-revc/src/CMakeLists.txt
+          grep -q 'pspdisplay' upstream-revc/src/CMakeLists.txt
           grep -q '^if(RW_PSP)$' upstream-revc/vendor/librw/CMakeLists.txt
           grep -q 'set(LIBRW_PLATFORMS "PSP")' upstream-revc/vendor/librw/CMakeLists.txt
           grep -q 'psp/rwpsp.cpp' upstream-revc/vendor/librw/src/CMakeLists.txt
