@@ -56,8 +56,65 @@ static void clearCamera(Camera*, RGBA *color, uint32 flags) {
     sceGuClear(clear);
 }
 static void showRaster(Raster*, uint32) { }
-static void setRenderState(int32, void*) { }
-static void *getRenderState(int32) { return 0; }
+static bool stateVertexAlpha = false;
+static bool stateZTest = true;
+static bool stateZWrite = true;
+static int32 stateCull = CULLBACK;
+
+static void setRenderState(int32 state, void *pvalue) {
+    uint32 value = (uint32)(uintptr)pvalue;
+    switch(state) {
+    case VERTEXALPHA:
+        stateVertexAlpha = value != 0;
+        if(stateVertexAlpha) {
+            sceGuEnable(GU_BLEND);
+            sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
+        } else {
+            sceGuDisable(GU_BLEND);
+        }
+        break;
+    case SRCBLEND:
+    case DESTBLEND:
+        // Keep the common alpha blend path enabled; exact blend mapping will
+        // be completed with the PSP RenderWare state table.
+        if(stateVertexAlpha) {
+            sceGuEnable(GU_BLEND);
+            sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
+        }
+        break;
+    case ZTESTENABLE:
+        stateZTest = value != 0;
+        if(stateZTest) sceGuEnable(GU_DEPTH_TEST);
+        else sceGuDisable(GU_DEPTH_TEST);
+        break;
+    case ZWRITEENABLE:
+        stateZWrite = value != 0;
+        if(stateZWrite) sceGuDepthMask(0);
+        else sceGuDepthMask(1);
+        break;
+    case CULLMODE:
+        stateCull = (int32)value;
+        if(stateCull == CULLNONE) {
+            sceGuDisable(GU_CULL_FACE);
+        } else {
+            sceGuEnable(GU_CULL_FACE);
+            sceGuFrontFace(stateCull == CULLFRONT ? GU_CCW : GU_CW);
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+static void *getRenderState(int32 state) {
+    switch(state) {
+    case VERTEXALPHA: return (void*)(uintptr)stateVertexAlpha;
+    case ZTESTENABLE: return (void*)(uintptr)stateZTest;
+    case ZWRITEENABLE: return (void*)(uintptr)stateZWrite;
+    case CULLMODE: return (void*)(uintptr)stateCull;
+    default: return 0;
+    }
+}
 static bool32 rasterRenderFast(Raster*, int32, int32) { return 0; }
 
 struct GU2DVertex {
