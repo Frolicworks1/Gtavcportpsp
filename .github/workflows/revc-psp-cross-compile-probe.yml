@@ -404,3 +404,4 @@ jobs:
             artifacts/PSP/GAME/GTAVCPSP/PARAM.SFO
             artifacts/PSP/GAME/GTAVCPSP/reVC.elf
           if-no-files-found: warn
+# PSP build pipeline: compile, link, package, validate.
