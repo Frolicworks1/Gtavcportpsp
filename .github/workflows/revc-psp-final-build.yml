@@ -50,14 +50,9 @@ jobs:
           cp porting/librw-psp/rwpsp.h upstream-revc/vendor/librw/src/psp/rwpsp.h
           cp porting/librw-psp/rwpsp.cpp upstream-revc/vendor/librw/src/psp/rwpsp.cpp
           cp porting/librw-psp/rwpsp_plugins.cpp upstream-revc/vendor/librw/src/psp/rwpsp_plugins.cpp
-          cp porting/librw-psp/psp_input.cpp upstream-revc/src/core/psp_input.cpp
-          cp porting/librw-psp/psp_platform.cpp upstream-revc/src/skel/psp_platform.cpp
-          cp porting/librw-psp/CdStream_psp.cpp upstream-revc/src/core/CdStream_psp.cpp
-          cp porting/librw-psp/psp_missing_stubs.cpp upstream-revc/src/core/psp_missing_stubs.cpp
           cp porting/librw-psp/rwpsp_plugins.cpp upstream-revc/vendor/librw/src/psp/rwpsp_plugins.cpp
           cp porting/librw-psp/psp_platform.cpp upstream-revc/src/skel/psp_platform.cpp
           cp porting/librw-psp/psp_input.cpp upstream-revc/src/core/psp_input.cpp
-          cp porting/librw-psp/psp_main.cpp upstream-revc/src/skel/psp_main.cpp
           sh scripts/patch_revc_psp.sh | tee psp-patch.log
           mkdir -p upstream-revc/vendor/librw/src/psp
           cp porting/librw-psp/rwpsp.cpp upstream-revc/vendor/librw/src/psp/rwpsp.cpp
@@ -65,14 +60,23 @@ jobs:
           cp porting/librw-psp/rwpsp_plugins.cpp upstream-revc/vendor/librw/src/psp/rwpsp_plugins.cpp
           printf '%s\n' 'target_sources(librw PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/psp/rwpsp_plugins.cpp)' >> upstream-revc/vendor/librw/CMakeLists.txt
           cat >> upstream-revc/src/CMakeLists.txt <<'CMAKE_EOF'
-          target_sources(reVC PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/psp_input.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/skel/psp_platform.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/skel/psp_main.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/librw/src/psp/rwpsp.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/CdStream_psp.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/psp_missing_stubs.cpp
+          add_library(psp_runtime STATIC
+            ${CMAKE_SOURCE_DIR}/../porting/librw-psp/psp_input.cpp
+            ${CMAKE_SOURCE_DIR}/../porting/librw-psp/psp_platform.cpp
+            ${CMAKE_SOURCE_DIR}/../porting/librw-psp/psp_main.cpp
+            ${CMAKE_SOURCE_DIR}/../porting/librw-psp/CdStream_psp.cpp
+            ${CMAKE_SOURCE_DIR}/../porting/librw-psp/psp_missing_stubs.cpp
           )
+          target_include_directories(psp_runtime PRIVATE
+            ${PROJECT_SOURCE_DIR}
+            ${${PROJECT}_INCLUDES}
+            ${CMAKE_SOURCE_DIR}/../porting/librw-psp
+          )
+          target_compile_definitions(psp_runtime PRIVATE
+            LIBRW CMAKE_NO_AUTOLINK CMAKE_BUILD USE_OUR_VERSIONING RW_PSP=1
+          )
+          target_link_libraries(psp_runtime PRIVATE librw::librw Threads::Threads)
+          target_link_libraries(reVC PRIVATE psp_runtime)
           CMAKE_EOF
 
       - name: Configure
