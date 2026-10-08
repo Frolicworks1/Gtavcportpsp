@@ -426,7 +426,7 @@ if [ -f "$CROSSPLATFORM" ]; then
   if ! grep -q 'pspNormalizeAlloc' "$CROSSPLATFORM"; then
     awk '{
       print
-      if ($0 ~ /psp_strsep_local/) {
+      if ($0 ~ /^static char \*psp_strsep_local/) {
         print "static char *pspNormalizeAlloc(const char *src) {"
         print "  if (!src) return NULL;"
         print "  size_t n = strlen(src);"
@@ -447,9 +447,9 @@ if [ -f "$CROSSPLATFORM" ]; then
       print
       print "#ifdef RW_PSP"
       print "  char *pspPath = pspNormalizeAlloc(filename);"
-      print "  FILE *result = fopen(pspPath ? pspPath : filename, mode);"
+      print "  FILE *pspResult = fopen(pspPath ? pspPath : filename, mode);"
       print "  if (pspPath) free(pspPath);"
-      print "  return result;"
+      print "  return pspResult;"
       print "#endif"
       next
     }
