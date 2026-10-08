@@ -107,7 +107,7 @@ jobs:
         run: |
           set -euxo pipefail
           export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
-          BUILD_DIR="$ENV{GITHUB_WORKSPACE}/build-revc-psp"
+          BUILD_DIR="$GITHUB_WORKSPACE/build-revc-psp"
           PACKAGE_DIR="$BUILD_DIR/psp-package"
           mkdir -p "$PACKAGE_DIR"
           ELF="$(find "$BUILD_DIR" -type f -name 'reVC' -print -quit)"
@@ -122,8 +122,8 @@ jobs:
           "$PSPDEV/bin/pack-pbp" EBOOT.PBP PARAM.SFO NULL NULL NULL NULL NULL reVC NULL
           test -s EBOOT.PBP
           test "$(od -An -tx1 -N4 EBOOT.PBP | tr -d ' \\n')" = "50425000"
-          mkdir -p "$ENV{GITHUB_WORKSPACE}/artifacts/PSP/GAME/GTAVCPSP"
-          cp EBOOT.PBP PARAM.SFO reVC "$ENV{GITHUB_WORKSPACE}/artifacts/PSP/GAME/GTAVCPSP/"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP"
+          cp EBOOT.PBP PARAM.SFO reVC "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP/"
 
       - name: Upload final PSP package
         if: always()
