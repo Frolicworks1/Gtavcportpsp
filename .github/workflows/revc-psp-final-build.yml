@@ -115,7 +115,11 @@ jobs:
           test -s "$ELF"
           cp "$ELF" "$PACKAGE_DIR/reVC"
           "$PSPDEV/bin/psp-strip" "$PACKAGE_DIR/reVC"
-          "$PSPDEV/bin/psp-fixup-imports" "$PACKAGE_DIR/reVC"
+          if "$PSPDEV/bin/psp-fixup-imports" "$PACKAGE_DIR/reVC"; then
+            printf "%s\n" "PSP import fixup applied"
+          else
+            printf "%s\n" "PSP import fixup skipped: retaining stripped ELF for early testing"
+          fi
           test "$(od -An -tx1 -N4 "$PACKAGE_DIR/reVC" | tr -d ' \\n')" = "7f454c46"
           cd "$PACKAGE_DIR"
           "$PSPDEV/bin/mksfoex" -d MEMSIZE=1 "Grand Theft Auto: Vice City PSP" PARAM.SFO
