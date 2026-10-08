@@ -1,7 +1,6 @@
 #include "common.h"
 #include "CdStream.h"
 #include "crossplatform.h"
-#include "rwcharset.h"
 #include <stddef.h>
 
 bool flushStream[5] = {false, false, false, false, false};
