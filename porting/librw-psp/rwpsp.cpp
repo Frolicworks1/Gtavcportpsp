@@ -200,7 +200,7 @@ static void im3DEnd(void){im3DBuffer=0;im3DCount=0;im3DFlags=0;}
 static int deviceSystem(DeviceReq req,void *arg,int32){
     switch(req){
     case DEVICEGETNUMSUBSYSTEMS:return 1; case DEVICEGETCURRENTSUBSYSTEM:return 0;
-    case DEVICEGETSUBSSYSTEMINFO: if(arg){SubSystemInfo*info=(SubSystemInfo*)arg;info->name[0]='P';info->name[1]='S';info->name[2]='P';info->name[3]='\\0';return 1;} return 0;
+    case DEVICEGETSUBSSYSTEMINFO: if(arg){SubSystemInfo*info=(SubSystemInfo*)arg;info->name[0]='P';info->name[1]='S';info->name[2]='P';info->name[3]='\0';return 1;} return 0;
     case DEVICEGETNUMVIDEOMODES:return 1; case DEVICEGETCURRENTVIDEOMODE:return 0;
     case DEVICEGETVIDEOMODEINFO:if(arg){VideoMode*mode=(VideoMode*)arg;mode->width=480;mode->height=272;mode->depth=32;mode->flags=0;return 1;}return 0;
     default:return 1;
