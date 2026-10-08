@@ -199,7 +199,7 @@ static int deviceSystem(DeviceReq req,void *arg,int32){
     default:return 1;
     }
 }
-Device renderdevice __attribute__((used))={0.1f,1000.0f,beginUpdate,endUpdate,clearCamera,showRaster,rasterRenderFast,setRenderState,getRenderState,
+Device renderdevice __asm__("_ZN2rw3ps212renderdeviceE") __attribute__((used))={0.1f,1000.0f,beginUpdate,endUpdate,clearCamera,showRaster,rasterRenderFast,setRenderState,getRenderState,
     im2DRenderLine,im2DRenderTriangle,im2DRenderPrimitive,im2DRenderIndexedPrimitive,
     im3DTransform,im3DRenderPrimitive,im3DRenderIndexedPrimitive,im3DEnd,deviceSystem};
 void registerPlatformPlugins(void){}
