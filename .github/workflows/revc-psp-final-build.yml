@@ -117,6 +117,16 @@ jobs:
             psp-cross-compile.log
           if-no-files-found: warn
 
+      - name: Upload native PSP ELF
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reVC-PSP-ELF
+          path: |
+            upstream-revc/**/*.elf
+            build/**/*.elf
+          if-no-files-found: error
+
       - name: Create PSP EBOOT.PBP
         if: success()
         shell: bash
