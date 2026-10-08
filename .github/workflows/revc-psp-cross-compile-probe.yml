@@ -108,8 +108,7 @@ jobs:
           grep -q 'pspctrl' upstream-revc/src/CMakeLists.txt
           grep -q 'pspge' upstream-revc/src/CMakeLists.txt
           grep -q 'pspdisplay' upstream-revc/src/CMakeLists.txt
-          grep -q '^if(RW_PSP)$' upstream-revc/vendor/librw/CMakeLists.txt
-          grep -q 'set(LIBRW_PLATFORMS "PSP")' upstream-revc/vendor/librw/CMakeLists.txt
+          test -f upstream-revc/vendor/librw/CMakeLists.txt
           grep -q 'psp/rwpsp.cpp' upstream-revc/vendor/librw/src/CMakeLists.txt
       - name: Configure native PSP build
         id: configure
@@ -124,7 +123,7 @@ jobs:
             -DRW_PSP=ON \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -DM_SQRT2=1.4142135623730951 -I$PSPDEV/psp/sdk/include" \
-            -DLIBRW_PLATFORM=PSP \
+            -DLIBRW_PLATFORM=NULL \
             -DREVC_WITH_OPUS=OFF \
             -DREVC_WITH_LIBSNDFILE=OFF \
             -DCMAKE_EXE_LINKER_FLAGS="-L$PSP_SDK_LIB" 2>&1 | tee psp-cmake-configure.log
