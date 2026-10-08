@@ -75,7 +75,7 @@ void CdStreamRemoveImages(void)
     gPspNumImages = 0;
 }
 
-int CdStreamGetNumImages(void) { return gPspNumImages; }
+int32 CdStreamGetNumImages(void) { return gPspNumImages; }
 
 uint32 GetGTA3ImgSize(void)
 {
