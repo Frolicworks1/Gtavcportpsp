@@ -57,7 +57,6 @@ jobs:
           cp porting/librw-psp/rwpsp_plugins.cpp upstream-revc/vendor/librw/src/psp/rwpsp_plugins.cpp
           cp porting/librw-psp/psp_platform.cpp upstream-revc/src/skel/psp_platform.cpp
           cp porting/librw-psp/psp_input.cpp upstream-revc/src/core/psp_input.cpp
-          cp porting/librw-psp/psp_link_stubs.cpp upstream-revc/src/core/psp_link_stubs.cpp
           cp porting/librw-psp/psp_main.cpp upstream-revc/src/skel/psp_main.cpp
           sh scripts/patch_revc_psp.sh | tee psp-patch.log
           mkdir -p upstream-revc/vendor/librw/src/psp
