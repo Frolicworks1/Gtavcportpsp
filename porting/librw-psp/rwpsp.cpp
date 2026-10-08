@@ -33,6 +33,10 @@ static void beginUpdate(Camera *cam) {
         sceGuDisplay(GU_TRUE);
         initialized = true;
     }
+    // Every frame gets a fresh active GU command list before any matrix/state command.
+    // sceGum* calls below emit GU commands and must not run outside sceGuStart/Finish.
+    sceGuStart(GU_DIRECT, guCommandList);
+
     if(cam) {
         ScePspFMatrix4 view = {
             { cam->devView.right.x, cam->devView.up.x, cam->devView.at.x, cam->devView.pos.x },
@@ -53,7 +57,6 @@ static void beginUpdate(Camera *cam) {
         sceGumMatrixMode(GU_MODEL);
         sceGumLoadIdentity();
     }
-    sceGuStart(GU_DIRECT, guCommandList);
 }
 static void endUpdate(Camera*) {
     sceGuFinish();
