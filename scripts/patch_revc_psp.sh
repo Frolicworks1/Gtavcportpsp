@@ -155,6 +155,9 @@ EOF
       print "  char pspPath[512];"
       print "  pspNormalizePath(filename, pspPath, sizeof(pspPath));"
       print "  myfiles[fd].file = fopen(pspPath, realmode);"
+      print "#ifdef RW_PSP"
+      print "  if (!myfiles[fd].file) pspFileIoLog(pspPath);"
+      print "#endif"
       print "#else"
       print "  myfiles[fd].file = fcaseopen(filename, realmode);"
       print "#endif"
@@ -222,18 +225,6 @@ if [ -f "$FILEMGR" ]; then
     }' "$FILEMGR" > "$FILEMGR.psp.tmp"
     mv "$FILEMGR.psp.tmp" "$FILEMGR"
   fi
-  awk '{
-    if ($0 ~ /fopen\(pspPath, realmode\)/ && $0 !~ /pspFileIoLog/) {
-      print
-      print "#ifdef RW_PSP"
-      print "  if (!myfiles[fd].file) pspFileIoLog(pspPath);"
-      print "#endif"
-      next
-    }
-    print
-  }' "$FILEMGR" > "$FILEMGR.psp.tmp"
-  mv "$FILEMGR.psp.tmp" "$FILEMGR"
-  grep -q 'pspFileIoLog(pspPath)' "$FILEMGR"
   grep -q '#if !defined(ANDROID) && !defined(RW_PSP)' "$FILEMGR"
 fi
 
