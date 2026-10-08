@@ -65,7 +65,7 @@ jobs:
           cp porting/librw-psp/rwpsp_plugins.cpp upstream-revc/vendor/librw/src/psp/rwpsp_plugins.cpp
           printf "\ntarget_sources(librw PRIVATE \\${CMAKE_CURRENT_SOURCE_DIR}/src/psp/rwpsp.cpp \\${CMAKE_CURRENT_SOURCE_DIR}/src/psp/rwpsp_plugins.cpp)\n" >> upstream-revc/vendor/librw/CMakeLists.txt
           cat >> upstream-revc/src/CMakeLists.txt <<'CMAKE_EOF'
-target_sources(reVC PRIVATE
+          target_sources(reVC PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/core/psp_input.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/core/psp_link_stubs.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/skel/psp_platform.cpp
