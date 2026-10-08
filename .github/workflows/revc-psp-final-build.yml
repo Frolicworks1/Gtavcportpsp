@@ -158,24 +158,13 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
+          test -s artifacts/PSP/GAME/GTAVCPSP/EBOOT.PBP
+          test "$(od -An -tx1 -N4 artifacts/PSP/GAME/GTAVCPSP/EBOOT.PBP | tr -d ' \\n')" = "00504250"
           mkdir -p eboot
-          ELF="$(find upstream-revc build . -type f \( -name '*.elf' -o -name 'reVC' -o -name 'reVC.elf' \) -perm -111 | head -n 1 || true)"
-          test -n "$ELF"
-          test -s "$ELF"
-          if command -v psp-fixup-imports >/dev/null 2>&1; then psp-fixup-imports "$ELF"; fi
-          if command -v psp-strip >/dev/null 2>&1; then psp-strip "$ELF"; fi
-          command -v pack-pbp >/dev/null 2>&1
-          if command -v mksfoex >/dev/null 2>&1; then
-            mksfoex "Grand Theft Auto: Vice City" eboot/PARAM.SFO
-          else
-            command -v mksfo >/dev/null 2>&1
-            mksfo "Grand Theft Auto: Vice City" eboot/PARAM.SFO
-          fi
-          cp "$ELF" eboot/EBOOT.ELF
-          pack-pbp eboot/EBOOT.PBP eboot/PARAM.SFO NULL NULL NULL NULL NULL eboot/EBOOT.ELF NULL
-          test -s eboot/EBOOT.PBP
-          test "$(dd if=eboot/EBOOT.PBP bs=1 count=4 2>/dev/null)" = "PBP\0"
-          tar -czf reVC-PSP-EBOOT.tar.gz -C eboot EBOOT.PBP
+          cp artifacts/PSP/GAME/GTAVCPSP/EBOOT.PBP eboot/EBOOT.PBP
+          cp artifacts/PSP/GAME/GTAVCPSP/PARAM.SFO eboot/PARAM.SFO
+          cp artifacts/PSP/GAME/GTAVCPSP/reVC eboot/EBOOT.ELF
+          tar -czf reVC-PSP-EBOOT.tar.gz -C eboot EBOOT.PBP PARAM.SFO EBOOT.ELF
 
       - name: Upload validated EBOOT
         if: success()
@@ -183,4 +172,4 @@ jobs:
         with:
           name: reVC-PSP-EBOOT
           path: reVC-PSP-EBOOT.tar.gz
-          if-no-files-found: error
+          if-no-files-found: error\n
