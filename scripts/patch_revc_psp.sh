@@ -199,6 +199,41 @@ if [ -f "$FILEMGR" ]; then
     mv "$FILEMGR.psp.tmp" "$FILEMGR"
   fi
   grep -q 'pspNormalizePath(path, normalized, sizeof(normalized));' "$FILEMGR"
+  if ! grep -q 'pspFileIoLog' "$FILEMGR"; then
+    awk '{
+      if ($0 == "#include \"FileMgr.h\"") {
+        print
+        print "#ifdef RW_PSP"
+        print "#include <pspiofilemgr.h>"
+        print "static void pspFileIoLog(const char *path)"
+        print "{"
+        print "  SceUID fd = sceIoOpen(\"psp_fileio.log\", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);"
+        print "  if (fd >= 0) {"
+        print "    const char *p = path ? path : \"<null>\";"
+        print "    sceIoWrite(fd, p, strlen(p));"
+        print "    sceIoWrite(fd, \"\\n\", 1);"
+        print "    sceIoClose(fd);"
+        print "  }"
+        print "}"
+        print "#endif"
+        next
+      }
+      print
+    }' "$FILEMGR" > "$FILEMGR.psp.tmp"
+    mv "$FILEMGR.psp.tmp" "$FILEMGR"
+  fi
+  awk '{
+    if ($0 == "  myfiles[fd].file = fopen(pspPath, realmode);") {
+      print
+      print "#ifdef RW_PSP"
+      print "  if (!myfiles[fd].file) pspFileIoLog(pspPath);"
+      print "#endif"
+      next
+    }
+    print
+  }' "$FILEMGR" > "$FILEMGR.psp.tmp"
+  mv "$FILEMGR.psp.tmp" "$FILEMGR"
+  grep -q 'pspFileIoLog(pspPath)' "$FILEMGR"
   grep -q '#if !defined(ANDROID) && !defined(RW_PSP)' "$FILEMGR"
 fi
 
