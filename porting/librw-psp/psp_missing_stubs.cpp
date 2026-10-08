@@ -3,6 +3,8 @@
 #include "crossplatform.h"
 #include <stddef.h>
 
+bool flushStream[5] = {false, false, false, false, false};
+
 extern "C" size_t _dwMemAvailPhys = 0;
 
 RwBool IsForegroundApp(void)
