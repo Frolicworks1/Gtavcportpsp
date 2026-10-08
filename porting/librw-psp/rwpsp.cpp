@@ -5,11 +5,15 @@
 
 namespace rw { namespace psp {
 
+// sceGuStart(GU_DIRECT, ...) writes the command list through the supplied pointer.
+// Passing NULL here can corrupt address 0 and hard-crash PPSSPP/the emulator.
+static unsigned int __attribute__((aligned(64))) guCommandList[262144];
+
 static void beginUpdate(Camera *cam) {
     static bool initialized = false;
     if(!initialized) {
         sceGuInit();
-        sceGuStart(GU_DIRECT, (void*)0);
+        sceGuStart(GU_DIRECT, guCommandList);
         sceGuDrawBuffer(GU_PSM_8888, (void*)0, 512);
         sceGuDispBuffer(480, 272, (void*)0x88000, 512);
         sceGuDepthBuffer((void*)0x110000, 512);
