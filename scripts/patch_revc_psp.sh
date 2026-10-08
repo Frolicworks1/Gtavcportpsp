@@ -379,8 +379,6 @@ if [ -f "$SRC_CMAKE" ]; then
   grep -q 'pspdisplay' "$SRC_CMAKE"
 fi
 
-exit 0
-
 # PSP screen-droplet fallback: keep the effect disabled without pulling D3D/GL backends.
 SD="upstream-revc/src/extras/screendroplets.cpp"
 if [ -f "$SD" ] && ! grep -q 'PSP screen-droplet fallback' "$SD"; then
@@ -388,3 +386,5 @@ if [ -f "$SD" ] && ! grep -q 'PSP screen-droplet fallback' "$SD"; then
   mv "$SD.psp.tmp" "$SD"
   grep -q 'PSP screen-droplet fallback' "$SD"
 fi
+
+exit 0
