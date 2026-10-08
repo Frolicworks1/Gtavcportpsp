@@ -136,6 +136,8 @@ jobs:
           ELF="$(find upstream-revc build . -type f \( -name '*.elf' -o -name 'reVC' -o -name 'reVC.elf' \) -perm -111 | head -n 1 || true)"
           test -n "$ELF"
           test -s "$ELF"
+          if command -v psp-fixup-imports >/dev/null 2>&1; then psp-fixup-imports "$ELF"; fi
+          if command -v psp-strip >/dev/null 2>&1; then psp-strip "$ELF"; fi
           command -v pack-pbp >/dev/null 2>&1
           if command -v mksfoex >/dev/null 2>&1; then
             mksfoex "Grand Theft Auto: Vice City" eboot/PARAM.SFO
