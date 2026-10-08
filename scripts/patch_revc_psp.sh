@@ -244,7 +244,7 @@ if [ -f "$GAME" ]; then
         print "#endif"
         next
       }
-      if ($0 == "CGame::Initialise(\"DATA\\\\GTA_VC.DAT\");") {
+      if (index($0, "CGame::Initialise") && index($0, "GTA_VC.DAT")) {
         print
         print "#ifdef RW_PSP"
         print "  pspStartupLog(\"psp-main-init-game-after-data\");"
