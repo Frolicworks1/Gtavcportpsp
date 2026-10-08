@@ -138,3 +138,11 @@ jobs:
           test -s eboot/EBOOT.PBP
           test "$(dd if=eboot/EBOOT.PBP bs=1 count=4 2>/dev/null)" = "PBP\0"
           tar -czf reVC-PSP-EBOOT.tar.gz -C eboot EBOOT.PBP
+
+      - name: Upload validated EBOOT
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reVC-PSP-EBOOT
+          path: reVC-PSP-EBOOT.tar.gz
+          if-no-files-found: error
