@@ -61,12 +61,12 @@ jobs:
           printf '%s\n' 'target_sources(librw PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/psp/rwpsp_plugins.cpp)' >> upstream-revc/vendor/librw/CMakeLists.txt
           cat >> upstream-revc/src/CMakeLists.txt <<'CMAKE_EOF'
           add_library(psp_runtime OBJECT
-            $GITHUB_WORKSPACE/porting/librw-psp/psp_input.cpp
-            $GITHUB_WORKSPACE/porting/librw-psp/psp_platform.cpp
-            $GITHUB_WORKSPACE/porting/librw-psp/psp_main.cpp
-            $GITHUB_WORKSPACE/porting/librw-psp/CdStream_psp.cpp
-            $GITHUB_WORKSPACE/porting/librw-psp/psp_missing_stubs.cpp
-            $GITHUB_WORKSPACE/porting/librw-psp/psp_custompipes_missing.cpp
+            $ENV{GITHUB_WORKSPACE}/porting/librw-psp/psp_input.cpp
+            $ENV{GITHUB_WORKSPACE}/porting/librw-psp/psp_platform.cpp
+            $ENV{GITHUB_WORKSPACE}/porting/librw-psp/psp_main.cpp
+            $ENV{GITHUB_WORKSPACE}/porting/librw-psp/CdStream_psp.cpp
+            $ENV{GITHUB_WORKSPACE}/porting/librw-psp/psp_missing_stubs.cpp
+            $ENV{GITHUB_WORKSPACE}/porting/librw-psp/psp_custompipes_missing.cpp
           )
           target_include_directories(psp_runtime PRIVATE
             ${PROJECT_SOURCE_DIR}
@@ -87,7 +87,7 @@ jobs:
           export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
           PSP_SDK_LIB="$(dirname "$(find "$PSPDEV/psp" -type f -name libpspgu.a -print -quit)")"
           cmake -S upstream-revc -B build-revc-psp \
-            -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake" \
+            -DCMAKE_TOOLCHAIN_FILE="$ENV{GITHUB_WORKSPACE}/cmake/toolchains/psp-allegrex.cmake" \
             -DRW_PSP=ON \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -DM_SQRT2=1.4142135623730951 -I$PSPDEV/psp/sdk/include" \
@@ -107,7 +107,7 @@ jobs:
         run: |
           set -euxo pipefail
           export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
-          BUILD_DIR="$GITHUB_WORKSPACE/build-revc-psp"
+          BUILD_DIR="$ENV{GITHUB_WORKSPACE}/build-revc-psp"
           PACKAGE_DIR="$BUILD_DIR/psp-package"
           mkdir -p "$PACKAGE_DIR"
           ELF="$(find "$BUILD_DIR" -type f -name 'reVC' -print -quit)"
@@ -122,8 +122,8 @@ jobs:
           "$PSPDEV/bin/pack-pbp" EBOOT.PBP PARAM.SFO NULL NULL NULL NULL NULL reVC NULL
           test -s EBOOT.PBP
           test "$(od -An -tx1 -N4 EBOOT.PBP | tr -d ' \\n')" = "50425000"
-          mkdir -p "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP"
-          cp EBOOT.PBP PARAM.SFO reVC "$GITHUB_WORKSPACE/artifacts/PSP/GAME/GTAVCPSP/"
+          mkdir -p "$ENV{GITHUB_WORKSPACE}/artifacts/PSP/GAME/GTAVCPSP"
+          cp EBOOT.PBP PARAM.SFO reVC "$ENV{GITHUB_WORKSPACE}/artifacts/PSP/GAME/GTAVCPSP/"
 
       - name: Upload final PSP package
         if: always()
