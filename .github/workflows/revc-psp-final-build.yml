@@ -144,14 +144,14 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload native PSP ELF
-        if: success()
+        if: success() && hashFiles('upstream-revc/**/*.elf', 'build/**/*.elf') != ''
         uses: actions/upload-artifact@v4
         with:
           name: reVC-PSP-ELF
           path: |
             upstream-revc/**/*.elf
             build/**/*.elf
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Create PSP EBOOT.PBP
         if: success()
