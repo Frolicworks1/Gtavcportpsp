@@ -144,7 +144,7 @@ jobs:
             mksfo "Grand Theft Auto: Vice City" eboot/PARAM.SFO
           fi
           cp "$ELF" eboot/EBOOT.ELF
-          pack-pbp eboot/EBOOT.PBP eboot/PARAM.SFO eboot/EBOOT.ELF
+          pack-pbp eboot/EBOOT.PBP eboot/PARAM.SFO NULL NULL NULL NULL NULL eboot/EBOOT.ELF NULL
           test -s eboot/EBOOT.PBP
           test "$(dd if=eboot/EBOOT.PBP bs=1 count=4 2>/dev/null)" = "PBP\0"
           tar -czf reVC-PSP-EBOOT.tar.gz -C eboot EBOOT.PBP
