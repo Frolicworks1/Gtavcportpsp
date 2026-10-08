@@ -87,7 +87,7 @@ jobs:
           export PSPDEV="${PSPDEV:-/usr/local/pspdev}"
           PSP_SDK_LIB="$(dirname "$(find "$PSPDEV/psp" -type f -name libpspgu.a -print -quit)")"
           cmake -S upstream-revc -B build-revc-psp \
-            -DCMAKE_TOOLCHAIN_FILE="$ENV{GITHUB_WORKSPACE}/cmake/toolchains/psp-allegrex.cmake" \
+            -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/cmake/toolchains/psp-allegrex.cmake" \
             -DRW_PSP=ON \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CXX_FLAGS="-fpermissive -include strings.h -DRW_PSP=1 -DM_SQRT2=1.4142135623730951 -I$PSPDEV/psp/sdk/include" \
