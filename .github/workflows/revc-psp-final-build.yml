@@ -60,12 +60,13 @@ jobs:
           cp porting/librw-psp/rwpsp_plugins.cpp upstream-revc/vendor/librw/src/psp/rwpsp_plugins.cpp
           printf '%s\n' 'target_sources(librw PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/psp/rwpsp_plugins.cpp)' >> upstream-revc/vendor/librw/CMakeLists.txt
           cat >> upstream-revc/src/CMakeLists.txt <<'CMAKE_EOF'
-          add_library(psp_runtime STATIC
+          add_library(psp_runtime OBJECT
             ${CMAKE_SOURCE_DIR}/../porting/librw-psp/psp_input.cpp
             ${CMAKE_SOURCE_DIR}/../porting/librw-psp/psp_platform.cpp
             ${CMAKE_SOURCE_DIR}/../porting/librw-psp/psp_main.cpp
             ${CMAKE_SOURCE_DIR}/../porting/librw-psp/CdStream_psp.cpp
             ${CMAKE_SOURCE_DIR}/../porting/librw-psp/psp_missing_stubs.cpp
+            ${CMAKE_SOURCE_DIR}/../porting/librw-psp/psp_custompipes_missing.cpp
           )
           target_include_directories(psp_runtime PRIVATE
             ${PROJECT_SOURCE_DIR}
@@ -76,7 +77,7 @@ jobs:
             LIBRW CMAKE_NO_AUTOLINK CMAKE_BUILD USE_OUR_VERSIONING RW_PSP=1
           )
           target_link_libraries(psp_runtime PRIVATE librw::librw Threads::Threads)
-          target_link_libraries(reVC PRIVATE psp_runtime)
+          target_link_libraries(reVC PRIVATE $<TARGET_OBJECTS:psp_runtime>)
           CMAKE_EOF
 
       - name: Configure
