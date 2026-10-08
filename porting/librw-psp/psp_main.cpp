@@ -8,15 +8,25 @@
 PSP_MODULE_INFO("reVC", 0, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
 
+static int gStartupLog = -1;
+
+static void startupLog(const char *msg)
+{
+    if (gStartupLog < 0)
+        gStartupLog = sceIoOpen("psp_startup.log", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+    if (gStartupLog >= 0 && msg) {
+        sceIoWrite(gStartupLog, msg, strlen(msg));
+        sceIoWrite(gStartupLog, "\n", 1);
+        sceIoSync(gStartupLog, 0);
+    }
+}
 
 static void setupWorkingDirectory(int argc, char **argv)
 {
     char path[256];
     path[0] = '\0';
+    startupLog("stage:main-enter");
 
-    // The working GTA III PSP build uses the PSP ms0: filesystem and keeps
-    // DATA/MODELS relative to the game directory. Recreate that invariant
-    // before RenderWare/game initialization instead of relying on the host CWD.
     if (argc > 0 && argv && argv[0]) {
         const char *exe = argv[0];
         const char *slash = strrchr(exe, '/');
@@ -28,35 +38,75 @@ static void setupWorkingDirectory(int argc, char **argv)
         }
     }
 
-    if (path[0] && sceIoChdir(path) >= 0)
-        return;
+    if (path[0]) {
+        startupLog("stage:argv-path");
+        if (sceIoChdir(path) >= 0) {
+            startupLog("stage:argv-chdir-ok");
+            return;
+        }
+        startupLog("stage:argv-chdir-failed");
+    }
 
-    // Fallback for PPSSPP launches that do not provide a full argv[0].
-    // The final package is installed under this PSP GAME directory.
-    sceIoChdir("ms0:/PSP/GAME/GTAVCPSP");
+    if (sceIoChdir("ms0:/PSP/GAME/GTAVCPSP") >= 0)
+        startupLog("stage:fallback-chdir-ok");
+    else
+        startupLog("stage:fallback-chdir-failed");
+}
+
+static void probeRequiredData(void)
+{
+    SceUID fd = sceIoOpen("DATA/GTA_VC.DAT", PSP_O_RDONLY, 0);
+    if (fd >= 0) {
+        startupLog("data:GTA_VC.DAT=present");
+        sceIoClose(fd);
+    } else {
+        startupLog("data:GTA_VC.DAT=missing");
+    }
+
+    SceUID dir = sceIoDopen("DATA");
+    if (dir >= 0) {
+        startupLog("data:DATA-dir=present");
+        sceIoDclose(dir);
+    } else {
+        startupLog("data:DATA-dir=missing");
+    }
 }
 
 extern "C" int main(int argc, char **argv)
 {
     setupWorkingDirectory(argc, argv);
+    startupLog("stage:cwd-setup-done");
+    probeRequiredData();
+    startupLog("stage:controller-before");
 
-    // Initialise the real PSP controller path before the game starts polling it.
     sceCtrlSetSamplingCycle(0);
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
+    startupLog("stage:controller-after");
 
-    if (RsEventHandler(rsINITIALIZE, NULL) == rsEVENTERROR)
+    startupLog("stage:rsinitialize-before");
+    if (RsEventHandler(rsINITIALIZE, NULL) == rsEVENTERROR) {
+        startupLog("stage:rsinitialize-error");
         return 1;
+    }
+    startupLog("stage:rsinitialize-ok");
 
+    startupLog("stage:rsrwinitialize-before");
     if (RsEventHandler(rsRWINITIALIZE, NULL) == rsEVENTERROR) {
+        startupLog("stage:rsrwinitialize-error");
         RsEventHandler(rsTERMINATE, NULL);
         return 1;
     }
+    startupLog("stage:rsrwinitialize-ok");
 
+    startupLog("stage:idle-loop");
     while (!RsGlobal.quit) {
         RsEventHandler(rsIDLE, (void *)TRUE);
         sceKernelDelayThread(1000);
     }
 
+    startupLog("stage:terminate");
     RsEventHandler(rsTERMINATE, NULL);
+    if (gStartupLog >= 0)
+        sceIoClose(gStartupLog);
     return 0;
 }
