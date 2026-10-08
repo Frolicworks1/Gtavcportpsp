@@ -47,10 +47,10 @@ static void setupWorkingDirectory(int argc, char **argv)
         startupLog("stage:argv-chdir-failed");
     }
 
-    if (sceIoChdir("ms0:/PSP/GAME/GTAVCPSP") >= 0)
-        startupLog("stage:fallback-chdir-ok");
-    else
-        startupLog("stage:fallback-chdir-failed");
+    // Preserve the loader-provided CWD. Do not force a hard-coded
+    // PSP/GAME directory because PPSSPP may use a differently named
+    // content directory.
+    startupLog("stage:keep-loader-cwd");
 }
 
 static void probeRequiredData(void)
