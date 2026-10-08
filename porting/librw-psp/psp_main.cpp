@@ -12,7 +12,7 @@ PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
 static void setupWorkingDirectory(int argc, char **argv)
 {
     char path[256];
-    path[0] = '\\0';
+    path[0] = '\0';
 
     // The working GTA III PSP build uses the PSP ms0: filesystem and keeps
     // DATA/MODELS relative to the game directory. Recreate that invariant
@@ -24,7 +24,7 @@ static void setupWorkingDirectory(int argc, char **argv)
             size_t n = (size_t)(slash - exe);
             if (n >= sizeof(path)) n = sizeof(path) - 1;
             memcpy(path, exe, n);
-            path[n] = '\\0';
+            path[n] = '\0';
         }
     }
 
