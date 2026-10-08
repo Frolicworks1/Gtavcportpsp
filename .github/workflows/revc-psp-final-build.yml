@@ -54,6 +54,8 @@ jobs:
           mkdir -p upstream-revc/src/extras
           cp porting/librw-psp/psp_platform.cpp upstream-revc/src/skel/psp_platform.cpp
           cp porting/librw-psp/custompipes_psp.cpp upstream-revc/src/extras/custompipes_psp.cpp
+          cp porting/librw-psp/CdStream_psp.cpp upstream-revc/src/core/CdStream_psp.cpp
+          cp porting/librw-psp/psp_missing_stubs.cpp upstream-revc/src/core/psp_missing_stubs.cpp
           cp porting/librw-psp/rwpsp_plugins.cpp upstream-revc/vendor/librw/src/psp/rwpsp_plugins.cpp
           cp porting/librw-psp/psp_platform.cpp upstream-revc/src/skel/psp_platform.cpp
           cp porting/librw-psp/psp_input.cpp upstream-revc/src/core/psp_input.cpp
@@ -70,7 +72,8 @@ jobs:
             ${CMAKE_CURRENT_SOURCE_DIR}/skel/psp_platform.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/skel/psp_main.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/librw/src/psp/rwpsp.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_psp.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/core/CdStream_psp.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/core/psp_missing_stubs.cpp
           )
           CMAKE_EOF
 
