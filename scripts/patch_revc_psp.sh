@@ -382,9 +382,13 @@ fi
 # PSP screen-droplet fallback: keep the effect disabled without pulling D3D/GL backends.
 SD="upstream-revc/src/extras/screendroplets.cpp"
 if [ -f "$SD" ] && ! grep -q 'PSP screen-droplet fallback' "$SD"; then
-  awk '/^static Im2DVertexUV2 VertexBuffer/ && !done { print; print "#ifdef RW_PSP"; print "// PSP screen-droplet fallback"; print "static void openim2d_uv2(void) {}"; print "static void closeim2d_uv2(void) {}"; print "static void RenderIndexedPrimitive_UV2(RwPrimitiveType, Im2DVertexUV2 *, RwInt32, RwImVertexIndex *, RwInt32) {}"; print "#endif"; done=1 } { print }' "$SD" > "$SD.psp.tmp"
-  mv "$SD.psp.tmp" "$SD"
+  cat >> "$SD" <<'EOF'
+#ifdef RW_PSP
+// PSP screen-droplet fallback
+static void openim2d_uv2(void) {}
+static void closeim2d_uv2(void) {}
+static void RenderIndexedPrimitive_UV2(RwPrimitiveType, Im2DVertexUV2 *, RwInt32, RwImVertexIndex *, RwInt32) {}
+#endif
+EOF
   grep -q 'PSP screen-droplet fallback' "$SD"
 fi
-
-exit 0
