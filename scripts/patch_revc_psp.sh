@@ -154,7 +154,7 @@ EOF
       print "#ifdef RW_PSP"
       print "  char pspPath[512];"
       print "  pspNormalizePath(filename, pspPath, sizeof(pspPath));"
-      print "  myfiles[fd].file = fcaseopen(pspPath, realmode);"
+      print "  myfiles[fd].file = fopen(pspPath, realmode);"
       print "#else"
       print "  myfiles[fd].file = fcaseopen(filename, realmode);"
       print "#endif"
@@ -180,6 +180,26 @@ if [ -f "$FILEMGR" ]; then
   sed -i 's/^#ifndef ANDROID$/#if !defined(ANDROID) \&\& !defined(RW_PSP)/' "$FILEMGR"
   grep -q '#ifdef RW_PSP' "$FILEMGR"
   grep -q 'mychdir(ms_rootDirName);' "$FILEMGR"
+  if ! grep -q 'pspDirectChdir' "$FILEMGR"; then
+    awk '{
+      if ($0 ~ /^#if !defined\(_WIN32\)$/) {
+        print
+        print "#ifdef RW_PSP"
+        print "static int pspDirectChdir(const char *path)"
+        print "{"
+        print "  char normalized[512];"
+        print "  pspNormalizePath(path, normalized, sizeof(normalized));"
+        print "  return chdir(normalized);"
+        print "}"
+        print "#define mychdir pspDirectChdir"
+        print "#endif"
+        next
+      }
+      print
+    }' "$FILEMGR" > "$FILEMGR.psp.tmp"
+    mv "$FILEMGR.psp.tmp" "$FILEMGR"
+  fi
+  grep -q 'pspDirectChdir' "$FILEMGR"
   grep -q '#if !defined(ANDROID) && !defined(RW_PSP)' "$FILEMGR"
 fi
 
