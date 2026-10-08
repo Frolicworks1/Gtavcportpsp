@@ -66,12 +66,12 @@ jobs:
           printf "\ntarget_sources(librw PRIVATE \\${CMAKE_CURRENT_SOURCE_DIR}/src/psp/rwpsp.cpp \\${CMAKE_CURRENT_SOURCE_DIR}/src/psp/rwpsp_plugins.cpp)\n" >> upstream-revc/vendor/librw/CMakeLists.txt
           cat >> upstream-revc/src/CMakeLists.txt <<'CMAKE_EOF'
           target_sources(reVC PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/core/psp_input.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/core/psp_link_stubs.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/skel/psp_platform.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_psp.cpp
-)
-CMAKE_EOF
+            ${CMAKE_CURRENT_SOURCE_DIR}/core/psp_input.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/core/psp_link_stubs.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/skel/psp_platform.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/extras/custompipes_psp.cpp
+          )
+          CMAKE_EOF
 
       - name: Configure
         shell: bash
