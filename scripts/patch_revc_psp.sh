@@ -432,8 +432,8 @@ if [ -f "$CROSSPLATFORM" ]; then
         print "  size_t n = strlen(src);"
         print "  char *out = (char *)malloc(n + 1);"
         print "  if (!out) return NULL;"
-        print "  for (size_t i = 0; i < n; ++i) out[i] = src[i] == '\\\\' ? '/' : src[i];"
-        print "  out[n] = '\\\\0';"
+        print "  for (size_t i = 0; i < n; ++i) out[i] = src[i] == 92 ? '/' : src[i];"
+        print "  out[n] = 0;"
         print "  return out;"
         print "}"
       }
