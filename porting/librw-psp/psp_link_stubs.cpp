@@ -1,5 +1,5 @@
 #include "common.h"
-#include "rwpsp.h"
+#include "../../vendor/librw/src/psp/rwpsp.h"
 #include <stdint.h>
 extern "C" double psTimer(){return 0.0;}
 extern "C" void psCameraShowRaster(void*){}
