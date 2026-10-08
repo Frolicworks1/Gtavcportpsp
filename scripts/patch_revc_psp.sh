@@ -116,8 +116,8 @@ if [ -f "$CDSTREAM" ]; then
 fi
 CDSTREAMPOSIX="upstream-revc/src/core/CdStream_posix.cpp"
 if [ -f "$CDSTREAMPOSIX" ]; then
-  sed -i "s/^int32 CdStreamGetLastPosn(void)/int CdStreamGetLastPosn(void)/" "$CDSTREAMPOSIX"
-  grep -Fq "int CdStreamGetLastPosn(void)" "$CDSTREAMPOSIX"
+  sed -E -i "s/^int32[[:space:]]+CdStreamGetLastPosn\\([^)]*\\)/int CdStreamGetLastPosn(void)/" "$CDSTREAMPOSIX"
+  grep -Eq "^int[[:space:]]+CdStreamGetLastPosn\\(void\\)" "$CDSTREAMPOSIX"
 fi
 if [ -f "$CDHEADER" ]; then
   sed -i 's/^int32 CdStreamGetLastPosn(void);$/int CdStreamGetLastPosn(void);/' "$CDHEADER"
