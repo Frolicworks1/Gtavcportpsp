@@ -1,0 +1,29 @@
+42:02:414 root         N[G3D]: Vulkan/ShaderManagerVulkan.cpp:622 ShaderCache: Loaded 2 vertex, 3 fragment shaders and 0 geometry shaders (failed 0)
+42:02:414 root         N[G3D]: Vulkan/PipelineManagerVulkan.cpp:786 Creating 6 pipelines from cache (1x MSAA)...
+42:02:825 user_main    E[FILESYS]: FileSystems/DirectoryFileSystem.cpp:26 File::OpenFD returned an error
+42:03:007 idle0        N[BOOT]: UI/EmuScreen.cpp:391 Booted content://com.android.externalstorage.documents/tree/primary%3APsp/document/primary%3APsp%2FGAME%2FGrand%20Theft%20Auto%20%2D%20Vice%20City%2FGrand%20Theft%20Auto%20Vice%20City...
+42:03:028 user_main    E[FILESYS]: FileSystems/DirectoryFileSystem.cpp:26 File::OpenFD returned an error
+42:03:031 user_main    E[MEMMAP]: Core/MemFault.cpp:299 Bad memory access detected and ignored: 00000000 (0x7900000000)
+42:03:032 user_main    E[MEMMAP]: Core/MemFault.cpp:299 Bad memory access detected and ignored: 00000004 (0x7900000004)
+42:03:032 user_main    E[MEMMAP]: Core/MemFault.cpp:299 Bad memory access detected and ignored: 00000008 (0x7900000008)
+42:03:032 user_main    E[MEMMAP]: Core/MemFault.cpp:299 Bad memory access detected and ignored: 0000000c (0x790000000c)
+42:03:192 idle0        N[SCEDISP]: HLE/sceDisplay.cpp:399 Dropping frames - budget = 16.68ms / 59.9fps, actual = 231.10ms (+214.41ms) / 4.3fps
+Kernel processing time: 164.94 ms
+Slowest syscall: sceIoDopen : 115.26 ms
+Most active syscall: sceIoDopen : 135.19 ms
+DL processing time: 0.00 ms, 0 drawsync, 0 listsync
+Draw: 0 (0 dec, 0 culled), flushes 0, clears 0, bbox jumps 0 (0 updates)
+Vertices: 0 dec: 0 drawn: 0
+FBOs active: 0 (evaluations: 0, created 0)
+Textures: 0, dec: 0, invalidated: 0, hashed: 0 kB, clut 0
+readbacks 0 (0 non-block), upload 0 (cached 0), depal 0
+block transfers: 0
+replacer: tracks 0 references, 0 unique textures
+Cpy: depth 0, color 0, reint 0, blend 0, self 0
+GPU cycles: 0 (0.0 per vertex)
+Z-rast: 0.00+0.00+0.00 (total 0.00/0.00) ms
+Z-rast: 0 prim, 0 nopix, 0 small, 0 earlysize, 0 zcull, 0 box
+Vertex, Fragment, Pipelines loaded: 2, 3, 6
+Pushbuffer space used: Vtx 0, Idx 0
+N/A
+
