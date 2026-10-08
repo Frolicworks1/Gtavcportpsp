@@ -149,32 +149,21 @@ static void pspNormalizePath(const char *src, char *dst, size_t cap)
 EOF
   sed -i '/#include "FileMgr.h"/r '"$TMPHELP" "$FILEMGR"
   rm -f "$TMPHELP"
-  python3 - "$FILEMGR" <<'PY'
-from pathlib import Path
-import sys
-p=Path(sys.argv[1]); s=p.read_text()
-old='myfiles[fd].file = fcaseopen(filename, realmode);'
-new='''#ifdef RW_PSP
+  sed -i '/myfiles\\[fd\\]\\.file = fcaseopen(filename, realmode);/c\\#ifdef RW_PSP
   char pspPath[512];
   pspNormalizePath(filename, pspPath, sizeof(pspPath));
   myfiles[fd].file = fcaseopen(pspPath, realmode);
 #else
   myfiles[fd].file = fcaseopen(filename, realmode);
-#endif'''
-if old not in s: raise SystemExit("fcaseopen target not found")
-s=s.replace(old,new,1)
-old='char* r = casepath(path, false);'
-new='''#ifdef RW_PSP
+#endif' "$FILEMGR"
+  sed -i '/char\\* r = casepath(path, false);/c\\#ifdef RW_PSP
   char pspPath[512];
   pspNormalizePath(path, pspPath, sizeof(pspPath));
   char* r = casepath(pspPath, false);
 #else
   char* r = casepath(path, false);
-#endif'''
-if old not in s: raise SystemExit("casepath target not found")
-s=s.replace(old,new,1)
-p.write_text(s)
-PY
+#endif' "$FILEMGR"
+
   grep -q 'pspNormalizePath' "$FILEMGR"
 fi
 if [ -f "$FILEMGR" ]; then
