@@ -125,6 +125,19 @@ if [ -f "$CDHEADER" ]; then
   sed -i 's/^int CdStreamGetLastPosn(void);$/int CdStreamGetLastPosn(void);/' "$CDHEADER"
 fi
 
+# PSP filesystem parity: CFileMgr must keep the PSP/PPSSPP root path in
+# native slash form. The desktop implementation appends a Windows-style
+# backslash and does not chdir on this path, which is incompatible with the
+# PSP runtime filesystem contract observed in the working GTA III port.
+FILEMGR="upstream-revc/src/core/FileMgr.cpp"
+if [ -f "$FILEMGR" ]; then
+  sed -i '/_getcwd(ms_rootDirName, sizeof(ms_rootDirName));/{N;s@_getcwd(ms_rootDirName, sizeof(ms_rootDirName));\n\tstrcat(ms_rootDirName, "\\\\");@#ifdef RW_PSP\n\t_getcwd(ms_rootDirName, sizeof(ms_rootDirName));\n\tstrcpy(ms_dirName, ms_rootDirName);\n\tmychdir(ms_rootDirName);\n#else\n\t_getcwd(ms_rootDirName, sizeof(ms_rootDirName));\n\tstrcat(ms_rootDirName, "\\\\");\n#endif@;}' "$FILEMGR"
+  sed -i 's/^#ifndef ANDROID$/#if !defined(ANDROID) \&\& !defined(RW_PSP)/' "$FILEMGR"
+  grep -q '#ifdef RW_PSP' "$FILEMGR"
+  grep -q 'mychdir(ms_rootDirName);' "$FILEMGR"
+  grep -q '#if !defined(ANDROID) && !defined(RW_PSP)' "$FILEMGR"
+fi
+
 if [ -f "$STREAMING" ]; then
   sed -i 's/^CStreaming::LoadCdDirectory(const char \*dirname, int n)/CStreaming::LoadCdDirectory(const char *dirname, int32 n)/' "$STREAMING"
 fi
