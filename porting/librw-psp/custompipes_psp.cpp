@@ -4,8 +4,8 @@ struct RpAtomic;
 
 namespace WorldRender {
 int numBlendInsts[3] = {0,0,0};
-void AtomicFirstPass(RpAtomic *, int) {}
-void AtomicFullyTransparent(RpAtomic *, int, int) {}
+void AtomicFirstPass(rw::Atomic *, int) {}
+void AtomicFullyTransparent(rw::Atomic *, int, int) {}
 void RenderBlendPass(int) {}
 }
 
