@@ -9,6 +9,9 @@ on:
       - 'scripts/patch_revc_psp.sh'
       - 'cmake/toolchains/psp-allegrex.cmake'
       - 'porting/librw-psp/**'
+      - 'porting/librw-psp/psp_main.cpp'
+      - 'porting/librw-psp/psp_platform.cpp'
+      - 'porting/librw-psp/psp_input.cpp'
 
 jobs:
   build:
