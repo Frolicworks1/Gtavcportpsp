@@ -358,21 +358,6 @@ if [ -f "$WATERCREATURESCPP" ]; then
   grep -Fq 'int32 CWaterCreatures::nNumActiveSeaLifeForms;' "$WATERCREATURESCPP"
 fi
 
-FILEMGR="upstream-revc/src/core/FileMgr.cpp"
-if [ -f "$FILEMGR" ]; then
-  # The reference GTA III PSP build keeps game files relative to the PSP game
-  # directory and accepts the original GTA backslash paths. Normalize those
-  # paths before libc file operations on PSP.
-  if ! grep -q 'PSP FileMgr path normalization' "$FILEMGR"; then
-    sed -i '1i #ifdef RW_PSP\n#include <string.h>\nstatic FILE *pspFopen(const char *filename, const char *mode) { char path[512]; size_t n = strlen(filename); if (n >= sizeof(path)) n = sizeof(path) - 1; for (size_t i = 0; i < n; ++i) path[i] = filename[i] == '\\\\' ? '/' : filename[i]; path[n] = 0; return fopen(path, mode); }\nstatic int pspChdir(const char *input) { char path[512]; size_t n = strlen(input); if (n >= sizeof(path)) n = sizeof(path) - 1; for (size_t i = 0; i < n; ++i) path[i] = input[i] == '\\\\' ? '/' : input[i]; path[n] = 0; return chdir(path); }\n/* PSP FileMgr path normalization */\n#endif' "$FILEMGR"
-    sed -i 's/myfiles\[fd\]\.file = fcaseopen(filename, realmode);/#ifdef RW_PSP\n myfiles[fd].file = pspFopen(filename, realmode);\n#else\n myfiles[fd].file = fcaseopen(filename, realmode);\n#endif/' "$FILEMGR"
-    sed -i 's/mychdir(ms_dirName);/#ifdef RW_PSP\n pspChdir(ms_dirName);\n#else\n mychdir(ms_dirName);\n#endif/g' "$FILEMGR"
-    sed -i 's/mychdir(_psGetUserFilesFolder());/#ifdef RW_PSP\n pspChdir(_psGetUserFilesFolder());\n#else\n mychdir(_psGetUserFilesFolder());\n#endif/' "$FILEMGR"
-    grep -q 'PSP FileMgr path normalization' "$FILEMGR"
-    grep -q 'pspFopen(filename, realmode)' "$FILEMGR"
-  fi
-fi
-
 CROSSPLATFORM="upstream-revc/src/skel/crossplatform.cpp"
 if [ -f "$CROSSPLATFORM" ]; then
   sed -i '1a #ifdef RW_PSP\n#include <alloca.h>\n#include <stdlib.h>\n#include <string.h>\n#include <strings.h>\n#include <unistd.h>\n#define alloca __builtin_alloca\nstatic char *psp_strsep_local(char **sp, const char *delim) { if (!sp || !*sp) return 0; char *s=*sp; char *p=s; while (*p && !strchr(delim,*p)) ++p; if (*p) { *p=0; *sp=p+1; } else { *sp=0; } return s; }\n#endif' "$CROSSPLATFORM"
