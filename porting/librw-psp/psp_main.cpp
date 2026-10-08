@@ -3,6 +3,7 @@
 #include <pspmoduleinfo.h>
 #include <pspctrl.h>
 #include <pspiofilemgr.h>
+#include <pspinit.h>
 #include <string.h>
 
 PSP_MODULE_INFO("reVC", 0, 1, 0);
@@ -27,8 +28,25 @@ static void setupWorkingDirectory(int argc, char **argv)
     path[0] = '\0';
     startupLog("stage:main-enter");
 
-    if (argc > 0 && argv && argv[0]) {
-        const char *exe = argv[0];
+    // On PSP, use the boot executable filename supplied by the kernel first.
+    // This is more reliable than assuming argv[0] contains the EBOOT path.
+    const char *exe = sceKernelInitFileName();
+    if (exe && exe[0]) {
+        startupLog("stage:init-filename-present");
+        const char *slash = strrchr(exe, '/');
+        if (slash) {
+            size_t n = (size_t)(slash - exe);
+            if (n >= sizeof(path)) n = sizeof(path) - 1;
+            memcpy(path, exe, n);
+            path[n] = '\0';
+        }
+    }
+
+    // Keep argv as a fallback for loaders that don't expose a usable
+    // initialization filename.
+    if (!path[0] && argc > 0 && argv && argv[0]) {
+        exe = argv[0];
+        startupLog("stage:argv-fallback");
         const char *slash = strrchr(exe, '/');
         if (slash) {
             size_t n = (size_t)(slash - exe);
@@ -39,17 +57,15 @@ static void setupWorkingDirectory(int argc, char **argv)
     }
 
     if (path[0]) {
-        startupLog("stage:argv-path");
+        startupLog("stage:derived-path");
         if (sceIoChdir(path) >= 0) {
-            startupLog("stage:argv-chdir-ok");
+            startupLog("stage:derived-chdir-ok");
             return;
         }
-        startupLog("stage:argv-chdir-failed");
+        startupLog("stage:derived-chdir-failed");
     }
 
-    // Preserve the loader-provided CWD. Do not force a hard-coded
-    // PSP/GAME directory because PPSSPP may use a differently named
-    // content directory.
+    // Preserve the loader-provided CWD only as the final fallback.
     startupLog("stage:keep-loader-cwd");
 }
 
