@@ -1,6 +1,5 @@
-#include "common.h"
-struct RpAtomic;
 #include <rw.h>
+struct RpAtomic;
 #include "custompipes.h"
 
 namespace WorldRender {
