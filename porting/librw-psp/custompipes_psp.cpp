@@ -1,3 +1,4 @@
+#include <rw.h>
 #include "custompipes.h"
 
 namespace WorldRender {
