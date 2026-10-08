@@ -152,24 +152,3 @@ jobs:
             upstream-revc/**/*.elf
             build/**/*.elf
           if-no-files-found: warn
-
-      - name: Create PSP EBOOT.PBP
-        if: success()
-        shell: bash
-        run: |
-          set -euxo pipefail
-          test -s artifacts/PSP/GAME/GTAVCPSP/EBOOT.PBP
-          test "$(od -An -tx1 -N4 artifacts/PSP/GAME/GTAVCPSP/EBOOT.PBP | tr -d ' \\n')" = "00504250"
-          mkdir -p eboot
-          cp artifacts/PSP/GAME/GTAVCPSP/EBOOT.PBP eboot/EBOOT.PBP
-          cp artifacts/PSP/GAME/GTAVCPSP/PARAM.SFO eboot/PARAM.SFO
-          cp artifacts/PSP/GAME/GTAVCPSP/reVC eboot/EBOOT.ELF
-          tar -czf reVC-PSP-EBOOT.tar.gz -C eboot EBOOT.PBP PARAM.SFO EBOOT.ELF
-
-      - name: Upload validated EBOOT
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: reVC-PSP-EBOOT
-          path: reVC-PSP-EBOOT.tar.gz
-          if-no-files-found: error\n
