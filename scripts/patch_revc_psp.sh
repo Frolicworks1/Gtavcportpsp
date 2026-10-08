@@ -223,7 +223,7 @@ if [ -f "$FILEMGR" ]; then
     mv "$FILEMGR.psp.tmp" "$FILEMGR"
   fi
   awk '{
-    if ($0 == "  myfiles[fd].file = fopen(pspPath, realmode);") {
+    if ($0 ~ /fopen\(pspPath, realmode\)/ && $0 !~ /pspFileIoLog/) {
       print
       print "#ifdef RW_PSP"
       print "  if (!myfiles[fd].file) pspFileIoLog(pspPath);"
