@@ -1,11 +1,12 @@
 #include "common.h"
+struct RpAtomic;
 #include <rw.h>
 #include "custompipes.h"
 
 namespace WorldRender {
 int numBlendInsts[3] = {0,0,0};
-void AtomicFirstPass(RpAtomic *atomic, int) { if(atomic) RpAtomicRender(atomic); }
-void AtomicFullyTransparent(RpAtomic *atomic, int, int) { if(atomic) RpAtomicRender(atomic); }
+void AtomicFirstPass(RpAtomic *, int) {}
+void AtomicFullyTransparent(RpAtomic *, int, int) {}
 void RenderBlendPass(int) {}
 }
 
