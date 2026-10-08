@@ -5,7 +5,7 @@
 
 extern "C" size_t _dwMemAvailPhys = 0;
 
-bool IsForegroundApp(void)
+RwBool IsForegroundApp(void)
 {
     return true;
 }
