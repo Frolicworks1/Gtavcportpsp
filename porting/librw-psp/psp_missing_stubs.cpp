@@ -1,3 +1,4 @@
+#include "common.h"
 #include "CdStream.h"
 #include "crossplatform.h"
 #include <stddef.h>
