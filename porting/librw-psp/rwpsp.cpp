@@ -53,7 +53,7 @@ static void beginUpdate(Camera *cam) {
         sceGumMatrixMode(GU_MODEL);
         sceGumLoadIdentity();
     }
-    sceGuStart(GU_DIRECT, (void*)0);
+    sceGuStart(GU_DIRECT, guCommandList);
 }
 static void endUpdate(Camera*) {
     sceGuFinish();
