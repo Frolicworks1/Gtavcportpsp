@@ -423,6 +423,50 @@ if [ -f "$CROSSPLATFORM" ]; then
   sed -i 's/strsep(&p, "\/\\\\")/psp_strsep_local(\&p, "\/\\\\")/' "$CROSSPLATFORM"
   grep -q '#include <alloca.h>' "$CROSSPLATFORM"
   grep -q 'psp_strsep_local' "$CROSSPLATFORM"
+  if ! grep -q 'pspNormalizeAlloc' "$CROSSPLATFORM"; then
+    awk '{
+      print
+      if ($0 ~ /psp_strsep_local/) {
+        print "static char *pspNormalizeAlloc(const char *src) {"
+        print "  if (!src) return NULL;"
+        print "  size_t n = strlen(src);"
+        print "  char *out = (char *)malloc(n + 1);"
+        print "  if (!out) return NULL;"
+        print "  for (size_t i = 0; i < n; ++i) out[i] = src[i] == '\\\\' ? '/' : src[i];"
+        print "  out[n] = '\\\\0';"
+        print "  return out;"
+        print "}"
+      }
+    }' "$CROSSPLATFORM" > "$CROSSPLATFORM.psp.tmp"
+    mv "$CROSSPLATFORM.psp.tmp" "$CROSSPLATFORM"
+  fi
+  awk '{
+    if ($0 == "FILE* _fcaseopen(char const* filename, char const* mode)") {
+      print
+      getline
+      print
+      print "#ifdef RW_PSP"
+      print "  char *pspPath = pspNormalizeAlloc(filename);"
+      print "  FILE *result = fopen(pspPath ? pspPath : filename, mode);"
+      print "  if (pspPath) free(pspPath);"
+      print "  return result;"
+      print "#endif"
+      next
+    }
+    if ($0 == "char* casepath(char const* path, bool checkPathFirst)") {
+      print
+      getline
+      print
+      print "#ifdef RW_PSP"
+      print "  (void)checkPathFirst;"
+      print "  return pspNormalizeAlloc(path);"
+      print "#endif"
+      next
+    }
+    print
+  }' "$CROSSPLATFORM" > "$CROSSPLATFORM.psp.tmp"
+  mv "$CROSSPLATFORM.psp.tmp" "$CROSSPLATFORM"
+  grep -q 'return pspNormalizeAlloc(path);' "$CROSSPLATFORM"
 fi
 
 # Link PSP SDK graphics/input libraries into the native executable target.
