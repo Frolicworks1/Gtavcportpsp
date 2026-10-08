@@ -231,33 +231,6 @@ if [ -f "$STREAMING" ]; then
   sed -i 's/^CStreaming::LoadCdDirectory(const char \*dirname, int n)/CStreaming::LoadCdDirectory(const char *dirname, int32 n)/' "$STREAMING"
 fi
 
-if [ -f "$GAME" ]; then
-  if ! grep -q 'psp-main-init-game-enter' "$GAME"; then
-    awk '{
-      if ($0 == "void InitialiseGame(void)") {
-        print
-        getline
-        print
-        print "#ifdef RW_PSP"
-        print "  extern void pspStartupLog(const char *msg);"
-        print "  pspStartupLog(\"psp-main-init-game-enter\");"
-        print "#endif"
-        next
-      }
-      if ($0 ~ /CGame::Initialise.*GTA_VC\.DAT/) {
-        print
-        print "#ifdef RW_PSP"
-        print "  pspStartupLog(\"psp-main-init-game-after-data\");"
-        print "#endif"
-        next
-      }
-      print
-    }' "$GAME" > "$GAME.psp.tmp"
-    mv "$GAME.psp.tmp" "$GAME"
-  fi
-  grep -q 'psp-main-init-game-enter' "$GAME"
-fi
-
 if [ -f "$GENERAL" ]; then
   if ! grep -q 'static int32 GetRandomNumberInRange(int low, int32 high)' "$GENERAL"; then
     sed -i '/static void SetRandomSeed/i\#endif' "$GENERAL"
