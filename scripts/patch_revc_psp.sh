@@ -261,7 +261,7 @@ if [ -f "$SRC_CMAKE" ]; then
   mv "$SRC_CMAKE.psp.tmp" "$SRC_CMAKE"
 fi
 if [ -f "$SRC_CMAKE" ]; then
-  if ! grep -q 'pspgu pspgum pspctrl pspge pspdisplay' "$SRC_CMAKE"; then
+  if ! grep -q 'pspgu pspgum pspctrl pspge pspdisplay pspdebug' "$SRC_CMAKE"; then
     sed -i '/^target_link_libraries(\${EXECUTABLE} PRIVATE/i if(RW_PSP)\ntarget_link_libraries(\${EXECUTABLE} PRIVATE pspgu pspgum pspctrl pspge pspdisplay)\nendif()' "$SRC_CMAKE"
   fi
   grep -q 'pspgu pspgum pspctrl pspge pspdisplay' "$SRC_CMAKE"
