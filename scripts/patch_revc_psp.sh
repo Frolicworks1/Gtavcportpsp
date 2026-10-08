@@ -114,6 +114,11 @@ if [ -f "$CDSTREAM" ]; then
     -e 's@realpath(real, path);@#ifdef RW_PSP\n\t\t\tstrncpy(path, real, sizeof(path)-1);\n\t\t\tpath[sizeof(path)-1] = 0;\n#else\n\t\t\trealpath(real, path);\n#endif@' \
     -e 's/strdup(path)/psp_strdup(path)/g' "$CDSTREAM"
 fi
+CDSTREAMPOSIX="upstream-revc/src/core/CdStream_posix.cpp"
+if [ -f "$CDSTREAMPOSIX" ]; then
+  sed -i "s/^int32 CdStreamGetLastPosn(void)/int CdStreamGetLastPosn(void)/" "$CDSTREAMPOSIX"
+  grep -Fq "int CdStreamGetLastPosn(void)" "$CDSTREAMPOSIX"
+fi
 if [ -f "$CDHEADER" ]; then
   sed -i 's/^int32 CdStreamGetLastPosn(void);$/int CdStreamGetLastPosn(void);/' "$CDHEADER"
   sed -i 's/^int CdStreamGetLastPosn(void);$/int CdStreamGetLastPosn(void);/' "$CDHEADER"
