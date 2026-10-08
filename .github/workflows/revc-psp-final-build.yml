@@ -68,7 +68,6 @@ jobs:
           cat >> upstream-revc/src/CMakeLists.txt <<'CMAKE_EOF'
           target_sources(reVC PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/core/psp_input.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/psp_link_stubs.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/skel/psp_platform.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/skel/psp_main.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/librw/src/psp/rwpsp.cpp
