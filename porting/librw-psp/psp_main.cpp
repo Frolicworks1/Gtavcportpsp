@@ -10,7 +10,7 @@ PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
 
 static int gStartupLog = -1;
 
-static void startupLog(const char *msg)
+extern "C" void pspStartupLog(const char *msg)
 {
     if (gStartupLog < 0)
         gStartupLog = sceIoOpen("psp_startup.log", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
