@@ -58,6 +58,7 @@ jobs:
           cp porting/librw-psp/rwpsp.h upstream-revc/vendor/librw/src/psp/rwpsp.h
           cp porting/librw-psp/rwpsp_plugins.cpp upstream-revc/vendor/librw/src/psp/rwpsp_plugins.cpp
           printf '%s\n' 'target_sources(librw PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/psp/rwpsp_plugins.cpp)' >> upstream-revc/vendor/librw/CMakeLists.txt
+          printf '%s\n' 'set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/charset.cpp PROPERTIES COMPILE_OPTIONS "-URW_NULL")' >> upstream-revc/vendor/librw/CMakeLists.txt
           cat >> upstream-revc/src/CMakeLists.txt <<'CMAKE_EOF'
           add_library(psp_runtime OBJECT
             $ENV{GITHUB_WORKSPACE}/porting/librw-psp/psp_input.cpp
