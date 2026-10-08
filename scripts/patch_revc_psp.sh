@@ -149,21 +149,30 @@ static void pspNormalizePath(const char *src, char *dst, size_t cap)
 EOF
   sed -i '/#include "FileMgr.h"/r '"$TMPHELP" "$FILEMGR"
   rm -f "$TMPHELP"
-  sed -i '/myfiles\\[fd\\]\\.file = fcaseopen(filename, realmode);/c\\#ifdef RW_PSP
-  char pspPath[512];
-  pspNormalizePath(filename, pspPath, sizeof(pspPath));
-  myfiles[fd].file = fcaseopen(pspPath, realmode);
-#else
-  myfiles[fd].file = fcaseopen(filename, realmode);
-#endif' "$FILEMGR"
-  sed -i '/char\\* r = casepath(path, false);/c\\#ifdef RW_PSP
-  char pspPath[512];
-  pspNormalizePath(path, pspPath, sizeof(pspPath));
-  char* r = casepath(pspPath, false);
-#else
-  char* r = casepath(path, false);
-#endif' "$FILEMGR"
-
+  awk '{
+    if ($0 == "  myfiles[fd].file = fcaseopen(filename, realmode);") {
+      print "#ifdef RW_PSP"
+      print "  char pspPath[512];"
+      print "  pspNormalizePath(filename, pspPath, sizeof(pspPath));"
+      print "  myfiles[fd].file = fcaseopen(pspPath, realmode);"
+      print "#else"
+      print "  myfiles[fd].file = fcaseopen(filename, realmode);"
+      print "#endif"
+      next
+    }
+    if ($0 == "  char* r = casepath(path, false);") {
+      print "#ifdef RW_PSP"
+      print "  char pspPath[512];"
+      print "  pspNormalizePath(path, pspPath, sizeof(pspPath));"
+      print "  char* r = casepath(pspPath, false);"
+      print "#else"
+      print "  char* r = casepath(path, false);"
+      print "#endif"
+      next
+    }
+    print
+  }' "$FILEMGR" > "$FILEMGR.psp.tmp"
+  mv "$FILEMGR.psp.tmp" "$FILEMGR"
   grep -q 'pspNormalizePath' "$FILEMGR"
 fi
 if [ -f "$FILEMGR" ]; then
