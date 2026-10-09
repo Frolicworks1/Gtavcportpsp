@@ -17,7 +17,6 @@ extern "C" void pspStartupLog(const char *msg)
     if (gStartupLog >= 0 && msg) {
         sceIoWrite(gStartupLog, msg, strlen(msg));
         sceIoWrite(gStartupLog, "\n", 1);
-        sceIoSync(gStartupLog, 0);
     }
 }
 
@@ -25,11 +24,11 @@ static void setupWorkingDirectory(int argc, char **argv)
 {
     char path[256];
     path[0] = '\0';
-    startupLog("stage:main-enter");
+    pspStartupLog("stage:main-enter");
 
     if (argc > 0 && argv && argv[0]) {
         const char *exe = argv[0];
-        startupLog("stage:argv-present");
+        pspStartupLog("stage:argv-present");
         const char *slash = strrchr(exe, '/');
         if (slash) {
             size_t n = (size_t)(slash - exe);
@@ -40,69 +39,69 @@ static void setupWorkingDirectory(int argc, char **argv)
     }
 
     if (path[0]) {
-        startupLog("stage:derived-path");
+        pspStartupLog("stage:derived-path");
         if (sceIoChdir(path) >= 0) {
-            startupLog("stage:derived-chdir-ok");
+            pspStartupLog("stage:derived-chdir-ok");
             return;
         }
-        startupLog("stage:derived-chdir-failed");
+        pspStartupLog("stage:derived-chdir-failed");
     }
 
-    startupLog("stage:keep-loader-cwd");
+    pspStartupLog("stage:keep-loader-cwd");
 }
 
 static void probeRequiredData(void)
 {
     SceUID fd = sceIoOpen("DATA/GTA_VC.DAT", PSP_O_RDONLY, 0);
     if (fd >= 0) {
-        startupLog("data:GTA_VC.DAT=present");
+        pspStartupLog("data:GTA_VC.DAT=present");
         sceIoClose(fd);
     } else {
-        startupLog("data:GTA_VC.DAT=missing");
+        pspStartupLog("data:GTA_VC.DAT=missing");
     }
 
     SceUID dir = sceIoDopen("DATA");
     if (dir >= 0) {
-        startupLog("data:DATA-dir=present");
+        pspStartupLog("data:DATA-dir=present");
         sceIoDclose(dir);
     } else {
-        startupLog("data:DATA-dir=missing");
+        pspStartupLog("data:DATA-dir=missing");
     }
 }
 
 extern "C" int main(int argc, char **argv)
 {
     setupWorkingDirectory(argc, argv);
-    startupLog("stage:cwd-setup-done");
+    pspStartupLog("stage:cwd-setup-done");
     probeRequiredData();
-    startupLog("stage:controller-before");
+    pspStartupLog("stage:controller-before");
 
     sceCtrlSetSamplingCycle(0);
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
-    startupLog("stage:controller-after");
+    pspStartupLog("stage:controller-after");
 
-    startupLog("stage:rsinitialize-before");
+    pspStartupLog("stage:rsinitialize-before");
     if (RsEventHandler(rsINITIALIZE, NULL) == rsEVENTERROR) {
-        startupLog("stage:rsinitialize-error");
+        pspStartupLog("stage:rsinitialize-error");
         return 1;
     }
-    startupLog("stage:rsinitialize-ok");
+    pspStartupLog("stage:rsinitialize-ok");
 
-    startupLog("stage:rsrwinitialize-before");
+    pspStartupLog("stage:rsrwinitialize-before");
     if (RsEventHandler(rsRWINITIALIZE, NULL) == rsEVENTERROR) {
-        startupLog("stage:rsrwinitialize-error");
+        pspStartupLog("stage:rsrwinitialize-error");
         RsEventHandler(rsTERMINATE, NULL);
         return 1;
     }
-    startupLog("stage:rsrwinitialize-ok");
+    pspStartupLog("stage:rsrwinitialize-ok");
 
-    startupLog("stage:idle-loop");
+    pspStartupLog("stage:idle-loop");
     while (!RsGlobal.quit) {
         RsEventHandler(rsIDLE, (void *)TRUE);
         sceKernelDelayThread(1000);
     }
 
-    startupLog("stage:terminate");
+    pspStartupLog("stage:terminate");
     RsEventHandler(rsTERMINATE, NULL);
     if (gStartupLog >= 0)
         sceIoClose(gStartupLog);
