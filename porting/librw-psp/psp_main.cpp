@@ -9,11 +9,43 @@ PSP_MODULE_INFO("reVC", 0, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
 
 static int gStartupLog = -1;
+static char gStartupLogPath[256];
+
+static int tryOpenLog(const char *path)
+{
+    if (!path || !path[0])
+        return -1;
+    return sceIoOpen(path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+}
+
+static void initStartupLogPath(int argc, char **argv)
+{
+    gStartupLogPath[0] = '\0';
+    if (argc > 0 && argv && argv[0]) {
+        const char *slash = strrchr(argv[0], '/');
+        if (slash) {
+            size_t n = (size_t)(slash - argv[0]);
+            if (n > sizeof(gStartupLogPath) - sizeof("/psp_startup.log"))
+                n = sizeof(gStartupLogPath) - sizeof("/psp_startup.log");
+            memcpy(gStartupLogPath, argv[0], n);
+            gStartupLogPath[n] = '\0';
+            strncat(gStartupLogPath, "/psp_startup.log",
+                    sizeof(gStartupLogPath) - strlen(gStartupLogPath) - 1);
+        }
+    }
+}
 
 extern "C" void pspStartupLog(const char *msg)
 {
-    if (gStartupLog < 0)
-        gStartupLog = sceIoOpen("psp_startup.log", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+    if (gStartupLog < 0) {
+        gStartupLog = tryOpenLog(gStartupLogPath);
+        if (gStartupLog < 0)
+            gStartupLog = tryOpenLog("ms0:/GAME/Grand Theft Auto Vice City/psp_startup.log");
+        if (gStartupLog < 0)
+            gStartupLog = tryOpenLog("ms0:/GAME/GTAVCPSP/psp_startup.log");
+        if (gStartupLog < 0)
+            gStartupLog = tryOpenLog("psp_startup.log");
+    }
     if (gStartupLog >= 0 && msg) {
         sceIoWrite(gStartupLog, msg, strlen(msg));
         sceIoWrite(gStartupLog, "\n", 1);
@@ -71,6 +103,8 @@ static void probeRequiredData(void)
 
 extern "C" int main(int argc, char **argv)
 {
+    initStartupLogPath(argc, argv);
+    pspStartupLog("stage:main-enter");
     setupWorkingDirectory(argc, argv);
     pspStartupLog("stage:cwd-setup-done");
     probeRequiredData();
